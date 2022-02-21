@@ -9,12 +9,20 @@ export default class Token {
         this._type = type;
     }
 
-    static Character(s: string): Token {
+    static character(s: string): Token {
         return new Token(s, TokenType.CHARACTER)
     }
 
-    static Modifier(s: string): Token {
+    static modifier(s: string): Token {
         return new Token(s, TokenType.MODIFIER)
+    }
+
+    static bracketOpen(): Token {
+        return new Token('[', TokenType.BRACKET_OPEN)
+    }
+
+    static bracketClose(): Token {
+        return new Token(']', TokenType.BRACKET_CLOSE)
     }
 
     get value(): string {
@@ -28,5 +36,7 @@ export default class Token {
 
 export enum TokenType {
     CHARACTER = 'CHARACTER',
-    MODIFIER = 'MODIFIER'
+    MODIFIER = 'MODIFIER',
+    BRACKET_OPEN = 'BRACKET_OPEN',
+    BRACKET_CLOSE = 'BRACKET_CLOSE'
 }

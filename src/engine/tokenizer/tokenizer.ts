@@ -6,9 +6,15 @@ export default class Tokenizer {
         const chars = explode(s)
         return chars.map(it => {
             if (it === '*' || it === '+') {
-                return Token.Modifier(it)
+                return Token.modifier(it)
             }
-            return Token.Character(it)
+            if (it === '[') {
+                return Token.bracketOpen()
+            }
+            if (it == ']') {
+                return Token.bracketClose()
+            }
+            return Token.character(it)
         })
     }
 }

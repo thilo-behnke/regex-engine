@@ -11,16 +11,36 @@ test('should correctly detect characters vs modifiers', () => {
     const tokenizer = new Tokenizer()
     const res = tokenizer.tokenize('this+-is-m*')
     expect(res).toEqual([
-        Token.Character('t'),
-        Token.Character('h'),
-        Token.Character('i'),
-        Token.Character('s'),
-        Token.Modifier('+'),
-        Token.Character('-'),
-        Token.Character('i'),
-        Token.Character('s'),
-        Token.Character('-'),
-        Token.Character('m'),
-        Token.Modifier('*'),
+        Token.character('t'),
+        Token.character('h'),
+        Token.character('i'),
+        Token.character('s'),
+        Token.modifier('+'),
+        Token.character('-'),
+        Token.character('i'),
+        Token.character('s'),
+        Token.character('-'),
+        Token.character('m'),
+        Token.modifier('*'),
+    ])
+})
+
+test('should correctly detect brackets', () => {
+    const tokenizer = new Tokenizer()
+    const res = tokenizer.tokenize('this-is-[abc]')
+    expect(res).toEqual([
+        Token.character('t'),
+        Token.character('h'),
+        Token.character('i'),
+        Token.character('s'),
+        Token.character('-'),
+        Token.character('i'),
+        Token.character('s'),
+        Token.character('-'),
+        Token.bracketOpen(),
+        Token.character('a'),
+        Token.character('b'),
+        Token.character('c'),
+        Token.bracketClose(),
     ])
 })

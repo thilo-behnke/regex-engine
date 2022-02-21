@@ -4,6 +4,7 @@ import {TokenType} from "../../model/token";
 import {SimpleExpression} from "../../model/simple-expression";
 import Character from "../../model/character";
 import GreedyExpression from "../../model/greedy-expression";
+import BracketExpression from "../../model/bracket-expression";
 
 export default class Parser {
     private _tokenizer: Tokenizer
@@ -12,6 +13,7 @@ export default class Parser {
         this._tokenizer = tokenizer;
     }
 
+    // TODO: Should detect errors in regex specification
     parse(s: string): Expression[] {
         const tokenized = this._tokenizer.tokenize(s)
         const expressions = []
@@ -20,6 +22,20 @@ export default class Parser {
             if (current.type == TokenType.MODIFIER) {
                 continue;
             }
+            if (current.type == TokenType.BRACKET_CLOSE) {
+                continue;
+            }
+
+            if (current.type == TokenType.BRACKET_OPEN) {
+                const offset = i + 1
+                const matchingBracketIdx = tokenized.slice(offset).findIndex(it => it.type == TokenType.BRACKET_CLOSE)
+                const betweenBrackets = tokenized.slice(offset, matchingBracketIdx + offset).map(it => new SimpleExpression(new Character(it.value)))
+                const bracketExpression = new BracketExpression(...betweenBrackets)
+                expressions.push(bracketExpression)
+                i = matchingBracketIdx + offset
+                continue;
+            }
+
             const baseExpression = new SimpleExpression(...Character.fromTokens(current))
             const next = i + 1 < tokenized.length ? tokenized[i + 1] : null
             if (!next || next.type != TokenType.MODIFIER) {

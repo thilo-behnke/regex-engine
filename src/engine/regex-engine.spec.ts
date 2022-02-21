@@ -34,8 +34,11 @@ test.each([
     {value: "test", pattern: "t*st", shouldMatch: true},
     {value: "test", pattern: "x*st", shouldMatch: true},
     {value: "test", pattern: "x+st", shouldMatch: false},
-]) ('should match', ({value, pattern, shouldMatch}) => {
+    {value: "ttsseet", pattern: "[test]+", shouldMatch: true},
+    {value: "ttsseetxxy", pattern: "[test]+[xyz]+", shouldMatch: true},
+]) ('should match: %s', ({value, pattern, shouldMatch}) => {
     const engine = new RegexEngine()
     const res = engine.test(value, pattern)
     expect(res).toEqual(shouldMatch)
 })
+
