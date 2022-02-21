@@ -7,6 +7,7 @@ import BracketExpression from "../../model/bracket-expression";
 import DefaultCharacter from "../../model/default-character";
 import WildcardCharacter from "../../model/wildcard-character";
 import WordBoundaryCharacter from "../../model/word-boundary-character";
+import WordWildcardCharacter from "../../model/word-wildcard-character";
 
 test('should return empty expression array for empty string', () => {
     const parser = new Parser()
@@ -105,6 +106,22 @@ test('should correctly parse word boundary character \b', () => {
         new SimpleExpression(new DefaultCharacter('s')),
         new SimpleExpression(new DefaultCharacter('t')),
         new SimpleExpression(new WordBoundaryCharacter()),
+    ]
+    expect(res).toEqual(expected)
+})
+
+test('should correctly parse word wildcard character \w', () => {
+    const parser = new Parser()
+    const res = parser.parse('test\\w029')
+    const expected = [
+        new SimpleExpression(new DefaultCharacter('t')),
+        new SimpleExpression(new DefaultCharacter('e')),
+        new SimpleExpression(new DefaultCharacter('s')),
+        new SimpleExpression(new DefaultCharacter('t')),
+        new SimpleExpression(new WordWildcardCharacter()),
+        new SimpleExpression(new DefaultCharacter('0')),
+        new SimpleExpression(new DefaultCharacter('2')),
+        new SimpleExpression(new DefaultCharacter('9')),
     ]
     expect(res).toEqual(expected)
 })

@@ -7,6 +7,7 @@ import BracketExpression from "../../model/bracket-expression";
 import DefaultCharacter from "../../model/default-character";
 import WildcardCharacter from "../../model/wildcard-character";
 import WordBoundaryCharacter from "../../model/word-boundary-character";
+import WordWildcardCharacter from "../../model/word-wildcard-character";
 
 export default class Parser {
     private _tokenizer: Tokenizer
@@ -52,6 +53,11 @@ export default class Parser {
                 }
                 if (next.value === "b") {
                     expressions.push(new SimpleExpression(new WordBoundaryCharacter()))
+                    i++
+                    continue
+                }
+                if (next.value === "w") {
+                    expressions.push(new SimpleExpression(new WordWildcardCharacter()))
                     i++
                     continue
                 }

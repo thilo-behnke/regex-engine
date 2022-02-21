@@ -40,6 +40,8 @@ test.each([
     {value: "testing", pattern: "test[wyz]n.", shouldMatch: false},
     {value: "this is not a drill in nottingham", pattern: "\\bnot\\b", shouldMatch: true},
     {value: "this is not a drill in nottingham", pattern: "\\bdrills\\b", shouldMatch: false},
+    {value: "many words", pattern: "\\w+", shouldMatch: true},
+    {value: " ", pattern: "\\w+", shouldMatch: false},
 ]) ('should match: %s', ({value, pattern, shouldMatch}) => {
     const engine = new RegexEngine()
     const res = engine.test(value, pattern)
