@@ -1,4 +1,5 @@
 import CharacterFactory from "../model/factory/character-factory";
+import {range} from "./array-utils";
 
 const explode = (s: string) => {
     return s.split('');
@@ -40,10 +41,20 @@ const isWhitespace = (s: string) => {
     return explode(s).every(it => it == " ")
 }
 
+const isDigit = (s: string) => {
+    if (s.length > 1) {
+        return false
+    }
+    const zeroPos = "0".charCodeAt(0)
+    const sCharCode = s.charCodeAt(0)
+    return range(zeroPos, zeroPos + 9).some(it => it === sCharCode)
+}
+
 export {
     explode,
     explodeWithEscapes,
     explodeToCharacters,
     isWord,
-    isWhitespace
+    isWhitespace,
+    isDigit
 }
