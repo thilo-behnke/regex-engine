@@ -20,4 +20,5 @@ Engine:
 Other:
 - [ ] Hooks for outputting status information during matching
 - [ ] Return start end position of match(es)
+- [ ] CLI interface
 - [ ] Web interface
