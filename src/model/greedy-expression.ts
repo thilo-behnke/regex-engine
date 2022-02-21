@@ -6,6 +6,7 @@ export default class GreedyExpression implements Expression {
 
     private _hasNext: boolean = true
     private _isSuccessful: boolean = undefined
+    private _currentMatch: string[] = []
 
     constructor(expression: Expression, allowNoMatch = true) {
         this._expression = expression;
@@ -23,6 +24,10 @@ export default class GreedyExpression implements Expression {
     matchNext(s: string): boolean {
         const res = this._expression.matchNext(s)
 
+        if (res) {
+           this._currentMatch.push(s)
+        }
+
         if (!this._expression.hasNext()) {
             if (this._expression.isSuccessful()) {
                 this._isSuccessful = true
@@ -36,6 +41,21 @@ export default class GreedyExpression implements Expression {
         }
 
         return res
+    }
+
+    backtrack(): boolean {
+        if (!this.canBacktrack()) {
+            return
+        }
+
+        const updatedMatch = this._currentMatch.slice(0, this._currentMatch.length - 1)
+        this.reset()
+        updatedMatch.every(it => this.matchNext(it))
+        return this._isSuccessful
+    }
+
+    canBacktrack(): boolean {
+        return true;
     }
 
     reset(): void {

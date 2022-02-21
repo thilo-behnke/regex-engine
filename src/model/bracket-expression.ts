@@ -34,6 +34,14 @@ export default class BracketExpression implements Expression {
         }
     }
 
+    backtrack(): boolean {
+        return false;
+    }
+
+    canBacktrack(): boolean {
+        return false;
+    }
+
     reset(): void {
         this._isSuccessful = undefined
         this._expressions.forEach(it => it.reset())

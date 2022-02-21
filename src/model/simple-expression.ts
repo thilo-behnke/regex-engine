@@ -35,6 +35,14 @@ export class SimpleExpression implements Expression {
         return this._isSuccessful
     }
 
+    backtrack(): boolean {
+        return false;
+    }
+
+    canBacktrack(): boolean {
+        return false;
+    }
+
     reset(): void {
         this._idx = 0
         this._isSuccessful = undefined
