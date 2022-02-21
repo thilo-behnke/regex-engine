@@ -8,6 +8,7 @@ import DefaultCharacter from "../../model/default-character";
 import WildcardCharacter from "../../model/wildcard-character";
 import WordBoundaryCharacter from "../../model/word-boundary-character";
 import WordWildcardCharacter from "../../model/word-wildcard-character";
+import DigitWildcardCharacter from "../../model/digit-wildcard-character";
 
 export default class Parser {
     private _tokenizer: Tokenizer
@@ -58,6 +59,11 @@ export default class Parser {
                 }
                 if (next.value === "w") {
                     expressions.push(new SimpleExpression(new WordWildcardCharacter()))
+                    i++
+                    continue
+                }
+                if (next.value === "d") {
+                    expressions.push(new SimpleExpression(new DigitWildcardCharacter()))
                     i++
                     continue
                 }

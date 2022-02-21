@@ -42,6 +42,8 @@ test.each([
     {value: "this is not a drill in nottingham", pattern: "\\bdrills\\b", shouldMatch: false},
     {value: "many words", pattern: "\\w+", shouldMatch: true},
     {value: " ", pattern: "\\w+", shouldMatch: false},
+    {value: "092934", pattern: "\\d+", shouldMatch: true},
+    {value: "word", pattern: "\\d", shouldMatch: false},
 ]) ('should match: %s', ({value, pattern, shouldMatch}) => {
     const engine = new RegexEngine()
     const res = engine.test(value, pattern)

@@ -8,6 +8,7 @@ import DefaultCharacter from "../../model/default-character";
 import WildcardCharacter from "../../model/wildcard-character";
 import WordBoundaryCharacter from "../../model/word-boundary-character";
 import WordWildcardCharacter from "../../model/word-wildcard-character";
+import DigitWildcardCharacter from "../../model/digit-wildcard-character";
 
 test('should return empty expression array for empty string', () => {
     const parser = new Parser()
@@ -122,6 +123,19 @@ test('should correctly parse word wildcard character \w', () => {
         new SimpleExpression(new DefaultCharacter('0')),
         new SimpleExpression(new DefaultCharacter('2')),
         new SimpleExpression(new DefaultCharacter('9')),
+    ]
+    expect(res).toEqual(expected)
+})
+
+test('should correctly parse word wildcard character \d', () => {
+    const parser = new Parser()
+    const res = parser.parse('test\\d')
+    const expected = [
+        new SimpleExpression(new DefaultCharacter('t')),
+        new SimpleExpression(new DefaultCharacter('e')),
+        new SimpleExpression(new DefaultCharacter('s')),
+        new SimpleExpression(new DefaultCharacter('t')),
+        new SimpleExpression(new DigitWildcardCharacter()),
     ]
     expect(res).toEqual(expected)
 })
