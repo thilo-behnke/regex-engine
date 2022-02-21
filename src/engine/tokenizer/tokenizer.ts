@@ -8,6 +8,9 @@ export default class Tokenizer {
             if (it === '*' || it === '+') {
                 return Token.modifier(it)
             }
+            if (it == '\\') {
+                return Token.escaped()
+            }
             if (it === '[') {
                 return Token.bracketOpen()
             }

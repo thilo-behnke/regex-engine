@@ -31,7 +31,7 @@ export default class RegexEngine {
             const nextExpression = expressions[i]
             while(nextExpression.hasNext()) {
                 const nextChar = toTest[stringIdx]
-                const res = nextExpression.matchNext(nextChar)
+                const res = nextExpression.matchNext(nextChar, stringIdx + 1 < toTest.length ? toTest[stringIdx + 1] : null)
                 if (res == false) {
                     return false
                 }

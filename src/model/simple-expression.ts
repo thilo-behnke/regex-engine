@@ -7,6 +7,7 @@ export class SimpleExpression implements Expression {
 
     private _idx = 0
     private _isSuccessful: boolean = undefined
+    private _lastChecked: string = undefined
 
     constructor(...characters: Character[]) {
         this._characters = characters;
@@ -23,18 +24,20 @@ export class SimpleExpression implements Expression {
         return this._isSuccessful;
     }
 
-    matchNext(s: string): boolean {
+    matchNext(s: string, next: string = null): boolean {
         if (!this.hasNext()) {
             return false
         }
 
-        this._isSuccessful = s === this._characters[this._idx].value
+        this._isSuccessful = this._characters[this._idx].test(s, this._lastChecked, next)
         this._idx++
+        this._lastChecked = s
         return this._isSuccessful
     }
 
     reset(): void {
         this._idx = 0
         this._isSuccessful = undefined
+        this._lastChecked = undefined
     }
 }

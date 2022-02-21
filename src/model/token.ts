@@ -13,6 +13,10 @@ export default class Token {
         return new Token(s, TokenType.CHARACTER)
     }
 
+    static escaped(): Token {
+        return new Token('\\', TokenType.ESCAPED)
+    }
+
     static modifier(s: string): Token {
         return new Token(s, TokenType.MODIFIER)
     }
@@ -36,6 +40,7 @@ export default class Token {
 
 export enum TokenType {
     CHARACTER = 'CHARACTER',
+    ESCAPED = 'ESCAPED',
     MODIFIER = 'MODIFIER',
     BRACKET_OPEN = 'BRACKET_OPEN',
     BRACKET_CLOSE = 'BRACKET_CLOSE'

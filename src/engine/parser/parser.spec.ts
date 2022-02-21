@@ -4,6 +4,9 @@ import {SimpleExpression} from "../../model/simple-expression";
 import Character from "../../model/character";
 import GreedyExpression from "../../model/greedy-expression";
 import BracketExpression from "../../model/bracket-expression";
+import DefaultCharacter from "../../model/default-character";
+import WildcardCharacter from "../../model/wildcard-character";
+import WordBoundaryCharacter from "../../model/word-boundary-character";
 
 test('should return empty expression array for empty string', () => {
     const parser = new Parser()
@@ -15,15 +18,15 @@ test('should correctly parse character literal', () => {
     const parser = new Parser()
     const res = parser.parse('my-string')
     const expected = [
-        new Character('m'),
-        new Character('y'),
-        new Character('-'),
-        new Character('s'),
-        new Character('t'),
-        new Character('r'),
-        new Character('i'),
-        new Character('n'),
-        new Character('g'),
+        new DefaultCharacter('m'),
+        new DefaultCharacter('y'),
+        new DefaultCharacter('-'),
+        new DefaultCharacter('s'),
+        new DefaultCharacter('t'),
+        new DefaultCharacter('r'),
+        new DefaultCharacter('i'),
+        new DefaultCharacter('n'),
+        new DefaultCharacter('g'),
     ].map(it => new SimpleExpression(it))
     expect(res).toEqual(expected)
 })
@@ -32,8 +35,8 @@ test('should correctly parse greedy modifier for single character', () => {
     const parser = new Parser()
     const res = parser.parse('st*')
     const expected = [
-        new SimpleExpression(new Character('s')),
-        new GreedyExpression(new SimpleExpression(new Character('t')))
+        new SimpleExpression(new DefaultCharacter('s')),
+        new GreedyExpression(new SimpleExpression(new DefaultCharacter('t')))
     ]
     expect(res).toEqual(expected)
 })
@@ -42,8 +45,8 @@ test('should correctly parse greedy at least once modifier for single character'
     const parser = new Parser()
     const res = parser.parse('st+')
     const expected = [
-        new SimpleExpression(new Character('s')),
-        new GreedyExpression(new SimpleExpression(new Character('t')), false)
+        new SimpleExpression(new DefaultCharacter('s')),
+        new GreedyExpression(new SimpleExpression(new DefaultCharacter('t')), false)
     ]
     expect(res).toEqual(expected)
 })
@@ -53,9 +56,9 @@ test('should correctly parse bracket expression', () => {
     const res = parser.parse('[abc]')
     const expected = [
         new BracketExpression(
-            new SimpleExpression(new Character('a')),
-            new SimpleExpression(new Character('b')),
-            new SimpleExpression(new Character('c')),
+            new SimpleExpression(new DefaultCharacter('a')),
+            new SimpleExpression(new DefaultCharacter('b')),
+            new SimpleExpression(new DefaultCharacter('c')),
         )
     ]
     expect(res).toEqual(expected)
@@ -66,15 +69,42 @@ test('should correctly parse multiple bracket expressions', () => {
     const res = parser.parse('[abc][zyw]')
     const expected = [
         new BracketExpression(
-            new SimpleExpression(new Character('a')),
-            new SimpleExpression(new Character('b')),
-            new SimpleExpression(new Character('c')),
+            new SimpleExpression(new DefaultCharacter('a')),
+            new SimpleExpression(new DefaultCharacter('b')),
+            new SimpleExpression(new DefaultCharacter('c')),
         ),
         new BracketExpression(
-            new SimpleExpression(new Character('z')),
-            new SimpleExpression(new Character('y')),
-            new SimpleExpression(new Character('w')),
+            new SimpleExpression(new DefaultCharacter('z')),
+            new SimpleExpression(new DefaultCharacter('y')),
+            new SimpleExpression(new DefaultCharacter('w')),
         )
+    ]
+    expect(res).toEqual(expected)
+})
+
+test('should correctly parse wildcard character .', () => {
+    const parser = new Parser()
+    const res = parser.parse('test.')
+    const expected = [
+        new SimpleExpression(new DefaultCharacter('t')),
+        new SimpleExpression(new DefaultCharacter('e')),
+        new SimpleExpression(new DefaultCharacter('s')),
+        new SimpleExpression(new DefaultCharacter('t')),
+        new SimpleExpression(new WildcardCharacter()),
+    ]
+    expect(res).toEqual(expected)
+})
+
+test('should correctly parse word boundary character \b', () => {
+    const parser = new Parser()
+    const res = parser.parse('\\btest\\b')
+    const expected = [
+        new SimpleExpression(new WordBoundaryCharacter()),
+        new SimpleExpression(new DefaultCharacter('t')),
+        new SimpleExpression(new DefaultCharacter('e')),
+        new SimpleExpression(new DefaultCharacter('s')),
+        new SimpleExpression(new DefaultCharacter('t')),
+        new SimpleExpression(new WordBoundaryCharacter()),
     ]
     expect(res).toEqual(expected)
 })
