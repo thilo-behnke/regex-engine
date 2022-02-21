@@ -1,6 +1,6 @@
 import {Expression} from "../../model/expression";
 import Tokenizer from "../tokenizer/tokenizer";
-import {TokenType} from "../../model/token";
+import Token, {TokenType} from "../../model/token";
 import {SimpleExpression} from "../../model/simple-expression";
 import GreedyExpression from "../../model/greedy-expression";
 import BracketExpression from "../../model/bracket-expression";
@@ -9,6 +9,8 @@ import WildcardCharacter from "../../model/wildcard-character";
 import WordBoundaryCharacter from "../../model/word-boundary-character";
 import WordWildcardCharacter from "../../model/word-wildcard-character";
 import DigitWildcardCharacter from "../../model/digit-wildcard-character";
+import AnchorStartCharacter from "../../model/anchor-start-character";
+import AnchorEndCharacter from "../../model/anchor-end-character";
 
 export default class Parser {
     private _tokenizer: Tokenizer
@@ -37,8 +39,19 @@ export default class Parser {
                 const matchingBracketIdx = tokenized.slice(offset).findIndex(it => it.type == TokenType.BRACKET_CLOSE)
                 const betweenBrackets = tokenized.slice(offset, matchingBracketIdx + offset).map(it => new SimpleExpression(new DefaultCharacter(it.value)))
                 const bracketExpression = new BracketExpression(...betweenBrackets)
-                expressions.push(bracketExpression)
+                const next = matchingBracketIdx + offset + 1 < tokenized.length ? tokenized[matchingBracketIdx + offset + 1] : null
+                const completeExpression = this.tryWrapInGreedyModifier(next, bracketExpression)
+                expressions.push(completeExpression)
                 i = matchingBracketIdx + offset
+                continue;
+            }
+
+            if (current.type === TokenType.ANCHOR_START) {
+                expressions.push(new SimpleExpression(new AnchorStartCharacter()))
+                continue;
+            }
+            if (current.type === TokenType.ANCHOR_END) {
+                expressions.push(new SimpleExpression(new AnchorEndCharacter()))
                 continue;
             }
 
@@ -72,16 +85,20 @@ export default class Parser {
 
             const baseExpression = new SimpleExpression(...DefaultCharacter.fromTokens(current))
             const next = i + 1 < tokenized.length ? tokenized[i + 1] : null
-            if (!next || next.type != TokenType.MODIFIER) {
-                expressions.push(baseExpression)
-            } else if (next.type == TokenType.MODIFIER && next.value == '*') {
-                expressions.push(new GreedyExpression(baseExpression))
-            } else if (next.type == TokenType.MODIFIER && next.value == '+') {
-                expressions.push(new GreedyExpression(baseExpression, false))
-            } else {
-                throw new Error('Unknown modifier token encountered: ' + next.type + "/" + next.value)
-            }
+            expressions.push(this.tryWrapInGreedyModifier(next, baseExpression))
         }
         return expressions
+    }
+
+    private tryWrapInGreedyModifier = (token: Token, baseExpression: Expression) => {
+        if (!token || token.type != TokenType.MODIFIER) {
+            return baseExpression
+        } else if (token.type == TokenType.MODIFIER && token.value == '*') {
+            return new GreedyExpression(baseExpression)
+        } else if (token.type == TokenType.MODIFIER && token.value == '+') {
+            return new GreedyExpression(baseExpression, false)
+        } else {
+            throw new Error('Unknown modifier token encountered: ' + token.type + "/" + token.value)
+        }
     }
 }

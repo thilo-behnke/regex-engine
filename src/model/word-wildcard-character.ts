@@ -5,4 +5,8 @@ export default class WordWildcardCharacter implements Character {
     test(s: string): boolean {
         return isWord(s)
     }
+
+    cursorOnly(): boolean {
+        return false;
+    }
 }

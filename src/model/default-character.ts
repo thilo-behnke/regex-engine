@@ -15,4 +15,8 @@ export default class DefaultCharacter implements Character {
     test(s: string): boolean {
         return this._value == s
     }
+
+    cursorOnly(): boolean {
+        return false;
+    }
 }

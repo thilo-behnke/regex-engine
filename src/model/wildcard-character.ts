@@ -4,4 +4,7 @@ export default class WildcardCharacter implements Character {
     test(s: string): boolean {
         return true
     }
+    cursorOnly(): boolean {
+        return false;
+    }
 }

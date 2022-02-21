@@ -29,6 +29,14 @@ export default class Token {
         return new Token(']', TokenType.BRACKET_CLOSE)
     }
 
+    static anchorStart(): Token {
+        return new Token("^", TokenType.ANCHOR_START)
+    }
+
+    static anchorEnd(): Token {
+        return new Token("$", TokenType.ANCHOR_END)
+    }
+
     get value(): string {
         return this._value;
     }
@@ -43,5 +51,7 @@ export enum TokenType {
     ESCAPED = 'ESCAPED',
     MODIFIER = 'MODIFIER',
     BRACKET_OPEN = 'BRACKET_OPEN',
-    BRACKET_CLOSE = 'BRACKET_CLOSE'
+    BRACKET_CLOSE = 'BRACKET_CLOSE',
+    ANCHOR_START = 'ANCHOR_START',
+    ANCHOR_END = 'ANCHOR_END'
 }

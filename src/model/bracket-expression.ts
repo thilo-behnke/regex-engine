@@ -1,10 +1,12 @@
 import {SimpleExpression} from "./simple-expression";
 import {Expression} from "./expression";
+import Character from "./character";
 
 export default class BracketExpression implements Expression {
     private readonly _expressions: SimpleExpression[]
 
     private _isSuccessful: boolean = undefined;
+    private _successfulExpression: Expression = undefined;
 
     constructor(...expressions: SimpleExpression[]) {
         this._expressions = expressions;
@@ -18,10 +20,10 @@ export default class BracketExpression implements Expression {
         return this._isSuccessful;
     }
 
-    matchNext(s: string): boolean {
+    matchNext(s: string, previous: string = null, next: string = null, isZeroPosMatch = false): boolean {
         for (let expression of this._expressions) {
             while(expression.hasNext()) {
-                const res = expression.matchNext(s)
+                const res = expression.matchNext(s, previous, next, isZeroPosMatch)
                 if (!res) {
                     this._isSuccessful = false
                     break
@@ -29,9 +31,14 @@ export default class BracketExpression implements Expression {
             }
             if (expression.isSuccessful()) {
                 this._isSuccessful = true
+                this._successfulExpression = expression
                 return true
             }
         }
+    }
+
+    lastMatchCharactersConsumed(): number {
+        return this._successfulExpression?.lastMatchCharactersConsumed() || 0;
     }
 
     backtrack(): boolean {
@@ -44,6 +51,7 @@ export default class BracketExpression implements Expression {
 
     reset(): void {
         this._isSuccessful = undefined
+        this._successfulExpression = undefined
         this._expressions.forEach(it => it.reset())
     }
 }

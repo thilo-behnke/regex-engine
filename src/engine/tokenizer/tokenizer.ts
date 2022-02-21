@@ -17,6 +17,12 @@ export default class Tokenizer {
             if (it == ']') {
                 return Token.bracketClose()
             }
+            if (it == '^') {
+                return Token.anchorStart()
+            }
+            if (it == '$') {
+                return Token.anchorEnd()
+            }
             return Token.character(it)
         })
     }

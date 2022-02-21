@@ -14,8 +14,8 @@ export default class RegexEngine {
 
         let stringIdx = 0;
         while(stringIdx < stringChars.length) {
-            const regexChars = this._parser.parse(p)
-            const res = this.tryTest(stringChars.slice(stringIdx), regexChars)
+            const expressions = this._parser.parse(p)
+            const res = this.tryTest(stringChars.slice(stringIdx), expressions, stringIdx == 0)
             if (res) {
                 return true
             }
@@ -25,19 +25,20 @@ export default class RegexEngine {
         return false
     }
 
-    private tryTest = (toTest: string[], expressions: Expression[]): boolean => {
+    private tryTest = (toTest: string[], expressions: Expression[], isZeroPosMatch = false): boolean => {
         let stringIdx = 0
         for(let i = 0; i < expressions.length; i++) {
-
             const nextExpression = expressions[i]
             let expressionRes = false
             while(nextExpression.hasNext()) {
-                const nextChar = toTest[stringIdx]
-                expressionRes = nextExpression.matchNext(nextChar, stringIdx + 1 < toTest.length ? toTest[stringIdx + 1] : null)
+                const nextChar = stringIdx < toTest.length ? toTest[stringIdx] : null
+                const previous = stringIdx > 0 ? toTest[stringIdx - 1] : null
+                const next = stringIdx + 1 < toTest.length ? toTest[stringIdx + 1] : null
+                expressionRes = nextExpression.matchNext(nextChar, previous, next, isZeroPosMatch)
                 if (!expressionRes) {
                     break
                 }
-                stringIdx++
+                stringIdx += nextExpression.lastMatchCharactersConsumed()
             }
             expressionRes = nextExpression.isSuccessful()
 
@@ -57,17 +58,6 @@ export default class RegexEngine {
             }
         }
         return true
-    }
-
-    private evaluateExpression = (expression: Expression, toTest: string, nextChar: string) => {
-        while (expression.hasNext()) {
-            const res = expression.matchNext(toTest, nextChar)
-            if (!res) {
-                return false
-            }
-        }
-
-        return expression.isSuccessful()
     }
 
     private tryBacktrack = (expression: Expression) => {

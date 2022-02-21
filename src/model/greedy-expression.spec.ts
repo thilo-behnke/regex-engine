@@ -1,15 +1,17 @@
 import {SimpleExpression} from "./simple-expression";
 import {explodeToCharacters} from "../utils/string-utils";
 import GreedyExpression from "./greedy-expression";
+import DefaultCharacter from "./default-character";
 
 test.each([
-    {expression: 'test', match: 'test', shouldMatch: true},
-    {expression: 'test', match: 'testtest', shouldMatch: true},
-    {expression: 'test', match: '', shouldMatch: false},
-    {expression: 'test', match: 'mambojambo', shouldMatch: true},
-    {expression: '', match: 'test', shouldMatch: true},
+    {expression: 't', match: 'test', shouldMatch: true},
+    {expression: 't', match: 'testtest', shouldMatch: true},
+    {expression: 't', match: '', shouldMatch: false},
+    {expression: 't', match: 'mambojambo', shouldMatch: false},
+    {expression: '', match: 'test', shouldMatch: false},
 ])('should greedily match expression: %s', ({expression, match, shouldMatch}) => {
-    const greedyExpression = new GreedyExpression(new SimpleExpression(...explodeToCharacters(expression)))
+    const expressions = explodeToCharacters(expression).map(it => new SimpleExpression(it))
+    const greedyExpression = new GreedyExpression(expression.length ? expressions[0] : new SimpleExpression(new DefaultCharacter('')), false)
     let idx = 0
     while(greedyExpression.hasNext()) {
         if (idx >= match.length) {
@@ -22,13 +24,14 @@ test.each([
 })
 
 test.each([
-    {expression: 'test', match: 'test', shouldMatch: true},
-    {expression: 'test', match: 'testtest', shouldMatch: true},
-    {expression: 'test', match: '', shouldMatch: false},
-    {expression: 'test', match: 'mambojambo', shouldMatch: false},
+    {expression: 't', match: 'test', shouldMatch: true},
+    {expression: 't', match: 'testtest', shouldMatch: true},
+    {expression: 't', match: '', shouldMatch: false},
+    {expression: 't', match: 'mambojambo', shouldMatch: true},
     {expression: '', match: 'test', shouldMatch: true},
 ])('should greedily match expression when allowNoMatch=true: %s', ({expression, match, shouldMatch}) => {
-    const greedyExpression = new GreedyExpression(new SimpleExpression(...explodeToCharacters(expression)), false)
+    const expressions = explodeToCharacters(expression).map(it => new SimpleExpression(it))
+    const greedyExpression = new GreedyExpression(expression.length ? expressions[0] : new SimpleExpression(new DefaultCharacter('')), true)
     let idx = 0
     while(greedyExpression.hasNext()) {
         if (idx >= match.length) {

@@ -9,6 +9,8 @@ import WildcardCharacter from "../../model/wildcard-character";
 import WordBoundaryCharacter from "../../model/word-boundary-character";
 import WordWildcardCharacter from "../../model/word-wildcard-character";
 import DigitWildcardCharacter from "../../model/digit-wildcard-character";
+import AnchorStartCharacter from "../../model/anchor-start-character";
+import AnchorEndCharacter from "../../model/anchor-end-character";
 
 test('should return empty expression array for empty string', () => {
     const parser = new Parser()
@@ -61,6 +63,22 @@ test('should correctly parse bracket expression', () => {
             new SimpleExpression(new DefaultCharacter('a')),
             new SimpleExpression(new DefaultCharacter('b')),
             new SimpleExpression(new DefaultCharacter('c')),
+        )
+    ]
+    expect(res).toEqual(expected)
+})
+
+test('should correctly parse greedy bracket expression', () => {
+    const parser = new Parser()
+    const res = parser.parse('[abc]+')
+    const expected = [
+        new GreedyExpression(
+            new BracketExpression(
+                new SimpleExpression(new DefaultCharacter('a')),
+                new SimpleExpression(new DefaultCharacter('b')),
+                new SimpleExpression(new DefaultCharacter('c')),
+            ),
+            false
         )
     ]
     expect(res).toEqual(expected)
@@ -136,6 +154,42 @@ test('should correctly parse word wildcard character \d', () => {
         new SimpleExpression(new DefaultCharacter('s')),
         new SimpleExpression(new DefaultCharacter('t')),
         new SimpleExpression(new DigitWildcardCharacter()),
+    ]
+    expect(res).toEqual(expected)
+})
+
+test('should correctly parse start anchor', () => {
+    const parser = new Parser()
+    const res = parser.parse('^test-word')
+    const expected = [
+        new SimpleExpression(new AnchorStartCharacter()),
+        new SimpleExpression(new DefaultCharacter('t')),
+        new SimpleExpression(new DefaultCharacter('e')),
+        new SimpleExpression(new DefaultCharacter('s')),
+        new SimpleExpression(new DefaultCharacter('t')),
+        new SimpleExpression(new DefaultCharacter('-')),
+        new SimpleExpression(new DefaultCharacter('w')),
+        new SimpleExpression(new DefaultCharacter('o')),
+        new SimpleExpression(new DefaultCharacter('r')),
+        new SimpleExpression(new DefaultCharacter('d')),
+    ]
+    expect(res).toEqual(expected)
+})
+
+test('should correctly parse end anchor', () => {
+    const parser = new Parser()
+    const res = parser.parse('test-word$')
+    const expected = [
+        new SimpleExpression(new DefaultCharacter('t')),
+        new SimpleExpression(new DefaultCharacter('e')),
+        new SimpleExpression(new DefaultCharacter('s')),
+        new SimpleExpression(new DefaultCharacter('t')),
+        new SimpleExpression(new DefaultCharacter('-')),
+        new SimpleExpression(new DefaultCharacter('w')),
+        new SimpleExpression(new DefaultCharacter('o')),
+        new SimpleExpression(new DefaultCharacter('r')),
+        new SimpleExpression(new DefaultCharacter('d')),
+        new SimpleExpression(new AnchorEndCharacter()),
     ]
     expect(res).toEqual(expected)
 })

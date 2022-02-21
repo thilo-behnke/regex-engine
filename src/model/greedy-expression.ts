@@ -21,8 +21,12 @@ export default class GreedyExpression implements Expression {
         return !!this._isSuccessful;
     }
 
-    matchNext(s: string): boolean {
-        const res = this._expression.matchNext(s)
+    matchNext(s: string, previous: string = null, next: string = null, isZeroPosMatch = false): boolean {
+        if (this._expression.isSuccessful()) {
+            this._expression.reset()
+        }
+
+        const res = this._expression.matchNext(s, previous, next, isZeroPosMatch)
 
         if (res) {
            this._currentMatch.push(s)
@@ -31,7 +35,6 @@ export default class GreedyExpression implements Expression {
         if (!this._expression.hasNext()) {
             if (this._expression.isSuccessful()) {
                 this._isSuccessful = true
-                this._expression.reset()
                 return true
             } else {
                 this._isSuccessful = this._allowNoMatch || this._isSuccessful
@@ -41,6 +44,10 @@ export default class GreedyExpression implements Expression {
         }
 
         return res
+    }
+
+    lastMatchCharactersConsumed(): number {
+        return this._expression.lastMatchCharactersConsumed();
     }
 
     backtrack(): boolean {
