@@ -9,8 +9,8 @@ Engine:
 - [x] Bracket expressions, e.g. `[abc]`
 - [x] Greedy matching, e.g. `a*` or `a+`
 - [x] Anchors, e.g. `^abc$`
-- [x] Supported matchers: `.`, `\b`, `\w`, `\d`
-- [ ] More matchers, e.g. `\s`
+- [x] Supported matchers: `.`, `\b`, `\w`, `\d`, `\s`
+- [ ] More matchers, e.g. `\W`
 - [ ] Group matching, e.g. `(?:abc)(def)`
 - [ ] Optional modifiers, e.g. `abc?`
 - [ ] Lazy modifiers, e.g. `a+?`
