@@ -1,6 +1,7 @@
 {
   "files": ["src/main.ts"],
   "compilerOptions": {
+    "lib": ["es6", "dom", "es2017"],
     "noImplicitAny": true,
     "target": "es5",
     "downlevelIteration": true

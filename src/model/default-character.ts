@@ -1,5 +1,6 @@
 import Token from "./token";
 import Character from "./character";
+import {ExpressionDescriptor} from "../engine/parser/expression/expression-type";
 
 export default class DefaultCharacter implements Character {
     private readonly _value
