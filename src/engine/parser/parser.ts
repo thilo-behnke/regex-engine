@@ -68,7 +68,7 @@ export default class Parser {
     }
 
     private preprocessTokens = (tokenized: Token[]): ExpressionDescriptor[] => {
-        const expressionStack = []
+        const expressionStack: ExpressionDescriptor[] = []
         for (let i = 0; i < tokenized.length; i++) {
             const current = tokenized[i]
 
@@ -97,7 +97,7 @@ export default class Parser {
                     expressionStack.unshift({type: ExpressionType.MODIFIER, value: current.value})
                     break
                 case TokenType.BRACKET_OPEN:
-                    const matchingBrackets = tokenized.findIndex(it => it.type === ExpressionType.BRACKETS)
+                    const matchingBrackets = tokenized.findIndex(it => it.type === TokenType.BRACKET_CLOSE)
                     if (matchingBrackets === -1) {
                         throw new Error("Failed to parse expression: expected to find opening brackets")
                     }
@@ -108,7 +108,7 @@ export default class Parser {
                     if (preprocessed.some(it => it.type !== ExpressionType.CHARACTER && it.type !== ExpressionType.SPECIAL_CHARACTER)) {
                         throw new Error("Unable to parse bracket contents, found forbidden characters")
                     }
-                    const bracketExpression = {type: ExpressionType.BRACKETS, value: preprocessed}
+                    const bracketExpression = {type: ExpressionType.BRACKETS, value: preprocessed} as {type: ExpressionType.BRACKETS, value: ExpressionDescriptor[]}
                     expressionStack.push(bracketExpression)
                     i = matchingBracketIdx + offset
                     break
@@ -122,8 +122,8 @@ export default class Parser {
 
     private parseExpression = (expression: ExpressionDescriptor, next: ExpressionDescriptor) => {
         if (expression.type === ExpressionType.CHARACTER) {
-            const expression = new SimpleExpression(new DefaultCharacter((expression as {type: ExpressionType.CHARACTER, value: string}).value))
-            const wrapped = this.tryWrapInGreedyModifier(next, expression)
+            const charExpression = new SimpleExpression(new DefaultCharacter((expression as {type: ExpressionType.CHARACTER, value: string}).value))
+            const wrapped = this.tryWrapInGreedyModifier(next, charExpression)
             return wrapped
         }
 
@@ -139,14 +139,14 @@ export default class Parser {
         }
 
         if (expression.type === ExpressionType.SPECIAL_CHARACTER) {
-            const expression = this.tryParseSpecialCharacter(expression as {type: ExpressionType.SPECIAL_CHARACTER, value: string})
-            const wrapped = this.tryWrapInGreedyModifier(next, expression)
+            const specialCharExpression = this.tryParseSpecialCharacter(expression as {type: ExpressionType.SPECIAL_CHARACTER, value: string})
+            const wrapped = this.tryWrapInGreedyModifier(next, specialCharExpression)
             return wrapped
         }
 
         if (expression.type === ExpressionType.BRACKETS) {
             const parsed = []
-            for (let i = 0; i < expression.value; i++) {
+            for (let i = 0; i < expression.value.length; i++) {
                 const next = i + 1 < expression.value.length ? expression.value[i + 1] : null
                 parsed.push(this.parseExpression(expression.value[i], next))
             }

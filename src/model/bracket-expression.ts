@@ -3,12 +3,12 @@ import {Expression} from "./expression";
 import Character from "./character";
 
 export default class BracketExpression implements Expression {
-    private readonly _expressions: SimpleExpression[]
+    private readonly _expressions: Expression[]
 
     private _isSuccessful: boolean = undefined;
     private _successfulExpression: Expression = undefined;
 
-    constructor(...expressions: SimpleExpression[]) {
+    constructor(...expressions: Expression[]) {
         this._expressions = expressions;
     }
 
