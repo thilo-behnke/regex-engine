@@ -11,6 +11,7 @@ import WordWildcardCharacter from "../../model/word-wildcard-character";
 import DigitWildcardCharacter from "../../model/digit-wildcard-character";
 import AnchorStartCharacter from "../../model/anchor-start-character";
 import AnchorEndCharacter from "../../model/anchor-end-character";
+import {WhitespaceCharacter} from "../../model/whitespace-character";
 
 test('should return empty expression array for empty string', () => {
     const parser = new Parser()
@@ -185,6 +186,24 @@ test('should correctly parse end anchor', () => {
         new SimpleExpression(new DefaultCharacter('s')),
         new SimpleExpression(new DefaultCharacter('t')),
         new SimpleExpression(new DefaultCharacter('-')),
+        new SimpleExpression(new DefaultCharacter('w')),
+        new SimpleExpression(new DefaultCharacter('o')),
+        new SimpleExpression(new DefaultCharacter('r')),
+        new SimpleExpression(new DefaultCharacter('d')),
+        new SimpleExpression(new AnchorEndCharacter()),
+    ]
+    expect(res).toEqual(expected)
+})
+
+test('should correctly parse whitespace', () => {
+    const parser = new Parser()
+    const res = parser.parse('test\\sword$')
+    const expected = [
+        new SimpleExpression(new DefaultCharacter('t')),
+        new SimpleExpression(new DefaultCharacter('e')),
+        new SimpleExpression(new DefaultCharacter('s')),
+        new SimpleExpression(new DefaultCharacter('t')),
+        new SimpleExpression(new WhitespaceCharacter()),
         new SimpleExpression(new DefaultCharacter('w')),
         new SimpleExpression(new DefaultCharacter('o')),
         new SimpleExpression(new DefaultCharacter('r')),

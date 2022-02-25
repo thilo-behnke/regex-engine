@@ -11,6 +11,7 @@ import WordWildcardCharacter from "../../model/word-wildcard-character";
 import DigitWildcardCharacter from "../../model/digit-wildcard-character";
 import AnchorStartCharacter from "../../model/anchor-start-character";
 import AnchorEndCharacter from "../../model/anchor-end-character";
+import {WhitespaceCharacter} from "../../model/whitespace-character";
 
 export default class Parser {
     private _tokenizer: Tokenizer
@@ -77,6 +78,11 @@ export default class Parser {
                 }
                 if (next.value === "d") {
                     expressions.push(new SimpleExpression(new DigitWildcardCharacter()))
+                    i++
+                    continue
+                }
+                if (next.value === "s") {
+                    expressions.push(new SimpleExpression(new WhitespaceCharacter()))
                     i++
                     continue
                 }
