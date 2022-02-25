@@ -13,6 +13,10 @@ export class SimpleExpression implements Expression {
         this._characters = characters;
     }
 
+    hasNotMatched(): boolean {
+        return this._charactersConsumed === 0;
+    }
+
     hasNext(): boolean {
         return this._idx < this._characters.length && this._isSuccessful != false
     }

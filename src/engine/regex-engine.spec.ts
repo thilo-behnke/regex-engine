@@ -50,7 +50,11 @@ test.each([
     {value: "test-word", pattern: "^test$", shouldMatch: false},
     {value: "another-test-word", pattern: "^test", shouldMatch: false},
     {value: "anchor-textabcabc", pattern: "^anchor-text[abc]+$", shouldMatch: true},
-    // {value: "anchor-textabcabcxxx", pattern: "^anchor-text[abc]+$", shouldMatch: false},
+    {value: "anchor-textabcabcxxx", pattern: "^anchor-text[abc]+$", shouldMatch: false},
+    {value: "abcd", pattern: "^abc[c]*[d]*cd$", shouldMatch: false},
+    {value: "abccd", pattern: "^abc[c]*[d]*cd$", shouldMatch: true},
+    {value: "abccccccd", pattern: "^abc[c]*[d]*cd$", shouldMatch: true},
+    {value: "abcd", pattern: "^ab[c]*[d]*cd$", shouldMatch: true},
 ]) ('should match: %s', ({value, pattern, shouldMatch}) => {
     const engine = new RegexEngine()
     const res = engine.test(value, pattern)

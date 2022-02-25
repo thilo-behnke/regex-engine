@@ -12,6 +12,10 @@ export default class BracketExpression implements Expression {
         this._expressions = expressions;
     }
 
+    hasNotMatched(): boolean {
+        return this._isSuccessful === undefined;
+    }
+
     hasNext(): boolean {
         return this.isSuccessful() == undefined;
     }
@@ -35,6 +39,7 @@ export default class BracketExpression implements Expression {
                 return true
             }
         }
+        return this._isSuccessful
     }
 
     lastMatchCharactersConsumed(): number {

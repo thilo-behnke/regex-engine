@@ -13,6 +13,10 @@ export default class GreedyExpression implements Expression {
         this._allowNoMatch = allowNoMatch;
     }
 
+    hasNotMatched(): boolean {
+        return this._currentMatch.length === 0;
+    }
+
     hasNext(): boolean {
         return this._hasNext;
     }
@@ -35,11 +39,9 @@ export default class GreedyExpression implements Expression {
         if (!this._expression.hasNext()) {
             if (this._expression.isSuccessful()) {
                 this._isSuccessful = true
-                return true
             } else {
                 this._isSuccessful = this._allowNoMatch || this._isSuccessful
                 this._hasNext = false
-                return this._isSuccessful
             }
         }
 
@@ -58,16 +60,20 @@ export default class GreedyExpression implements Expression {
         const updatedMatch = this._currentMatch.slice(0, this._currentMatch.length - 1)
         this.reset()
         updatedMatch.every(it => this.matchNext(it))
+        if (this._isSuccessful === undefined && this._allowNoMatch) {
+            this._isSuccessful = true
+        }
         return this._isSuccessful
     }
 
     canBacktrack(): boolean {
-        return true;
+        return this._currentMatch.length > 0;
     }
 
     reset(): void {
         this._hasNext = true
         this._isSuccessful = undefined
+        this._currentMatch = []
         this._expression.reset()
     }
 }
