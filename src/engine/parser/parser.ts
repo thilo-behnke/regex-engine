@@ -11,7 +11,8 @@ import AnchorEndCharacter from "../../model/anchor-end-character";
 import {WhitespaceCharacter} from "../../model/whitespace-character";
 import {Lexer} from "../lexer/lexer";
 import DefaultCharacter from "../../model/default-character";
-import BracketExpression from "../../model/bracket-expression";
+import SquareBracketExpression from "../../model/square-bracket-expression";
+import {GroupExpression} from "../../model/group-expression";
 
 export default class Parser {
     private _lexer: Lexer
@@ -29,11 +30,6 @@ export default class Parser {
         this._expressions = []
         this._currentToken = this._lexer.getNextToken()
         while (this._currentToken !== null) {
-            if (this._currentToken.type == TokenType.SQUARE_BRACKET_OPEN) {
-                this.consumeBrackets()
-                continue;
-            }
-
             if (this._currentToken.type === TokenType.ANCHOR_START) {
                 this.consume(TokenType.ANCHOR_START)
                 this._expressions.push(new SimpleExpression(new AnchorStartCharacter()))
@@ -42,6 +38,16 @@ export default class Parser {
             if (this._currentToken.type === TokenType.ANCHOR_END) {
                 this.consume(TokenType.ANCHOR_END)
                 this._expressions.push(new SimpleExpression(new AnchorEndCharacter()))
+                continue;
+            }
+
+            if (this._currentToken.type == TokenType.SQUARE_BRACKET_OPEN) {
+                this.consumeSquareBrackets()
+                continue;
+            }
+
+            if (this._currentToken.type == TokenType.BRACKET_OPEN) {
+                this.consumeSquareBrackets()
                 continue;
             }
 
@@ -66,6 +72,10 @@ export default class Parser {
             }
 
             if (this._currentToken.type == TokenType.SQUARE_BRACKET_CLOSE) {
+                throw new Error(`Found orphaned closing square bracket`)
+            }
+
+            if (this._currentToken.type == TokenType.BRACKET_CLOSE) {
                 throw new Error(`Found orphaned closing bracket`)
             }
 
@@ -103,7 +113,7 @@ export default class Parser {
         throw new Error(`Found invalid escape sequence: ${TokenType.ESCAPED}/${next.type}`)
     }
 
-    private consumeBrackets() {
+    private consumeSquareBrackets() {
         this.consume(TokenType.SQUARE_BRACKET_OPEN)
         let negated = this._currentToken.type === TokenType.CHARACTER && this._currentToken.value === "^"
         if (negated) {
@@ -134,7 +144,39 @@ export default class Parser {
             }
         }
         this.consume(TokenType.SQUARE_BRACKET_CLOSE)
-        const bracketExpression = negated ? BracketExpression.negated(...expressions) : new BracketExpression(...expressions)
+        const bracketExpression = negated ? SquareBracketExpression.negated(...expressions) : new SquareBracketExpression(...expressions)
+        const expression = this.tryWrapInGreedyModifier(bracketExpression)
+        this._expressions.push(expression)
+    }
+
+    private consumeBrackets() {
+        this.consume(TokenType.BRACKET_OPEN)
+        const expressions = []
+        while(this._currentToken.type !== TokenType.BRACKET_CLOSE) {
+            const next = this._currentToken
+            switch(next.type) {
+                case TokenType.ANCHOR_START:
+                case TokenType.ANCHOR_END:
+                case TokenType.SQUARE_BRACKET_OPEN:
+                    // TODO: Consume square brackets
+                case TokenType.EOF:
+                    throw new Error(`Unexpected eof in brackets`)
+                case TokenType.CHARACTER:
+                    const charExpression = new SimpleExpression(new DefaultCharacter(this._currentToken.value))
+                    this.consume(TokenType.CHARACTER)
+                    expressions.push(charExpression)
+                    break
+                case TokenType.ESCAPED:
+                    this.consume(TokenType.ESCAPED)
+                    const escapedExpression = this.tryParseEscaped()
+                    expressions.push(escapedExpression)
+                    break
+                default:
+                    throw new Error(`Unknown token in brackets: ${next.value} (${next.type})`)
+            }
+        }
+        this.consume(TokenType.BRACKET_CLOSE)
+        const bracketExpression = new GroupExpression(...expressions)
         const expression = this.tryWrapInGreedyModifier(bracketExpression)
         this._expressions.push(expression)
     }

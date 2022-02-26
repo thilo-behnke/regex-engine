@@ -4,7 +4,7 @@ export class GroupExpression implements Expression {
     private readonly _expressions: Expression[]
     private _idx: number = 0
 
-    constructor(expressions: Expression[]) {
+    constructor(...expressions: Expression[]) {
         this._expressions = expressions;
     }
 

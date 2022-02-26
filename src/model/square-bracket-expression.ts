@@ -3,7 +3,7 @@ import {Expression} from "./expression";
 import Character from "./character";
 import {NegatedSimpleExpression} from "./negated-simple-expression";
 
-export default class BracketExpression implements Expression {
+export default class SquareBracketExpression implements Expression {
     private readonly _expressions: (SimpleExpression|NegatedSimpleExpression)[]
     protected _anyMatch = true
 
@@ -15,7 +15,7 @@ export default class BracketExpression implements Expression {
     }
 
     static negated(...expressions: SimpleExpression[]): Expression {
-        const expression = new BracketExpression(...expressions.map(it => new NegatedSimpleExpression(it)))
+        const expression = new SquareBracketExpression(...expressions.map(it => new NegatedSimpleExpression(it)))
         expression._anyMatch = false
         return expression
     }

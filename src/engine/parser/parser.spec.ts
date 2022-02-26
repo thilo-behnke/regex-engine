@@ -1,7 +1,7 @@
 import Parser from "./parser";
 import {SimpleExpression} from "../../model/simple-expression";
 import GreedyExpression from "../../model/greedy-expression";
-import BracketExpression from "../../model/bracket-expression";
+import SquareBracketExpression from "../../model/square-bracket-expression";
 import DefaultCharacter from "../../model/default-character";
 import WildcardCharacter from "../../model/wildcard-character";
 import WordBoundaryCharacter from "../../model/word-boundary-character";
@@ -10,6 +10,7 @@ import DigitWildcardCharacter from "../../model/digit-wildcard-character";
 import AnchorStartCharacter from "../../model/anchor-start-character";
 import AnchorEndCharacter from "../../model/anchor-end-character";
 import {WhitespaceCharacter} from "../../model/whitespace-character";
+import {GroupExpression} from "../../model/group-expression";
 
 test('should return empty expression array for empty string', () => {
     const parser = new Parser()
@@ -58,7 +59,7 @@ test('should correctly parse bracket expression', () => {
     const parser = new Parser()
     const res = parser.parse('[abc]')
     const expected = [
-        new BracketExpression(
+        new SquareBracketExpression(
             new SimpleExpression(new DefaultCharacter('a')),
             new SimpleExpression(new DefaultCharacter('b')),
             new SimpleExpression(new DefaultCharacter('c')),
@@ -72,7 +73,7 @@ test('should correctly parse greedy bracket expression', () => {
     const res = parser.parse('[abc]+')
     const expected = [
         new GreedyExpression(
-            new BracketExpression(
+            new SquareBracketExpression(
                 new SimpleExpression(new DefaultCharacter('a')),
                 new SimpleExpression(new DefaultCharacter('b')),
                 new SimpleExpression(new DefaultCharacter('c')),
@@ -87,12 +88,12 @@ test('should correctly parse multiple bracket expressions', () => {
     const parser = new Parser()
     const res = parser.parse('[abc][zyw]')
     const expected = [
-        new BracketExpression(
+        new SquareBracketExpression(
             new SimpleExpression(new DefaultCharacter('a')),
             new SimpleExpression(new DefaultCharacter('b')),
             new SimpleExpression(new DefaultCharacter('c')),
         ),
-        new BracketExpression(
+        new SquareBracketExpression(
             new SimpleExpression(new DefaultCharacter('z')),
             new SimpleExpression(new DefaultCharacter('y')),
             new SimpleExpression(new DefaultCharacter('w')),
@@ -215,7 +216,20 @@ test('should correctly parse not modifier in beginning of bracket (^)', () => {
     const parser = new Parser()
     const res = parser.parse('[^abc]')
     const expected = [
-        BracketExpression.negated(
+        SquareBracketExpression.negated(
+            new SimpleExpression(new DefaultCharacter('a')),
+            new SimpleExpression(new DefaultCharacter('b')),
+            new SimpleExpression(new DefaultCharacter('c')),
+        )
+    ]
+    expect(res).toEqual(expected)
+})
+
+test('should correctly parse group', () => {
+    const parser = new Parser()
+    const res = parser.parse('(abc)')
+    const expected = [
+        new GroupExpression(
             new SimpleExpression(new DefaultCharacter('a')),
             new SimpleExpression(new DefaultCharacter('b')),
             new SimpleExpression(new DefaultCharacter('c')),
