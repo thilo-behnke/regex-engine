@@ -29,7 +29,7 @@ export default class Parser {
         this._expressions = []
         this._currentToken = this._lexer.getNextToken()
         while (this._currentToken !== null) {
-            if (this._currentToken.type == TokenType.BRACKET_OPEN) {
+            if (this._currentToken.type == TokenType.SQUARE_BRACKET_OPEN) {
                 this.consumeBrackets()
                 continue;
             }
@@ -65,7 +65,7 @@ export default class Parser {
                 throw new Error(`Found orphaned modifier: ${this._currentToken.value}`)
             }
 
-            if (this._currentToken.type == TokenType.BRACKET_CLOSE) {
+            if (this._currentToken.type == TokenType.SQUARE_BRACKET_CLOSE) {
                 throw new Error(`Found orphaned closing bracket`)
             }
 
@@ -104,18 +104,18 @@ export default class Parser {
     }
 
     private consumeBrackets() {
-        this.consume(TokenType.BRACKET_OPEN)
+        this.consume(TokenType.SQUARE_BRACKET_OPEN)
         let negated = this._currentToken.type === TokenType.CHARACTER && this._currentToken.value === "^"
         if (negated) {
             this.consume(TokenType.CHARACTER)
         }
         const expressions = []
-        while(this._currentToken.type !== TokenType.BRACKET_CLOSE) {
+        while(this._currentToken.type !== TokenType.SQUARE_BRACKET_CLOSE) {
             const next = this._currentToken
             switch(next.type) {
                 case TokenType.ANCHOR_START:
                 case TokenType.ANCHOR_END:
-                case TokenType.BRACKET_OPEN:
+                case TokenType.SQUARE_BRACKET_OPEN:
                     throw new Error(`Unexpected token in brackets: ${next.value} (${next.type})`)
                 case TokenType.EOF:
                     throw new Error(`Unexpected eof in brackets`)
@@ -133,7 +133,7 @@ export default class Parser {
                     throw new Error(`Unknown token in brackets: ${next.value} (${next.type})`)
             }
         }
-        this.consume(TokenType.BRACKET_CLOSE)
+        this.consume(TokenType.SQUARE_BRACKET_CLOSE)
         const bracketExpression = negated ? BracketExpression.negated(...expressions) : new BracketExpression(...expressions)
         const expression = this.tryWrapInGreedyModifier(bracketExpression)
         this._expressions.push(expression)
