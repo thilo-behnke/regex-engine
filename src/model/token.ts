@@ -37,6 +37,10 @@ export default class Token {
         return new Token("$", TokenType.ANCHOR_END)
     }
 
+    static eof(): Token {
+        return new Token("EOF", TokenType.EOF)
+    }
+
     get value(): string {
         return this._value;
     }
@@ -53,5 +57,6 @@ export enum TokenType {
     BRACKET_OPEN = 'BRACKET_OPEN',
     BRACKET_CLOSE = 'BRACKET_CLOSE',
     ANCHOR_START = 'ANCHOR_START',
-    ANCHOR_END = 'ANCHOR_END'
+    ANCHOR_END = 'ANCHOR_END',
+    EOF = 'EOF'
 }

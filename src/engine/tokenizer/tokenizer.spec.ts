@@ -4,7 +4,7 @@ import Token from "../../model/token";
 test('should return empty array for empty string', () => {
     const tokenizer = new Tokenizer()
     const res = tokenizer.tokenize('')
-    expect(res).toEqual([])
+    expect(res).toEqual([Token.eof()])
 })
 
 test('should correctly detect characters vs modifiers', () => {
@@ -22,6 +22,7 @@ test('should correctly detect characters vs modifiers', () => {
         Token.character('-'),
         Token.character('m'),
         Token.modifier('*'),
+        Token.eof()
     ])
 })
 
@@ -42,5 +43,6 @@ test('should correctly detect brackets', () => {
         Token.character('b'),
         Token.character('c'),
         Token.bracketClose(),
+        Token.eof()
     ])
 })

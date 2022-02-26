@@ -42,7 +42,7 @@ const isWhitespace = (s: string) => {
 }
 
 const isDigit = (s: string) => {
-    if (s.length > 1) {
+    if (s === null || s.length > 1) {
         return false
     }
     const zeroPos = "0".charCodeAt(0)
