@@ -151,7 +151,7 @@ export default class Parser {
 
     private consumeBrackets() {
         this.consume(TokenType.BRACKET_OPEN)
-        const expressions = []
+        const expressions: Expression[] = []
         // TODO: This must itself consume a whole regex + also potential modifiers afterwards
         this.consume(TokenType.BRACKET_CLOSE)
         const bracketExpression = new GroupExpression(...expressions)
