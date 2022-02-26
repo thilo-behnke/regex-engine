@@ -47,7 +47,7 @@ export default class Parser {
             }
 
             if (this._currentToken.type == TokenType.BRACKET_OPEN) {
-                this.consumeSquareBrackets()
+                this.consumeBrackets()
                 continue;
             }
 
@@ -152,29 +152,7 @@ export default class Parser {
     private consumeBrackets() {
         this.consume(TokenType.BRACKET_OPEN)
         const expressions = []
-        while(this._currentToken.type !== TokenType.BRACKET_CLOSE) {
-            const next = this._currentToken
-            switch(next.type) {
-                case TokenType.ANCHOR_START:
-                case TokenType.ANCHOR_END:
-                case TokenType.SQUARE_BRACKET_OPEN:
-                    // TODO: Consume square brackets
-                case TokenType.EOF:
-                    throw new Error(`Unexpected eof in brackets`)
-                case TokenType.CHARACTER:
-                    const charExpression = new SimpleExpression(new DefaultCharacter(this._currentToken.value))
-                    this.consume(TokenType.CHARACTER)
-                    expressions.push(charExpression)
-                    break
-                case TokenType.ESCAPED:
-                    this.consume(TokenType.ESCAPED)
-                    const escapedExpression = this.tryParseEscaped()
-                    expressions.push(escapedExpression)
-                    break
-                default:
-                    throw new Error(`Unknown token in brackets: ${next.value} (${next.type})`)
-            }
-        }
+        // TODO: This must itself consume a whole regex + also potential modifiers afterwards
         this.consume(TokenType.BRACKET_CLOSE)
         const bracketExpression = new GroupExpression(...expressions)
         const expression = this.tryWrapInGreedyModifier(bracketExpression)
