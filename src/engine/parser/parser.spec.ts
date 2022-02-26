@@ -1,7 +1,5 @@
 import Parser from "./parser";
-import Token from "../../model/token";
 import {SimpleExpression} from "../../model/simple-expression";
-import Character from "../../model/character";
 import GreedyExpression from "../../model/greedy-expression";
 import BracketExpression from "../../model/bracket-expression";
 import DefaultCharacter from "../../model/default-character";
@@ -209,6 +207,19 @@ test('should correctly parse whitespace', () => {
         new SimpleExpression(new DefaultCharacter('r')),
         new SimpleExpression(new DefaultCharacter('d')),
         new SimpleExpression(new AnchorEndCharacter()),
+    ]
+    expect(res).toEqual(expected)
+})
+
+test('should correctly parse not modifier in beginning of bracket (^)', () => {
+    const parser = new Parser()
+    const res = parser.parse('[^abc]')
+    const expected = [
+        BracketExpression.negated(
+            new SimpleExpression(new DefaultCharacter('a')),
+            new SimpleExpression(new DefaultCharacter('b')),
+            new SimpleExpression(new DefaultCharacter('c')),
+        )
     ]
     expect(res).toEqual(expected)
 })

@@ -4,7 +4,7 @@ import {explode} from "../../utils/string-utils";
 export default class Tokenizer {
     tokenize(s: string): Token[] {
         const chars = explode(s)
-        const tokens = chars.map(it => {
+        const tokens = chars.map((it, idx) => {
             if (it === '*' || it === '+') {
                 return Token.modifier(it)
             }
@@ -17,8 +17,11 @@ export default class Tokenizer {
             if (it == ']') {
                 return Token.bracketClose()
             }
-            if (it == '^') {
+            if (it == '^' && idx === 0) {
                 return Token.anchorStart()
+            }
+            if (it == '^') {
+                return Token.character('^')
             }
             if (it == '$') {
                 return Token.anchorEnd()

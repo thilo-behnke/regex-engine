@@ -46,7 +46,6 @@ export default class RegexEngine {
             }
 
             let backtrackIdx = expressionIdx - 1
-            cursorPos--
             while(backtrackIdx >= 0) {
                 const previousExpression = expressions[backtrackIdx]
                 while (this.tryBacktrack(previousExpression)) {
@@ -80,7 +79,7 @@ export default class RegexEngine {
             const next = idx + 1 < toTest.length ? toTest[idx + 1] : null
             expression.matchNext(nextChar, previous, next, this.isAtZeroPos())
             idx += expression.lastMatchCharactersConsumed()
-            if (!expression.isSuccessful) {
+            if (!expression.isSuccessful()) {
                 return {match: false, tokensConsumed: 0}
             }
         }

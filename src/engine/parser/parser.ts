@@ -105,6 +105,10 @@ export default class Parser {
 
     private consumeBrackets() {
         this.consume(TokenType.BRACKET_OPEN)
+        let negated = this._currentToken.type === TokenType.CHARACTER && this._currentToken.value === "^"
+        if (negated) {
+            this.consume(TokenType.CHARACTER)
+        }
         const expressions = []
         while(this._currentToken.type !== TokenType.BRACKET_CLOSE) {
             const next = this._currentToken
@@ -130,7 +134,7 @@ export default class Parser {
             }
         }
         this.consume(TokenType.BRACKET_CLOSE)
-        const bracketExpression = new BracketExpression(...expressions)
+        const bracketExpression = negated ? BracketExpression.negated(...expressions) : new BracketExpression(...expressions)
         const expression = this.tryWrapInGreedyModifier(bracketExpression)
         this._expressions.push(expression)
     }

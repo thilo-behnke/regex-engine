@@ -1,15 +1,23 @@
 import {SimpleExpression} from "./simple-expression";
 import {Expression} from "./expression";
 import Character from "./character";
+import {NegatedSimpleExpression} from "./negated-simple-expression";
 
 export default class BracketExpression implements Expression {
-    private readonly _expressions: SimpleExpression[]
+    private readonly _expressions: (SimpleExpression|NegatedSimpleExpression)[]
+    protected _anyMatch = true
 
     private _isSuccessful: boolean = undefined;
     private _successfulExpression: Expression = undefined;
 
-    constructor(...expressions: SimpleExpression[]) {
+    constructor(...expressions: (SimpleExpression|NegatedSimpleExpression)[]) {
         this._expressions = expressions;
+    }
+
+    static negated(...expressions: SimpleExpression[]): Expression {
+        const expression = new BracketExpression(...expressions.map(it => new NegatedSimpleExpression(it)))
+        expression._anyMatch = false
+        return expression
     }
 
     hasNotMatched(): boolean {
@@ -30,6 +38,9 @@ export default class BracketExpression implements Expression {
                 const res = expression.matchNext(s, previous, next, isZeroPosMatch)
                 if (!res) {
                     this._isSuccessful = false
+                    if (!this._anyMatch) {
+                        return false
+                    }
                     break
                 }
             }
