@@ -6,7 +6,7 @@ Regex engine written in typescript.
 
 Engine:
 - [x] Ascii literal matching, e.g. `abc123`
-- [x] Bracket expressions, e.g. `[abc]`
+- [x] Bracket expressions, e.g. `[abc]` or `[^abc]`
 - [x] Greedy matching, e.g. `a*` or `a+`
 - [x] Anchors, e.g. `^abc$`
 - [x] Supported matchers: `.`, `\b`, `\w`, `\d`, `\s`
