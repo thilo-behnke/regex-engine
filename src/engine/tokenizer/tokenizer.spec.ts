@@ -26,9 +26,30 @@ test('should correctly detect characters vs modifiers', () => {
     ])
 })
 
-test('should correctly detect brackets', () => {
+test('should correctly detect square brackets', () => {
     const tokenizer = new Tokenizer()
     const res = tokenizer.tokenize('this-is-[abc]')
+    expect(res).toEqual([
+        Token.character('t'),
+        Token.character('h'),
+        Token.character('i'),
+        Token.character('s'),
+        Token.character('-'),
+        Token.character('i'),
+        Token.character('s'),
+        Token.character('-'),
+        Token.squareBracketOpen(),
+        Token.character('a'),
+        Token.character('b'),
+        Token.character('c'),
+        Token.squareBracketClose(),
+        Token.eof()
+    ])
+})
+
+test('should correctly detect brackets', () => {
+    const tokenizer = new Tokenizer()
+    const res = tokenizer.tokenize('this-is-(abc)')
     expect(res).toEqual([
         Token.character('t'),
         Token.character('h'),

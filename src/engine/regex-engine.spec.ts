@@ -68,3 +68,19 @@ test.each([
     expect(res).toEqual(shouldMatch)
 })
 
+test.each([
+    {value: 'abc', pattern: '(a)', shouldMatch: true, expectedMatchGroups: ['a']},
+    {value: 'abc', pattern: '(ad*)', shouldMatch: true, expectedMatchGroups: ['a']},
+    {value: 'abc', pattern: '(ad+)', shouldMatch: false, expectedMatchGroups: []},
+    {value: 'abc', pattern: '(ab+)c', shouldMatch: true, expectedMatchGroups: ['ab']},
+    {value: 'abc', pattern: 'a(b+)c', shouldMatch: true, expectedMatchGroups: ['b']},
+    {value: 'abc', pattern: 'a(d*)b', shouldMatch: false, expectedMatchGroups: []},
+    {value: 'abc', pattern: 'a(d)*b', shouldMatch: true, expectedMatchGroups: []},
+    {value: 'addb', pattern: 'a(d)*b', shouldMatch: true, expectedMatchGroups: ['d']},
+]) ('should correctly match groups: %s', ({value, pattern, shouldMatch, expectedMatchGroups}) => {
+    const engine = new RegexEngine()
+    const res = engine.test(value, pattern)
+    expect(res).toEqual(shouldMatch)
+    expect(engine.matchGroups).toEqual(expectedMatchGroups)
+})
+

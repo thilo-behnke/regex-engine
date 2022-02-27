@@ -22,11 +22,19 @@ export default class Token {
     }
 
     static bracketOpen(): Token {
-        return new Token('[', TokenType.BRACKET_OPEN)
+        return new Token('(', TokenType.BRACKET_OPEN)
     }
 
     static bracketClose(): Token {
-        return new Token(']', TokenType.BRACKET_CLOSE)
+        return new Token(')', TokenType.BRACKET_CLOSE)
+    }
+
+    static squareBracketOpen(): Token {
+        return new Token('[', TokenType.SQUARE_BRACKET_OPEN)
+    }
+
+    static squareBracketClose(): Token {
+        return new Token(']', TokenType.SQUARE_BRACKET_CLOSE)
     }
 
     static anchorStart(): Token {
@@ -56,6 +64,8 @@ export enum TokenType {
     MODIFIER = 'MODIFIER',
     BRACKET_OPEN = 'BRACKET_OPEN',
     BRACKET_CLOSE = 'BRACKET_CLOSE',
+    SQUARE_BRACKET_OPEN = 'SQUARE_BRACKET_OPEN',
+    SQUARE_BRACKET_CLOSE = 'SQUARE_BRACKET_CLOSE',
     ANCHOR_START = 'ANCHOR_START',
     ANCHOR_END = 'ANCHOR_END',
     EOF = 'EOF'

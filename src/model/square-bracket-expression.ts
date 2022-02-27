@@ -3,19 +3,20 @@ import {Expression} from "./expression";
 import Character from "./character";
 import {NegatedSimpleExpression} from "./negated-simple-expression";
 
-export default class BracketExpression implements Expression {
+export default class SquareBracketExpression implements Expression {
     private readonly _expressions: (SimpleExpression|NegatedSimpleExpression)[]
     protected _anyMatch = true
 
     private _isSuccessful: boolean = undefined;
     private _successfulExpression: Expression = undefined;
+    private _currentMatch: string[] = []
 
     constructor(...expressions: (SimpleExpression|NegatedSimpleExpression)[]) {
         this._expressions = expressions;
     }
 
     static negated(...expressions: SimpleExpression[]): Expression {
-        const expression = new BracketExpression(...expressions.map(it => new NegatedSimpleExpression(it)))
+        const expression = new SquareBracketExpression(...expressions.map(it => new NegatedSimpleExpression(it)))
         expression._anyMatch = false
         return expression
     }
@@ -38,6 +39,7 @@ export default class BracketExpression implements Expression {
                 const res = expression.matchNext(s, previous, next, isZeroPosMatch)
                 if (!res) {
                     this._isSuccessful = false
+                    this._currentMatch = []
                     if (!this._anyMatch) {
                         return false
                     }
@@ -46,6 +48,7 @@ export default class BracketExpression implements Expression {
             }
             if (expression.isSuccessful()) {
                 this._isSuccessful = true
+                this._currentMatch = [s]
                 this._successfulExpression = expression
                 return true
             }
@@ -65,9 +68,18 @@ export default class BracketExpression implements Expression {
         return false;
     }
 
+    currentMatch(): string[] {
+        return this._currentMatch;
+    }
+
+    tracksMatch(): boolean {
+        return false;
+    }
+
     reset(): void {
         this._isSuccessful = undefined
         this._successfulExpression = undefined
         this._expressions.forEach(it => it.reset())
+        this._currentMatch = []
     }
 }

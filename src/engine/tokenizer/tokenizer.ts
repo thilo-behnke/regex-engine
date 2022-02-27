@@ -11,11 +11,17 @@ export default class Tokenizer {
             if (it == '\\') {
                 return Token.escaped()
             }
-            if (it === '[') {
+            if (it === '(') {
                 return Token.bracketOpen()
             }
-            if (it == ']') {
+            if (it == ')') {
                 return Token.bracketClose()
+            }
+            if (it === '[') {
+                return Token.squareBracketOpen()
+            }
+            if (it == ']') {
+                return Token.squareBracketClose()
             }
             if (it == '^' && idx === 0) {
                 return Token.anchorStart()

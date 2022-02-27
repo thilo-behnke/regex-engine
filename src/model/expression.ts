@@ -8,5 +8,7 @@ export interface Expression {
     canBacktrack(): boolean
     backtrack(): boolean
     isSuccessful: () => boolean
+    currentMatch: () => string[]
+    tracksMatch: () => boolean
     reset(): void
 }

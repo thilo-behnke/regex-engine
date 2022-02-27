@@ -8,6 +8,7 @@ export class SimpleExpression implements Expression {
     private _idx = 0
     private _isSuccessful: boolean = undefined
     private _charactersConsumed = 0
+    private _currentMatch: string[] = []
 
     constructor(...characters: Character[]) {
         this._characters = characters;
@@ -34,6 +35,7 @@ export class SimpleExpression implements Expression {
         }
 
         this._isSuccessful = this._characters[this._idx].test(s, last, next, isZeroPosMatch)
+        this._currentMatch = this._isSuccessful ? [s] : []
         this._charactersConsumed = this._characters[this._idx].cursorOnly() ? 0 : 1;
         this._idx++
         return this._isSuccessful
@@ -51,8 +53,17 @@ export class SimpleExpression implements Expression {
         return false;
     }
 
+    currentMatch(): string[] {
+        return this._currentMatch;
+    }
+
+    tracksMatch(): boolean {
+        return false;
+    }
+
     reset(): void {
         this._idx = 0
         this._isSuccessful = undefined
+        this._currentMatch = []
     }
 }
