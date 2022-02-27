@@ -23,7 +23,7 @@ export default class Parser {
     private _currentToken: Token
 
     constructor(lexer: Lexer = null) {
-        this._lexer = lexer ?? new Lexer();
+        this._lexer = lexer ?? new Lexer()
     }
 
     parse(s: string): Expression[] {

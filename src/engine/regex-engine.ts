@@ -2,14 +2,18 @@ import {explode} from "../utils/string-utils";
 import Parser from "./parser/parser";
 import {Expression} from "../model/expression";
 import {GroupExpression} from "../model/group-expression";
+import defaultOptions, {RegexEngineOptions} from "./options/regex-engine-options";
 
 export default class RegexEngine {
     private readonly _parser: Parser
     private _matchOffset: number = 0
     private _matchGroups: string[] = []
 
-    constructor(parser: Parser = new Parser()) {
-        this._parser = parser;
+    private _options: RegexEngineOptions
+
+    constructor(options: RegexEngineOptions = null, parser: Parser = null) {
+        this._options = options ?? defaultOptions();
+        this._parser = parser ?? new Parser();
     }
 
     get matchGroups(): string[] {

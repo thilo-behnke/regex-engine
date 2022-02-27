@@ -1,5 +1,8 @@
-import CharacterFactory from "../model/factory/character-factory";
 import {range} from "./array-utils";
+import Character from "../model/character";
+import WildcardCharacter from "../model/wildcard-character";
+import WordBoundaryCharacter from "../model/word-boundary-character";
+import DefaultCharacter from "../model/default-character";
 
 const explode = (s: string) => {
     return s.split('');
@@ -25,9 +28,23 @@ const explodeWithEscapes = (s: string) => {
     return res
 }
 
+// TODO: Only used by tests, move to test utils
 const explodeToCharacters = (s: string) => {
     const factory = new CharacterFactory()
     return explodeWithEscapes(s).map(it => factory.create(it));
+}
+
+class CharacterFactory {
+    create = (s: string): Character => {
+        switch (s) {
+            case '.':
+                return new WildcardCharacter()
+            case '\\b':
+                return new WordBoundaryCharacter()
+            default:
+                return new DefaultCharacter(s)
+        }
+    }
 }
 
 // TODO: Should also support line breaks and tabs.
