@@ -14,6 +14,7 @@ import DefaultCharacter from "../../model/default-character";
 import SquareBracketExpression from "../../model/square-bracket-expression";
 import {GroupExpression} from "../../model/group-expression";
 import {GreedyGroupExpression} from "../../model/greedy-group-expression";
+import {getCharRange} from "../../utils/string-utils";
 
 export default class Parser {
     private _lexer: Lexer
@@ -132,9 +133,20 @@ export default class Parser {
                 case TokenType.EOF:
                     throw new Error(`Unexpected eof in brackets`)
                 case TokenType.CHARACTER:
-                    const charExpression = new SimpleExpression(new DefaultCharacter(this._currentToken.value))
+                    const char = this._currentToken.value
                     this.consume(TokenType.CHARACTER)
-                    expressions.push(charExpression)
+                    if (this._currentToken.value !== "-") {
+                        const charExpression = new SimpleExpression(new DefaultCharacter(char))
+                        expressions.push(charExpression)
+                        break
+                    }
+                    this.consume(TokenType.CHARACTER)
+                    if (this._currentToken.type !== TokenType.CHARACTER) {
+                        throw new Error(`Invalid range definition in brackets: ${char}-${this._currentToken.value}`)
+                    }
+                    const charsInRange = getCharRange(char, this._currentToken.value).map(it => new SimpleExpression(new DefaultCharacter(it)))
+                    charsInRange.forEach(it => expressions.push(it))
+                    this.consume(TokenType.CHARACTER)
                     break
                 case TokenType.ESCAPED:
                     this.consume(TokenType.ESCAPED)

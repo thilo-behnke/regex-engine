@@ -50,11 +50,25 @@ const isDigit = (s: string) => {
     return range(zeroPos, zeroPos + 9).some(it => it === sCharCode)
 }
 
+const getCharRange = (a: string, b: string): string[] => {
+    if (a === null || a.length > 1 || b === null || b.length > 1) {
+        return []
+    }
+    const posStart = a.charCodeAt(0)
+    const posEnd = b.charCodeAt(0)
+    if (posStart > posEnd) {
+        throw new Error(`Invalid char range, a should be higher than b: a=${a}, b=${b}`)
+    }
+
+    return explode(String.fromCharCode(...range(posStart, posEnd)))
+}
+
 export {
     explode,
     explodeWithEscapes,
     explodeToCharacters,
     isWord,
     isWhitespace,
-    isDigit
+    isDigit,
+    getCharRange
 }

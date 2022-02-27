@@ -103,6 +103,49 @@ test('should correctly parse multiple bracket expressions', () => {
     expect(res).toEqual(expected)
 })
 
+test('should correctly parse bracket with character range', () => {
+    const parser = new Parser()
+    const res = parser.parse('[a-c]')
+    const expected = [
+        new SquareBracketExpression(
+            new SimpleExpression(new DefaultCharacter('a')),
+            new SimpleExpression(new DefaultCharacter('b')),
+            new SimpleExpression(new DefaultCharacter('c')),
+        ),
+    ]
+    expect(res).toEqual(expected)
+})
+
+test('should correctly parse bracket with number range', () => {
+    const parser = new Parser()
+    const res = parser.parse('[2-5]')
+    const expected = [
+        new SquareBracketExpression(
+            new SimpleExpression(new DefaultCharacter('2')),
+            new SimpleExpression(new DefaultCharacter('3')),
+            new SimpleExpression(new DefaultCharacter('4')),
+            new SimpleExpression(new DefaultCharacter('5')),
+        ),
+    ]
+    expect(res).toEqual(expected)
+})
+
+test('should correctly parse bracket with capitalized char range', () => {
+    const parser = new Parser()
+    const res = parser.parse('[a-cA-C]')
+    const expected = [
+        new SquareBracketExpression(
+            new SimpleExpression(new DefaultCharacter('a')),
+            new SimpleExpression(new DefaultCharacter('b')),
+            new SimpleExpression(new DefaultCharacter('c')),
+            new SimpleExpression(new DefaultCharacter('A')),
+            new SimpleExpression(new DefaultCharacter('B')),
+            new SimpleExpression(new DefaultCharacter('C')),
+        ),
+    ]
+    expect(res).toEqual(expected)
+})
+
 test('should correctly parse wildcard character .', () => {
     const parser = new Parser()
     const res = parser.parse('test.')
