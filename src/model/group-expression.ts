@@ -8,8 +8,16 @@ export class GroupExpression implements Expression {
     private _failed = false
     private _lastMatchConsumed = 0
 
+    private _nonCapturing: boolean = false
+
     constructor(...expressions: Expression[]) {
         this._expressions = expressions;
+    }
+
+    static nonCapturing(...expressions: Expression[]) {
+        const expression = new GroupExpression(...expressions)
+        expression._nonCapturing = true
+        return expression
     }
 
     hasNext(): boolean {
@@ -65,7 +73,7 @@ export class GroupExpression implements Expression {
     }
 
     tracksMatch(): boolean {
-        return true;
+        return !this._nonCapturing;
     }
 
     reset(): void {

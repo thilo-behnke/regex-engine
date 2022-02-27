@@ -77,6 +77,8 @@ test.each([
     {value: 'abc', pattern: 'a(d*)b', shouldMatch: false, expectedMatchGroups: []},
     {value: 'abc', pattern: 'a(d)*b', shouldMatch: true, expectedMatchGroups: []},
     {value: 'addb', pattern: 'a(d)*b', shouldMatch: true, expectedMatchGroups: ['d']},
+    {value: 'abc', pattern: 'a(?:bc)', shouldMatch: true, expectedMatchGroups: []},
+    {value: 'abcde', pattern: 'a(?:bc)(de)', shouldMatch: true, expectedMatchGroups: ['de']},
 ]) ('should correctly match groups: %s', ({value, pattern, shouldMatch, expectedMatchGroups}) => {
     const engine = new RegexEngine()
     const res = engine.test(value, pattern)

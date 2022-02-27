@@ -274,3 +274,39 @@ test.each([
     const res = new Parser().parse(expression)
     expect(res).toEqual(expected)
 })
+
+test.each([
+    {
+        expression: "(?:abc)de",
+        expected: [
+            GroupExpression.nonCapturing(
+                new SimpleExpression(new DefaultCharacter('a')),
+                new SimpleExpression(new DefaultCharacter('b')),
+                new SimpleExpression(new DefaultCharacter('c')),
+            ),
+            new SimpleExpression(new DefaultCharacter('d')),
+            new SimpleExpression(new DefaultCharacter('e')),
+        ]
+    },
+    {
+        expression: "(?:abc)(def)+",
+        expected: [
+            GroupExpression.nonCapturing(
+                new SimpleExpression(new DefaultCharacter('a')),
+                new SimpleExpression(new DefaultCharacter('b')),
+                new SimpleExpression(new DefaultCharacter('c')),
+            ),
+            new GreedyGroupExpression(
+                new GroupExpression(
+                    new SimpleExpression(new DefaultCharacter('d')),
+                    new SimpleExpression(new DefaultCharacter('e')),
+                    new SimpleExpression(new DefaultCharacter('f')),
+                ),
+                false
+            )
+        ]
+    }
+]) ('should correctly parse non matching group: %s', ({expression, expected}) => {
+    const res = new Parser().parse(expression)
+    expect(res).toEqual(expected)
+})

@@ -152,13 +152,19 @@ export default class Parser {
 
     private consumeBrackets(): Expression {
         this.consume(TokenType.BRACKET_OPEN)
+        let isNonCapturing = false
+        if (this._currentToken.type === TokenType.CHARACTER && this._currentToken.value === "?" && this._lexer.lookahead()?.type === TokenType.CHARACTER && this._lexer.lookahead().value === ":") {
+            this.consume(TokenType.CHARACTER)
+            this.consume(TokenType.CHARACTER)
+            isNonCapturing = true
+        }
         const expressions: Expression[] = []
         while(this._currentToken !== null && this._currentToken.type !== TokenType.BRACKET_CLOSE) {
             const withinBrackets = this.tryParseRegex()
             withinBrackets.forEach(it => expressions.push(it))
         }
         this.consume(TokenType.BRACKET_CLOSE)
-        const bracketExpression = new GroupExpression(...expressions)
+        const bracketExpression = isNonCapturing ? GroupExpression.nonCapturing(...expressions) : new GroupExpression(...expressions)
         return this.tryWrapInGreedyModifier(bracketExpression)
     }
 
