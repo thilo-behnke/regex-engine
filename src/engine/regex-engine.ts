@@ -30,6 +30,7 @@ export default class RegexEngine {
             const expressions = this._parser.parse(p)
             const res = this.tryTest(stringChars.slice(this._matchOffset), expressions)
             if (res) {
+                this._groups = Object.fromEntries(Object.entries(this._groups).map(([key, value]) => [key, {...value, from: value.from + this._matchOffset, to: value.to + this._matchOffset}]))
                 return true
             }
             this._matchOffset++;
@@ -58,9 +59,9 @@ export default class RegexEngine {
             }
 
             let backtrackIdx = expressionIdx - 1
+            let backtrackSuccessful = false
             while(backtrackIdx >= 0) {
                 const previousExpression = expressions[backtrackIdx]
-                let backtrackSuccessful = false
                 while (!backtrackSuccessful && this.tryBacktrack(previousExpression)) {
                     cursorPos--
                     if (previousExpression instanceof GroupExpression) {
@@ -86,6 +87,9 @@ export default class RegexEngine {
                     continue;
                 }
                 // backtrack failed
+                return false
+            }
+            if (!backtrackSuccessful) {
                 return false
             }
         }
