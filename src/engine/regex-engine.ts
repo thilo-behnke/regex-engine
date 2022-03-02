@@ -7,6 +7,7 @@ import {MatchGroup} from "../model/match/match-group";
 export default class RegexEngine {
     private readonly _parser: Parser
     private _matchOffset: number = 0
+    private _match: string = null
     private _groups: {[key: string]: MatchGroup} = {}
 
     constructor(parser: Parser = new Parser()) {
@@ -17,6 +18,10 @@ export default class RegexEngine {
         return Object.values(this._groups)
     }
 
+    get matched(): string {
+        return this._match
+    }
+
     isAtZeroPos = () => {
         return this._matchOffset === 0;
     }
@@ -24,6 +29,7 @@ export default class RegexEngine {
     match = (s: string, p: string): boolean => {
         this._matchOffset = 0;
         this._groups = {}
+        this._match = null
         const stringChars = explode(s)
 
         while(this._matchOffset < stringChars.length) {
@@ -31,6 +37,7 @@ export default class RegexEngine {
             const res = this.tryTest(stringChars.slice(this._matchOffset), expressions)
             if (res) {
                 this._groups = Object.fromEntries(Object.entries(this._groups).map(([key, value]) => [key, {...value, from: value.from + this._matchOffset, to: value.to + this._matchOffset}]))
+                this._match = expressions.flatMap(it => it.currentMatch()).join('')
                 return true
             }
             this._matchOffset++;
