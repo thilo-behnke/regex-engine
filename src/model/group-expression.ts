@@ -33,12 +33,21 @@ export class GroupExpression implements Expression {
     }
 
     backtrack(): boolean {
-        return false;
+        if (!this.canBacktrack()) {
+            return false
+        }
+
+        const updatedMatch = this._persistedMatch.slice(0, this._persistedMatch.length - 1)
+        this.reset()
+        updatedMatch.every(it => this.matchNext(it))
+        this._failed = this._expressions.some(it => !it.isSuccessful())
+        this._persistedMatch = this.currentMatch()
+        this._currentMatch = []
+        return this.isSuccessful()
     }
 
-    // TODO: Should be possible?
     canBacktrack(): boolean {
-        return false;
+        return this._expressions[this._idx - 1].canBacktrack()
     }
 
     lastMatchCharactersConsumed(): number {

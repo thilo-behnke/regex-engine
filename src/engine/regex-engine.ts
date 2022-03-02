@@ -7,14 +7,14 @@ import {MatchGroup} from "../model/match/match-group";
 export default class RegexEngine {
     private readonly _parser: Parser
     private _matchOffset: number = 0
-    private _groups: MatchGroup[] = []
+    private _groups: {[key: string]: MatchGroup} = {}
 
     constructor(parser: Parser = new Parser()) {
         this._parser = parser;
     }
 
     get groups(): MatchGroup[] {
-        return this._groups
+        return Object.values(this._groups)
     }
 
     isAtZeroPos = () => {
@@ -23,7 +23,7 @@ export default class RegexEngine {
 
     match = (s: string, p: string): boolean => {
         this._matchOffset = 0;
-        this._groups = []
+        this._groups = {}
         const stringChars = explode(s)
 
         while(this._matchOffset < stringChars.length) {
@@ -47,7 +47,7 @@ export default class RegexEngine {
 
             if (match) {
                 if (nextExpression.tracksMatch() && matched.length) {
-                    this._groups.push({match: matched.join(''), from: cursorPos - matched.length, to: cursorPos})
+                    this._groups[expressionIdx] = {match: matched.join(''), from: cursorPos - matched.length, to: cursorPos}
                 }
 
                 continue
@@ -60,8 +60,12 @@ export default class RegexEngine {
             let backtrackIdx = expressionIdx - 1
             while(backtrackIdx >= 0) {
                 const previousExpression = expressions[backtrackIdx]
-                while (this.tryBacktrack(previousExpression)) {
+                let backtrackSuccessful = false
+                while (!backtrackSuccessful && this.tryBacktrack(previousExpression)) {
                     cursorPos--
+                    if (previousExpression instanceof GroupExpression) {
+                        this._groups[backtrackIdx] = {match: previousExpression.currentMatch().join(''), from: cursorPos - previousExpression.currentMatch().length, to: cursorPos}
+                    }
                     nextExpression.reset()
                     const {match: backtrackMatch, matched: backtrackMatched, tokensConsumed: backtrackTokensConsumed} = this.tryTestExpression(nextExpression, toTest, cursorPos)
                     if (!backtrackMatch) {
@@ -70,9 +74,12 @@ export default class RegexEngine {
                     cursorPos += backtrackTokensConsumed
                     // backtrack successful
                     if (nextExpression instanceof GroupExpression) {
-                        this._groups.push({match: backtrackMatched.join(''), from: cursorPos - backtrackMatched.length, to: cursorPos})
+                        this._groups[backtrackIdx] = {match: backtrackMatched.join(''), from: cursorPos - backtrackMatched.length, to: cursorPos}
                     }
-                    return true
+                    backtrackSuccessful = true
+                }
+                if (backtrackSuccessful) {
+                    break
                 }
                 if (previousExpression.hasNotMatched() && previousExpression.isSuccessful()) {
                     backtrackIdx--
@@ -81,7 +88,6 @@ export default class RegexEngine {
                 // backtrack failed
                 return false
             }
-            return false
         }
 
         // Sanity check, should not be necessary (?)
