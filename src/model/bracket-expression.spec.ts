@@ -32,7 +32,7 @@ test.each([
         if (idx > match.length) {
             break
         }
-        bracketExpression.matchNext(match[idx])
+        bracketExpression.matchNext(match[idx], null, null, idx === 0)
         idx++
     }
     expect(bracketExpression.isSuccessful()).toEqual(shouldMatch)

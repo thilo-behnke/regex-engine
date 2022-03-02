@@ -3,7 +3,7 @@ import Character from "./character";
 export interface Expression {
     hasNotMatched: () => boolean
     hasNext: () => boolean
-    matchNext(s: string, last: string = null, next: string = null, isZeroPosMatch = false): boolean
+    matchNext(s: string, last: string, next: string, isZeroPosMatch: boolean): boolean
     lastMatchCharactersConsumed(): number
     canBacktrack(): boolean
     backtrack(): boolean
