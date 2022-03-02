@@ -2,27 +2,28 @@ import {explode} from "../utils/string-utils";
 import Parser from "./parser/parser";
 import {Expression} from "../model/expression";
 import {GroupExpression} from "../model/group-expression";
+import {MatchGroup} from "../model/match/match-group";
 
 export default class RegexEngine {
     private readonly _parser: Parser
     private _matchOffset: number = 0
-    private _matchGroups: string[] = []
+    private _groups: MatchGroup[] = []
 
     constructor(parser: Parser = new Parser()) {
         this._parser = parser;
     }
 
-    get matchGroups(): string[] {
-        return this._matchGroups
+    get groups(): MatchGroup[] {
+        return this._groups
     }
 
     isAtZeroPos = () => {
         return this._matchOffset === 0;
     }
 
-    test = (s: string, p: string): boolean => {
+    match = (s: string, p: string): boolean => {
         this._matchOffset = 0;
-        this._matchGroups = []
+        this._groups = []
         const stringChars = explode(s)
 
         while(this._matchOffset < stringChars.length) {
@@ -46,7 +47,7 @@ export default class RegexEngine {
 
             if (match) {
                 if (nextExpression.tracksMatch() && matched.length) {
-                    this._matchGroups.push(matched.join(''))
+                    this._groups.push({match: matched.join(''), from: cursorPos - matched.length, to: cursorPos})
                 }
 
                 continue
@@ -62,12 +63,14 @@ export default class RegexEngine {
                 while (this.tryBacktrack(previousExpression)) {
                     cursorPos--
                     nextExpression.reset()
-                    if (!this.tryTestExpression(nextExpression, toTest, cursorPos).match) {
+                    const {match: backtrackMatch, matched: backtrackMatched, tokensConsumed: backtrackTokensConsumed} = this.tryTestExpression(nextExpression, toTest, cursorPos)
+                    if (!backtrackMatch) {
                         continue
                     }
+                    cursorPos += backtrackTokensConsumed
                     // backtrack successful
                     if (nextExpression instanceof GroupExpression) {
-                        this._matchGroups.push(matched.join(''))
+                        this._groups.push({match: backtrackMatched.join(''), from: cursorPos - backtrackMatched.length, to: cursorPos})
                     }
                     return true
                 }
