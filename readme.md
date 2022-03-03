@@ -11,10 +11,11 @@ Engine:
 - [x] Anchors, e.g. `^abc$`
 - [x] Supported matchers: `.`, `\b`, `\w`, `\d`, `\s`
 - [x] Group matching, e.g. `(?:abc)(def)`
+- [x] Lookahead, e.g. `(?=abc)` or `(?!abc)`
 - [ ] More matchers, e.g. `\W`
 - [ ] Optional modifiers, e.g. `abc?`
 - [ ] Lazy modifiers, e.g. `a+?`
-- [ ] Lookbehind / lookahead, e.g. `abc(?=d)`
+- [ ] Lookbehind , e.g. `abc(?<=d)`
 - [ ] General modifiers, e.g. `i` for case-insensitive
 
 Other:
