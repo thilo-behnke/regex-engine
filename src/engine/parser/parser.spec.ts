@@ -14,6 +14,7 @@ import {GreedyGroupExpression} from "../../model/greedy-group-expression";
 import {AssertionExpression} from "../../model/assertion-expression";
 import {DefaultGroupExpression} from "../../model/default-group-expression";
 import {OptionalExpression} from "../../model/optional-expression";
+import {OptionalGroupExpression} from "../../model/optional-group-expression";
 
 test('should return empty expression array for empty string', () => {
     const parser = new Parser()
@@ -444,6 +445,16 @@ test.each([
             new SimpleExpression(new DefaultCharacter('b')),
             new OptionalExpression(
                 new SimpleExpression(new DefaultCharacter('c'))
+            )
+        ]
+    },
+    {
+        expression: "ab(c)?",
+        expected: [
+            new SimpleExpression(new DefaultCharacter('a')),
+            new SimpleExpression(new DefaultCharacter('b')),
+            new OptionalGroupExpression(
+                new DefaultGroupExpression(new SimpleExpression(new DefaultCharacter('c')))
             )
         ]
     }

@@ -25,6 +25,8 @@ import {RegexTokenType} from "../../model/token/regex-token";
 import {IndexedRegexToken} from "../../model/token/indexed-regex-token";
 import {ParseError} from "../../exception/parse-error";
 import {OptionalExpression} from "../../model/optional-expression";
+import {isGroupExpression} from "../../model/group-expression";
+import {OptionalGroupExpression} from "../../model/optional-group-expression";
 
 export default class Parser {
     private _lexer: Lexer
@@ -303,11 +305,11 @@ export default class Parser {
                 this.throwParseError('Modifiers not allowed at current position')
             }
             if (this._currentToken.value === "*" || this._currentToken.value === "+") {
-                const expression = baseExpression instanceof DefaultGroupExpression ? new GreedyGroupExpression(baseExpression, this._currentToken.value === "*") : new GreedyExpression(baseExpression, this._currentToken.value === "*")
+                const expression = isGroupExpression(baseExpression) ? new GreedyGroupExpression(baseExpression, this._currentToken.value === "*") : new GreedyExpression(baseExpression, this._currentToken.value === "*")
                 this.consume(RegexTokenType.MODIFIER)
                 return expression
             } else if (this._currentToken.value === "?") {
-                const expression = new OptionalExpression(baseExpression)
+                const expression = isGroupExpression(baseExpression) ? new OptionalGroupExpression(baseExpression) : new OptionalExpression(baseExpression)
                 this.consume(RegexTokenType.MODIFIER)
                 return expression
             }
