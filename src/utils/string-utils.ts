@@ -54,7 +54,7 @@ const isWordBoundary = (s: string) => {
 }
 
 const isDigit = (s: string) => {
-    if (s === null || s.length > 1) {
+    if (!s || s.length > 1) {
         return false
     }
     const zeroPos = "0".charCodeAt(0)
@@ -63,7 +63,7 @@ const isDigit = (s: string) => {
 }
 
 const getCharRange = (a: string, b: string): string[] => {
-    if (a === null || a.length > 1 || b === null || b.length > 1) {
+    if (!a || a.length > 1 || !b || b.length > 1) {
         return []
     }
     const posStart = a.charCodeAt(0)

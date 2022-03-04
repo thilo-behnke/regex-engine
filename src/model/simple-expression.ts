@@ -40,7 +40,7 @@ export class SimpleExpression implements Expression {
         }
 
         this._isSuccessful = this._characters[this._idx].test(s?.value, last?.value, next?.value, s?.first)
-        this._currentMatch = this._isSuccessful ? [s] : []
+        this._currentMatch = this._isSuccessful && s ? [s] : []
         this._charactersConsumed = this._characters[this._idx].cursorOnly() ? 0 : 1;
         this._idx++
         return this._isSuccessful

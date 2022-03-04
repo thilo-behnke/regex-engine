@@ -1,7 +1,7 @@
 import {DefaultGroupExpression} from "./default-group-expression";
 import {SimpleExpression} from "./simple-expression";
 import DefaultCharacter from "./default-character";
-import {explode, explodeToCharacters} from "../utils/string-utils";
+import {explode, explodeIndexed, explodeToCharacters} from "../utils/string-utils";
 import GreedyExpression from "./greedy-expression";
 import SquareBracketExpression from "./square-bracket-expression";
 
@@ -101,11 +101,12 @@ test.each([
     const expression = new DefaultGroupExpression(...expressions)
     let res = false
     let stringIdx = 0
+    const tokens = explodeIndexed(toTest)
     while(expression.hasNext()) {
-        expression.matchNext(toTest[stringIdx])
+        expression.matchNext(tokens[stringIdx])
         res = expression.isSuccessful()
         stringIdx++
     }
     expect(res).toEqual(expectedRes)
-    expect(expression.currentMatch()).toEqual(expectedMatch)
+    expect(expression.currentMatch().map(it => it.value)).toEqual(expectedMatch)
 })

@@ -1,5 +1,5 @@
 import {SimpleExpression} from "./simple-expression";
-import {explodeToCharacters} from "../utils/string-utils";
+import {explodeIndexed, explodeToCharacters} from "../utils/string-utils";
 import GreedyExpression from "./greedy-expression";
 import DefaultCharacter from "./default-character";
 
@@ -13,11 +13,12 @@ test.each([
     const expressions = explodeToCharacters(expression).map(it => new SimpleExpression(it))
     const greedyExpression = new GreedyExpression(expression.length ? expressions[0] : new SimpleExpression(new DefaultCharacter('')), false)
     let idx = 0
+    const tokens = explodeIndexed(match)
     while(greedyExpression.hasNext()) {
         if (idx >= match.length) {
             break
         }
-        greedyExpression.matchNext(match[idx])
+        greedyExpression.matchNext(tokens[idx])
         idx++
     }
     expect(greedyExpression.isSuccessful()).toEqual(shouldMatch)
@@ -33,11 +34,12 @@ test.each([
     const expressions = explodeToCharacters(expression).map(it => new SimpleExpression(it))
     const greedyExpression = new GreedyExpression(expression.length ? expressions[0] : new SimpleExpression(new DefaultCharacter('')), true)
     let idx = 0
+    const tokens = explodeIndexed(match)
     while(greedyExpression.hasNext()) {
         if (idx >= match.length) {
             break
         }
-        greedyExpression.matchNext(match[idx])
+        greedyExpression.matchNext(tokens[idx])
         idx++
     }
     expect(greedyExpression.isSuccessful()).toEqual(shouldMatch)
