@@ -50,11 +50,17 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
 
         const updatedMatch = this._persistedMatch.slice(0, this._persistedMatch.length - 1)
         this.reset()
-        updatedMatch.every((it, idx) => {
-            const last = idx > 0 ? updatedMatch[idx - 1] : null
-            const next = idx < updatedMatch.length ? updatedMatch[idx + 1] : null
-            return this.matchNext(it, last, next, isZeroPosMatch)
-        })
+        let sIdx = 0
+        // TODO: Basically a regex engine within the group?
+        let hasMatched = true
+        while(hasMatched) {
+            const thisChar = updatedMatch[sIdx]
+            const last = sIdx > 0 ? updatedMatch[sIdx - 1] : null
+            const next = sIdx < updatedMatch.length ? updatedMatch[sIdx + 1] : null
+            hasMatched = this.matchNext(thisChar, last, next, isZeroPosMatch)
+            sIdx++
+        }
+
         this._failed = this._expressions.some(it => !it.isSuccessful())
         this._persistedMatch = this.currentMatch()
         this._currentMatch = []

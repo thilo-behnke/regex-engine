@@ -99,12 +99,12 @@ export default class RegexEngine {
                 const previousExpression = expressions[backtrackIdx]
                 while (!backtrackSuccessful && this.tryBacktrack(previousExpression)) {
                     cursorPos--
-                    if (isGroupExpression(previousExpression)) {
-                        // TODO: correct end position?
-                        this._groups[expressionIdx] = previousExpression.matchGroups.map(group => ({match: group.match, from: cursorPos - backtrackMatched.length + group.from, to: cursorPos - backtrackMatched.length + group.from + group.to}))
-                    }
                     nextExpression.reset()
                     const {match: backtrackMatch, matched: backtrackMatched, tokensConsumed: backtrackTokensConsumed} = RegexEngine.tryTestExpression(nextExpression, toTest, cursorPos, this.isAtZeroPos())
+                    if (isGroupExpression(previousExpression)) {
+                        // TODO: correct end position?
+                        this._groups[backtrackIdx] = previousExpression.matchGroups.map(group => ({match: group.match, from: cursorPos - previousExpression.currentMatch().length + group.from, to: cursorPos - previousExpression.currentMatch().length + group.from + group.to}))
+                    }
                     if (!backtrackMatch) {
                         continue
                     }
