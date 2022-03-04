@@ -73,6 +73,7 @@ export default class RegexEngine {
                     lookbehindCursorPos += 1
                 }
                 if (lookbehindSuccessful) {
+                    this._groups[expressionIdx] = nextExpression.matchGroups
                     cursorPos = lookbehindCursorPos
                     continue;
                 }
