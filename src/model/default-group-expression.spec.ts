@@ -1,4 +1,4 @@
-import {GroupExpression} from "./group-expression";
+import {DefaultGroupExpression} from "./default-group-expression";
 import {SimpleExpression} from "./simple-expression";
 import DefaultCharacter from "./default-character";
 import {explode, explodeToCharacters} from "../utils/string-utils";
@@ -8,7 +8,6 @@ import SquareBracketExpression from "./square-bracket-expression";
 test.each([
     {
         expressions: [
-
             new SimpleExpression(new DefaultCharacter('a')),
             new SimpleExpression(new DefaultCharacter('b'))
         ],
@@ -99,7 +98,7 @@ test.each([
         expectedMatch: ['a', 'd', 'd', 'd']
     }
 ])('should correctly match group of characters: %s', ({expressions, toTest, expectedRes, expectedMatch}) => {
-    const expression = new GroupExpression(...expressions)
+    const expression = new DefaultGroupExpression(...expressions)
     let res = false
     let stringIdx = 0
     while(expression.hasNext()) {

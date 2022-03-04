@@ -10,7 +10,7 @@ import DigitWildcardCharacter from "../../model/digit-wildcard-character";
 import AnchorStartCharacter from "../../model/anchor-start-character";
 import AnchorEndCharacter from "../../model/anchor-end-character";
 import {WhitespaceCharacter} from "../../model/whitespace-character";
-import {GroupExpression} from "../../model/group-expression";
+import {DefaultGroupExpression} from "../../model/default-group-expression";
 import {GreedyGroupExpression} from "../../model/greedy-group-expression";
 import {AssertionExpression} from "../../model/assertion-expression";
 
@@ -274,7 +274,7 @@ test('should correctly parse group', () => {
     const parser = new Parser()
     const res = parser.parse('(abc)')
     const expected = [
-        new GroupExpression(
+        new DefaultGroupExpression(
             new SimpleExpression(new DefaultCharacter('a')),
             new SimpleExpression(new DefaultCharacter('b')),
             new SimpleExpression(new DefaultCharacter('c')),
@@ -287,7 +287,7 @@ test.each([
     {
         expression: "(abc)de",
         expected: [
-            new GroupExpression(
+            new DefaultGroupExpression(
                 new SimpleExpression(new DefaultCharacter('a')),
                 new SimpleExpression(new DefaultCharacter('b')),
                 new SimpleExpression(new DefaultCharacter('c')),
@@ -299,13 +299,13 @@ test.each([
     {
         expression: "(abc)(def)+",
         expected: [
-            new GroupExpression(
+            new DefaultGroupExpression(
                 new SimpleExpression(new DefaultCharacter('a')),
                 new SimpleExpression(new DefaultCharacter('b')),
                 new SimpleExpression(new DefaultCharacter('c')),
             ),
             new GreedyGroupExpression(
-                new GroupExpression(
+                new DefaultGroupExpression(
                     new SimpleExpression(new DefaultCharacter('d')),
                     new SimpleExpression(new DefaultCharacter('e')),
                     new SimpleExpression(new DefaultCharacter('f')),
@@ -323,7 +323,7 @@ test.each([
     {
         expression: "(?:abc)de",
         expected: [
-            GroupExpression.nonCapturing(
+            DefaultGroupExpression.nonCapturing(
                 new SimpleExpression(new DefaultCharacter('a')),
                 new SimpleExpression(new DefaultCharacter('b')),
                 new SimpleExpression(new DefaultCharacter('c')),
@@ -335,13 +335,13 @@ test.each([
     {
         expression: "(?:abc)(def)+",
         expected: [
-            GroupExpression.nonCapturing(
+            DefaultGroupExpression.nonCapturing(
                 new SimpleExpression(new DefaultCharacter('a')),
                 new SimpleExpression(new DefaultCharacter('b')),
                 new SimpleExpression(new DefaultCharacter('c')),
             ),
             new GreedyGroupExpression(
-                new GroupExpression(
+                new DefaultGroupExpression(
                     new SimpleExpression(new DefaultCharacter('d')),
                     new SimpleExpression(new DefaultCharacter('e')),
                     new SimpleExpression(new DefaultCharacter('f')),

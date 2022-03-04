@@ -12,7 +12,7 @@ import {WhitespaceCharacter} from "../../model/whitespace-character";
 import {Lexer} from "../lexer/lexer";
 import DefaultCharacter from "../../model/default-character";
 import SquareBracketExpression from "../../model/square-bracket-expression";
-import {GroupExpression} from "../../model/group-expression";
+import {DefaultGroupExpression} from "../../model/default-group-expression";
 import {GreedyGroupExpression} from "../../model/greedy-group-expression";
 import {getCharRange} from "../../utils/string-utils";
 import {AssertionExpression} from "../../model/assertion-expression";
@@ -284,7 +284,7 @@ export default class Parser {
             if (!this._allowModifiers) {
                 throw new Error('Modifiers not allowed at current position.')
             }
-            const expression = baseExpression instanceof GroupExpression ? new GreedyGroupExpression(baseExpression, this._currentToken.value === "*") : new GreedyExpression(baseExpression, this._currentToken.value === "*")
+            const expression = baseExpression instanceof DefaultGroupExpression ? new GreedyGroupExpression(baseExpression, this._currentToken.value === "*") : new GreedyExpression(baseExpression, this._currentToken.value === "*")
             this.consume(TokenType.MODIFIER)
             return expression
         } else {

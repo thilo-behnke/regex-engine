@@ -1,7 +1,7 @@
 import {explode} from "../utils/string-utils";
 import Parser from "./parser/parser";
 import {Expression} from "../model/expression";
-import {GroupExpression} from "../model/group-expression";
+import {DefaultGroupExpression} from "../model/default-group-expression";
 import {MatchGroup} from "../model/match/match-group";
 import {AssertionExpression, AssertionType} from "../model/assertion-expression";
 
@@ -96,7 +96,7 @@ export default class RegexEngine {
                 const previousExpression = expressions[backtrackIdx]
                 while (!backtrackSuccessful && this.tryBacktrack(previousExpression)) {
                     cursorPos--
-                    if (previousExpression instanceof GroupExpression) {
+                    if (previousExpression instanceof DefaultGroupExpression) {
                         this._groups[backtrackIdx] = {match: previousExpression.currentMatch().join(''), from: cursorPos - previousExpression.currentMatch().length, to: cursorPos}
                     }
                     nextExpression.reset()
@@ -106,7 +106,7 @@ export default class RegexEngine {
                     }
                     cursorPos += backtrackTokensConsumed
                     // backtrack successful
-                    if (nextExpression instanceof GroupExpression) {
+                    if (nextExpression instanceof DefaultGroupExpression) {
                         this._groups[backtrackIdx] = {match: backtrackMatched.join(''), from: cursorPos - backtrackMatched.length, to: cursorPos}
                     }
                     backtrackSuccessful = true
