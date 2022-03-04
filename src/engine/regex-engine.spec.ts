@@ -87,6 +87,7 @@ test.each([
     {value: 'abcddde', pattern: 'abc(d*)de', shouldMatch: true, expectedMatchGroups: [{match: 'dd', from: 3, to: 5}]},
     {value: 'test', pattern: 't*(st)', shouldMatch: true, expectedMatchGroups: [{match: 'st', from: 2, to: 4}]},
     {value: 'test', pattern: 't*st', shouldMatch: true, expectedMatchGroups: []},
+    {value: 'abc', pattern: '(a(b(c)))', shouldMatch: true, expectedMatchGroups: [{match: 'abc', from: 0, to: 3}, {match: 'bc', from: 1, to: 3}, {match: 'c', from: 2, to: 3}]},
 ]) ('should correctly match groups: %s', ({value, pattern, shouldMatch, expectedMatchGroups}) => {
     const engine = new RegexEngine()
     const res = engine.match(value, pattern)
@@ -102,7 +103,7 @@ test.each([
     {value: 'a', pattern: '(?!b)a', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'a'},
     {value: 'ba', pattern: '(?=b)ba', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'ba'},
     {value: 'bac', pattern: '(?=b)(?:b)(a)(?=c)', shouldMatch: true, expectedMatchGroups: [{match: 'a', from: 1, to: 2}], expectedMatch: 'ba'},
-    // {value: 'bac', pattern: '(?=(b))(?:b)(a)(?=c)', shouldMatch: true, expectedMatchGroups: [{match: 'b', from: 0, to: 1}, {match: 'a', from: 1, to: 2}], expectedMatch: 'ba'},
+    {value: 'bac', pattern: '(?=(b))(?:b)(a)(?=c)', shouldMatch: true, expectedMatchGroups: [{match: 'b', from: 0, to: 1}, {match: 'a', from: 1, to: 2}], expectedMatch: 'ba'},
 ]) ('should correctly handle lookahead: %s', ({value, pattern, shouldMatch, expectedMatchGroups, expectedMatch}) => {
     const engine = new RegexEngine()
     const res = engine.match(value, pattern)
@@ -115,7 +116,7 @@ test.each([
     {value: 'ab', pattern: '(?<=a)b', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'b'},
     {value: 'ab', pattern: 'a(?<=a)b', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'ab'},
     {value: 'abctestabc', pattern: '(?<!d)test', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'test'},
-    // {value: 'ab', pattern: 'a(?<=(a))b', shouldMatch: true, expectedMatchGroups: [{match: 'a', from: 0, to: 1}], expectedMatch: 'ab'},
+    {value: 'ab', pattern: 'a(?<=(a))b', shouldMatch: true, expectedMatchGroups: [{match: 'a', from: 0, to: 1}], expectedMatch: 'ab'},
 ]) ('should correctly handle lookbehind: %s', ({value, pattern, shouldMatch, expectedMatchGroups, expectedMatch}) => {
     const engine = new RegexEngine()
     const res = engine.match(value, pattern)
