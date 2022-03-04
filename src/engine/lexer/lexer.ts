@@ -33,7 +33,7 @@ export class Lexer {
         return token
     }
 
-    lookahead(): Token {
-        return this.hasNextToken() ? this._tokens[this._idx] : null
+    lookahead(i: number = 0): Token {
+        return this.hasNextToken() ? this._tokens[this._idx + i] : null
     }
 }

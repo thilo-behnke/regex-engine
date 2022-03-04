@@ -1,6 +1,6 @@
 import Token from "./token";
 
 export default interface Character {
-    test(s: string, previous: string = null, next: string = null, isZeroPosMatch = false): boolean
+    test(s: string, previous: string, next: string, isZeroPosMatch: boolean): boolean
     cursorOnly(): boolean
 }

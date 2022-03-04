@@ -12,6 +12,7 @@ import AnchorEndCharacter from "../../model/anchor-end-character";
 import {WhitespaceCharacter} from "../../model/whitespace-character";
 import {GroupExpression} from "../../model/group-expression";
 import {GreedyGroupExpression} from "../../model/greedy-group-expression";
+import {LookAheadExpression} from "../../model/look-ahead-expression";
 
 test('should return empty expression array for empty string', () => {
     const parser = new Parser()
@@ -350,6 +351,31 @@ test.each([
         ]
     }
 ]) ('should correctly parse non matching group: %s', ({expression, expected}) => {
+    const res = new Parser().parse(expression)
+    expect(res).toEqual(expected)
+})
+
+test.each([
+    {
+        expression: "a(?=b)",
+        expected: [
+            new SimpleExpression(new DefaultCharacter('a')),
+            LookAheadExpression.positive(
+                new SimpleExpression(new DefaultCharacter('b'))
+            ),
+        ]
+    },
+    {
+        expression: "de(?=a)",
+        expected: [
+            new SimpleExpression(new DefaultCharacter('d')),
+            new SimpleExpression(new DefaultCharacter('e')),
+            LookAheadExpression.positive(
+                new SimpleExpression(new DefaultCharacter('a'))
+            ),
+        ]
+    }
+]) ('should correctly look ahead: %s', ({expression, expected}) => {
     const res = new Parser().parse(expression)
     expect(res).toEqual(expected)
 })

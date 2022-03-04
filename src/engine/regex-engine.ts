@@ -3,11 +3,13 @@ import Parser from "./parser/parser";
 import {Expression} from "../model/expression";
 import {GroupExpression} from "../model/group-expression";
 import defaultOptions, {RegexEngineOptions} from "./options/regex-engine-options";
+import {MatchGroup} from "../model/match/match-group";
 
 export default class RegexEngine {
     private readonly _parser: Parser
     private _matchOffset: number = 0
-    private _matchGroups: string[] = []
+    private _match: string = null
+    private _groups: {[key: string]: MatchGroup} = {}
 
     private _options: RegexEngineOptions
 
@@ -16,23 +18,30 @@ export default class RegexEngine {
         this._parser = parser ?? new Parser();
     }
 
-    get matchGroups(): string[] {
-        return this._matchGroups
+    get groups(): MatchGroup[] {
+        return Object.values(this._groups)
+    }
+
+    get matched(): string {
+        return this._match
     }
 
     isAtZeroPos = () => {
         return this._matchOffset === 0;
     }
 
-    test = (s: string, p: string): boolean => {
+    match = (s: string, p: string): boolean => {
         this._matchOffset = 0;
-        this._matchGroups = []
+        this._groups = {}
+        this._match = null
         const stringChars = explode(s)
 
         while(this._matchOffset < stringChars.length) {
             const expressions = this._parser.parse(p)
             const res = this.tryTest(stringChars.slice(this._matchOffset), expressions)
             if (res) {
+                this._groups = Object.fromEntries(Object.entries(this._groups).map(([key, value]) => [key, {...value, from: value.from + this._matchOffset, to: value.to + this._matchOffset}]))
+                this._match = expressions.flatMap(it => it.currentMatch()).join('')
                 return true
             }
             this._matchOffset++;
@@ -50,7 +59,7 @@ export default class RegexEngine {
 
             if (match) {
                 if (nextExpression.tracksMatch() && matched.length) {
-                    this._matchGroups.push(matched.join(''))
+                    this._groups[expressionIdx] = {match: matched.join(''), from: cursorPos - matched.length, to: cursorPos}
                 }
 
                 continue
@@ -61,19 +70,28 @@ export default class RegexEngine {
             }
 
             let backtrackIdx = expressionIdx - 1
+            let backtrackSuccessful = false
             while(backtrackIdx >= 0) {
                 const previousExpression = expressions[backtrackIdx]
-                while (this.tryBacktrack(previousExpression)) {
+                while (!backtrackSuccessful && this.tryBacktrack(previousExpression)) {
                     cursorPos--
+                    if (previousExpression instanceof GroupExpression) {
+                        this._groups[backtrackIdx] = {match: previousExpression.currentMatch().join(''), from: cursorPos - previousExpression.currentMatch().length, to: cursorPos}
+                    }
                     nextExpression.reset()
-                    if (!this.tryTestExpression(nextExpression, toTest, cursorPos).match) {
+                    const {match: backtrackMatch, matched: backtrackMatched, tokensConsumed: backtrackTokensConsumed} = this.tryTestExpression(nextExpression, toTest, cursorPos)
+                    if (!backtrackMatch) {
                         continue
                     }
+                    cursorPos += backtrackTokensConsumed
                     // backtrack successful
                     if (nextExpression instanceof GroupExpression) {
-                        this._matchGroups.push(matched.join(''))
+                        this._groups[backtrackIdx] = {match: backtrackMatched.join(''), from: cursorPos - backtrackMatched.length, to: cursorPos}
                     }
-                    return true
+                    backtrackSuccessful = true
+                }
+                if (backtrackSuccessful) {
+                    break
                 }
                 if (previousExpression.hasNotMatched() && previousExpression.isSuccessful()) {
                     backtrackIdx--
@@ -82,7 +100,9 @@ export default class RegexEngine {
                 // backtrack failed
                 return false
             }
-            return false
+            if (!backtrackSuccessful) {
+                return false
+            }
         }
 
         // Sanity check, should not be necessary (?)

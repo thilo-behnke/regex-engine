@@ -11,7 +11,7 @@ test.each([
     {expression: '', match: 'test', shouldMatch: true},
     {expression: 'test.', match: 'testing', shouldMatch: true},
     {expression: 'test.ng', match: 'testing', shouldMatch: true},
-    {expression: '\\btest\\b', match: ' test ', shouldMatch: true},
+    {expression: '\\btest\\b', match: 'test', shouldMatch: true},
 ])('should match simple expression: %s', ({expression, match, shouldMatch}) => {
     const simpleExpression = new SimpleExpression(...explodeToCharacters(expression))
     let idx = 0
@@ -20,7 +20,7 @@ test.each([
             break
         }
         simpleExpression.matchNext(match[idx], idx > 0 ? match[idx - 1] : null, idx + 1 < match.length ? match[idx + 1] : null)
-        idx++
+        idx += simpleExpression.lastMatchCharactersConsumed()
     }
     expect(simpleExpression.isSuccessful()).toEqual(shouldMatch)
 })

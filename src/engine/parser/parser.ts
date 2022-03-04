@@ -15,6 +15,7 @@ import SquareBracketExpression from "../../model/square-bracket-expression";
 import {GroupExpression} from "../../model/group-expression";
 import {GreedyGroupExpression} from "../../model/greedy-group-expression";
 import {getCharRange} from "../../utils/string-utils";
+import {LookAheadExpression} from "../../model/look-ahead-expression";
 
 export default class Parser {
     private _lexer: Lexer
@@ -165,10 +166,22 @@ export default class Parser {
     private consumeBrackets(): Expression {
         this.consume(TokenType.BRACKET_OPEN)
         let isNonCapturing = false
-        if (this._currentToken.type === TokenType.CHARACTER && this._currentToken.value === "?" && this._lexer.lookahead()?.type === TokenType.CHARACTER && this._lexer.lookahead().value === ":") {
-            this.consume(TokenType.CHARACTER)
-            this.consume(TokenType.CHARACTER)
-            isNonCapturing = true
+        let isPositiveLookahead = false
+        let isNegativeLookahead = false
+        if (this._currentToken.type === TokenType.CHARACTER) {
+            if (this._currentToken.value === "?" && this._lexer.lookahead()?.type === TokenType.CHARACTER && this._lexer.lookahead().value === ":") {
+                this.consume(TokenType.CHARACTER)
+                this.consume(TokenType.CHARACTER)
+                isNonCapturing = true
+            } else if (this._currentToken.value === "?" && this._lexer.lookahead()?.type === TokenType.CHARACTER && this._lexer.lookahead().value === "=") {
+                this.consume(TokenType.CHARACTER)
+                this.consume(TokenType.CHARACTER)
+                isPositiveLookahead = true
+            } else if (this._currentToken.value === "?" && this._lexer.lookahead()?.type === TokenType.CHARACTER && this._lexer.lookahead().value === "!") {
+                this.consume(TokenType.CHARACTER)
+                this.consume(TokenType.CHARACTER)
+                isNegativeLookahead = true
+            }
         }
         const expressions: Expression[] = []
         while(this._currentToken !== null && this._currentToken.type !== TokenType.BRACKET_CLOSE) {
@@ -176,8 +189,17 @@ export default class Parser {
             withinBrackets.forEach(it => expressions.push(it))
         }
         this.consume(TokenType.BRACKET_CLOSE)
-        const bracketExpression = isNonCapturing ? GroupExpression.nonCapturing(...expressions) : new GroupExpression(...expressions)
-        return this.tryWrapInGreedyModifier(bracketExpression)
+        if (!isPositiveLookahead && !isNegativeLookahead) {
+            const bracketExpression = isNonCapturing ? GroupExpression.nonCapturing(...expressions) : new GroupExpression(...expressions)
+            return this.tryWrapInGreedyModifier(bracketExpression)
+        }
+        if (isPositiveLookahead) {
+            return LookAheadExpression.positive(...expressions)
+        }
+        if (isNegativeLookahead) {
+            return LookAheadExpression.negative(...expressions)
+        }
+        throw new Error('Invalid bracket expression, is neither group nor lookahead.')
     }
 
     private consumeCharacter() {

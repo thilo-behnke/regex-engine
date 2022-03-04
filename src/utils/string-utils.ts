@@ -5,7 +5,7 @@ import WordBoundaryCharacter from "../model/word-boundary-character";
 import DefaultCharacter from "../model/default-character";
 
 const explode = (s: string) => {
-    return s.split('');
+    return s.split('').map(it => it === "" ? " " : it);
 }
 
 const explodeWithEscapes = (s: string) => {
@@ -50,12 +50,16 @@ class CharacterFactory {
 // TODO: Should also support line breaks and tabs.
 const isWord = (s: string) => {
     if (!s) return false
-    return explode(s).every(it => it != " ")
+    return explode(s).every(it => !isWordBoundary(s))
 }
 
 const isWhitespace = (s: string) => {
     if (!s) return false
-    return explode(s).every(it => it == " ")
+    return explode(s).every(it => [' ', '\\t'].includes(it))
+}
+
+const isWordBoundary = (s: string) => {
+    return !s || ['-'].includes(s) || isWhitespace(s)
 }
 
 const isDigit = (s: string) => {
@@ -87,5 +91,6 @@ export {
     isWord,
     isWhitespace,
     isDigit,
-    getCharRange
+    getCharRange,
+    isWordBoundary
 }
