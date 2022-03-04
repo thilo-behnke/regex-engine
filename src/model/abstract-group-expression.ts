@@ -2,11 +2,12 @@ import {Expression} from "./expression";
 import FixedLengthExpression from "./fixed-length-expression";
 import GroupExpression, {isGroupExpression} from "./group-expression";
 import {MatchGroup} from "./match/match-group";
+import {IndexedToken} from "../utils/string-utils";
 
 export abstract class AbstractGroupExpression implements Expression, GroupExpression {
     private _idx: number = 0
-    private _persistedMatch: string[] = []
-    private _currentMatch: string[] = []
+    private _persistedMatch: IndexedToken[] = []
+    private _currentMatch: IndexedToken[] = []
     private _matchGroups: MatchGroup[] = []
 
     protected readonly _expressions: Expression[]
@@ -21,7 +22,7 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
         return [...this._persistedMatch, ...this._currentMatch];
     }
 
-    abstract currentMatch(): string[]
+    abstract currentMatch(): IndexedToken[]
 
     get matchGroups(): Array<MatchGroup> {
         return this._matchGroups;
@@ -57,7 +58,7 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
             const thisChar = updatedMatch[sIdx]
             const last = sIdx > 0 ? updatedMatch[sIdx - 1] : null
             const next = sIdx < updatedMatch.length ? updatedMatch[sIdx + 1] : null
-            hasMatched = this.matchNext(thisChar, last, next, isZeroPosMatch)
+            hasMatched = this.matchNext(thisChar, last, next)
             sIdx++
         }
 
@@ -73,12 +74,12 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
 
     abstract lastMatchCharactersConsumed(): number
 
-    matchNext(s: string, last: string = null, next: string = null, isZeroPosMatch: boolean = null): boolean {
+    matchNext(s: IndexedToken, last: IndexedToken = null, next: IndexedToken = null): boolean {
         if (!this.hasNext()) {
             return false
         }
         const nextExpression = this._expressions[this._idx]
-        const res = nextExpression.matchNext(s, last, next, isZeroPosMatch);
+        const res = nextExpression.matchNext(s, last, next);
         if (res) {
             this._lastMatchConsumed = nextExpression.lastMatchCharactersConsumed()
         }

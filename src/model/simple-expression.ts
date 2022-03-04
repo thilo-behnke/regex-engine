@@ -1,6 +1,7 @@
 import {Expression} from "./expression";
 import Token from "./token";
 import Character from "./character";
+import {IndexedToken} from "../utils/string-utils";
 
 export class SimpleExpression implements Expression {
     private readonly _characters: Character[]
@@ -8,7 +9,7 @@ export class SimpleExpression implements Expression {
     private _idx = 0
     private _isSuccessful: boolean = undefined
     private _charactersConsumed = 0
-    private _currentMatch: string[] = []
+    private _currentMatch: IndexedToken[] = []
 
     constructor(...characters: Character[]) {
         this._characters = characters;
@@ -33,12 +34,12 @@ export class SimpleExpression implements Expression {
         return this._isSuccessful;
     }
 
-    matchNext(s: string, last: string = null, next: string = null, isZeroPosMatch = false): boolean {
+    matchNext(s: IndexedToken, last: IndexedToken = null, next: IndexedToken = null): boolean {
         if (!this.hasNext()) {
             return false
         }
 
-        this._isSuccessful = this._characters[this._idx].test(s, last, next, isZeroPosMatch)
+        this._isSuccessful = this._characters[this._idx].test(s.value, last.value, next.value, s.first)
         this._currentMatch = this._isSuccessful ? [s] : []
         this._charactersConsumed = this._characters[this._idx].cursorOnly() ? 0 : 1;
         this._idx++
@@ -57,7 +58,7 @@ export class SimpleExpression implements Expression {
         return false;
     }
 
-    currentMatch(): string[] {
+    currentMatch(): IndexedToken[] {
         return this._currentMatch;
     }
 

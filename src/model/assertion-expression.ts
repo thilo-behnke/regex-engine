@@ -1,6 +1,6 @@
 import {Expression} from "./expression";
 import {AbstractGroupExpression} from "./abstract-group-expression";
-import {GroupExpressionType, isLookbehind} from "./parser/group-expression-type";
+import {IndexedToken} from "../utils/string-utils";
 
 export class AssertionExpression extends AbstractGroupExpression {
     private _positive = true
@@ -42,8 +42,8 @@ export class AssertionExpression extends AbstractGroupExpression {
         return expression
     }
 
-    matchNext(s: string, last: string = null, next: string = null, isZeroPosMatch: boolean = null): boolean {
-        const matchRes = super.matchNext(s, last, next, isZeroPosMatch);
+    matchNext(s: IndexedToken, last: IndexedToken = null, next: IndexedToken = null): boolean {
+        const matchRes = super.matchNext(s, last, next);
         return this._positive && matchRes || !this._positive && !matchRes;
     }
 
@@ -51,7 +51,7 @@ export class AssertionExpression extends AbstractGroupExpression {
         return 0;
     }
 
-    currentMatch(): string[] {
+    currentMatch(): IndexedToken[] {
         return [];
     }
 

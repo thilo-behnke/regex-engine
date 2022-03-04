@@ -1,5 +1,6 @@
 import {Expression} from "./expression";
 import {AbstractGroupExpression} from "./abstract-group-expression";
+import {IndexedToken} from "../utils/string-utils";
 
 export class DefaultGroupExpression extends AbstractGroupExpression {
     protected _nonCapturing: boolean = false
@@ -22,7 +23,7 @@ export class DefaultGroupExpression extends AbstractGroupExpression {
         return this._lastMatchConsumed;
     }
 
-    currentMatch(): string[] {
+    currentMatch(): IndexedToken[] {
         return this.internalMatch
     }
 

@@ -2,6 +2,7 @@ import AbstractGreedyExpression from "./abstract-greedy-expression";
 import {Expression} from "./expression";
 import GroupExpression from "./group-expression";
 import {MatchGroup} from "./match/match-group";
+import {IndexedToken} from "../utils/string-utils";
 
 export class GreedyGroupExpression extends AbstractGreedyExpression implements GroupExpression {
     private _groupExpression: GroupExpression
@@ -16,7 +17,7 @@ export class GreedyGroupExpression extends AbstractGreedyExpression implements G
         return this._matchGroups
     }
 
-    storeCurrentMatch(s: string, expressionWasReset: boolean): void {
+    storeCurrentMatch(s: IndexedToken, expressionWasReset: boolean): void {
         if (expressionWasReset) {
             this._currentMatch = [s]
         } else {

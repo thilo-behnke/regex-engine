@@ -5,6 +5,14 @@ const explode = (s: string) => {
     return s.split('').map(it => it === "" ? " " : it);
 }
 
+const explodeIndexed = (s: string): IndexedToken[] => {
+    return explode(s).map((value, idx, arr) => ({value, idx, first: idx === 0, last: idx === arr.length - 1}))
+}
+
+export type IndexedToken = {
+    idx: number, value: string, first: boolean, last: boolean
+}
+
 const explodeWithEscapes = (s: string) => {
     const chars = explode(s)
     const res: string[] = []
@@ -69,6 +77,7 @@ const getCharRange = (a: string, b: string): string[] => {
 
 export {
     explode,
+    explodeIndexed,
     explodeWithEscapes,
     explodeToCharacters,
     isWord,
