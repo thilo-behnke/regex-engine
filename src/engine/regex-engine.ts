@@ -33,7 +33,6 @@ export default class RegexEngine {
             const expressions = this._parser.parse(p)
             const res = this.tryTest(tokens.slice(this._matchOffset), expressions)
             if (res) {
-                this._groups = Object.fromEntries(Object.entries(this._groups).map(([key, groups]) => [key, groups.map(value =>  ({...value, from: value.from + this._matchOffset, to: value.to + this._matchOffset}))]))
                 this._match = expressions.flatMap(it => it.currentMatch().map(it => it.value)).join('')
                 return true
             }
@@ -51,8 +50,8 @@ export default class RegexEngine {
                 const {match, tokensConsumed, matched} = RegexEngine.tryTestExpression(nextExpression, toTest, cursorPos)
                 cursorPos += tokensConsumed
                 if (match) {
-                    if (nextExpression.tracksMatch() && matched.length) {
-                        this._groups[expressionIdx] = [{match: matched.join(''), from: cursorPos - matched.length, to: cursorPos}]
+                    if (isGroupExpression(nextExpression)) {
+                        this._groups[expressionIdx] = nextExpression.matchGroups
                     }
 
                     continue
@@ -93,7 +92,7 @@ export default class RegexEngine {
                 while (!backtrackSuccessful && this.tryBacktrack(previousExpression)) {
                     cursorPos--
                     if (isGroupExpression(previousExpression)) {
-                        this._groups[backtrackIdx] = [{match: previousExpression.currentMatch().map(it => it.value).join(''), from: cursorPos - previousExpression.currentMatch().length, to: cursorPos}]
+                        this._groups[backtrackIdx] = previousExpression.matchGroups
                     }
                     nextExpression.reset()
                     const {match: backtrackMatch, matched: backtrackMatched, tokensConsumed: backtrackTokensConsumed} = RegexEngine.tryTestExpression(nextExpression, toTest, cursorPos)
@@ -103,7 +102,7 @@ export default class RegexEngine {
                     cursorPos += backtrackTokensConsumed
                     // backtrack successful
                     if (isGroupExpression(nextExpression)) {
-                        this._groups[backtrackIdx] = [{match: backtrackMatched.join(''), from: cursorPos - backtrackMatched.length, to: cursorPos}]
+                        this._groups[backtrackIdx] = nextExpression.matchGroups
                     }
                     backtrackSuccessful = true
                 }
