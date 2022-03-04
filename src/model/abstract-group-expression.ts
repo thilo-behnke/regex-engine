@@ -1,6 +1,6 @@
 import {Expression} from "./expression";
 import FixedLengthExpression from "./fixed-length-expression";
-import GroupExpression from "./group-expression";
+import GroupExpression, {isGroupExpression} from "./group-expression";
 import {MatchGroup} from "./match/match-group";
 
 export abstract class AbstractGroupExpression implements Expression, GroupExpression {
@@ -58,12 +58,6 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
         this._failed = this._expressions.some(it => !it.isSuccessful())
         this._persistedMatch = this.currentMatch()
         this._currentMatch = []
-        if (this.tracksMatch()) {
-            this._matchGroups = [{match: this._persistedMatch.join(''), from: 0, to: this._persistedMatch.length - 1}]
-        }
-        this._matchGroups = this._expressions.flatMap(expr => {
-            return expr instanceof AbstractGroupExpression ? expr.matchGroups : []
-        })
         return this.isSuccessful()
     }
 
@@ -85,12 +79,14 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
         this._currentMatch = res || nextExpression.isSuccessful() ? nextExpression.currentMatch() : []
         if (!nextExpression.hasNext()) {
             if (nextExpression.isSuccessful()) {
+                const expressionMatchFrom = this._persistedMatch.length
                 this._persistedMatch = this.currentMatch()
+                this._matchGroups = []
                 if (this.tracksMatch()) {
-                    this._matchGroups = [{match: this._persistedMatch.join(''), from: 0, to: this._persistedMatch.length - 1}]
+                    this._matchGroups = [{match: this._persistedMatch.join(''), from: 0, to: this._persistedMatch.length}]
                 }
-                if (nextExpression instanceof AbstractGroupExpression) {
-                    this._matchGroups = [...this.matchGroups, ...nextExpression.matchGroups]
+                if (isGroupExpression(nextExpression)) {
+                    this._matchGroups = [...this.matchGroups, ...nextExpression.matchGroups.map(group => ({match: group.match, from: expressionMatchFrom + group.from, to: expressionMatchFrom + group.from + group.to}))]
                 }
             } else {
                 this._failed = true
