@@ -7,6 +7,7 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
     private _idx: number = 0
     private _persistedMatch: string[] = []
     private _currentMatch: string[] = []
+    private _matchGroups: MatchGroup[] = []
 
     protected readonly _expressions: Expression[]
     protected _failed = false
@@ -23,7 +24,7 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
     abstract currentMatch(): string[]
 
     get matchGroups(): Array<MatchGroup> {
-        return undefined;
+        return this._matchGroups;
     }
 
     hasNext(): boolean {
@@ -57,6 +58,12 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
         this._failed = this._expressions.some(it => !it.isSuccessful())
         this._persistedMatch = this.currentMatch()
         this._currentMatch = []
+        if (this.tracksMatch()) {
+            this._matchGroups = [{match: this._persistedMatch.join(''), from: 0, to: this._persistedMatch.length - 1}]
+        }
+        this._matchGroups = this._expressions.flatMap(expr => {
+            return expr instanceof AbstractGroupExpression ? expr.matchGroups : []
+        })
         return this.isSuccessful()
     }
 
@@ -77,11 +84,17 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
         }
         this._currentMatch = res || nextExpression.isSuccessful() ? nextExpression.currentMatch() : []
         if (!nextExpression.hasNext()) {
-            if (!nextExpression.isSuccessful()) {
+            if (nextExpression.isSuccessful()) {
+                this._persistedMatch = this.currentMatch()
+                if (this.tracksMatch()) {
+                    this._matchGroups = [{match: this._persistedMatch.join(''), from: 0, to: this._persistedMatch.length - 1}]
+                }
+                if (nextExpression instanceof AbstractGroupExpression) {
+                    this._matchGroups = [...this.matchGroups, ...nextExpression.matchGroups]
+                }
+            } else {
                 this._failed = true
                 this._persistedMatch = []
-            } else {
-                this._persistedMatch = this.currentMatch()
             }
             this._currentMatch = []
             this._idx++
@@ -94,6 +107,7 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
         this._expressions.forEach(it => it.reset())
         this._currentMatch = []
         this._persistedMatch = []
+        this._matchGroups = []
         this._failed = false
     }
 }
