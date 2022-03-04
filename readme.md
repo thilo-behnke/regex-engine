@@ -10,7 +10,7 @@ Engine:
 - [x] Greedy matching, e.g. `a*` or `a+`
 - [x] Anchors, e.g. `^abc$`
 - [x] Supported matchers: `.`, `\b`, `\w`, `\d`, `\s`
-- [x] Group matching, e.g. `(?:abc)(def)`
+- [x] Group matching, e.g. `(?:abc)(def)` or `(a(b(c)))`
 - [x] Lookahead, e.g. `(?=abc)` or `(?!abc)`
 - [ ] More matchers, e.g. `\W`
 - [ ] Optional modifiers, e.g. `abc?`
