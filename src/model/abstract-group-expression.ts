@@ -1,7 +1,9 @@
 import {Expression} from "./expression";
 import FixedLengthExpression from "./fixed-length-expression";
+import GroupExpression from "./group-expression";
+import {MatchGroup} from "./match/match-group";
 
-export abstract class AbstractGroupExpression implements Expression {
+export abstract class AbstractGroupExpression implements Expression, GroupExpression {
     private _idx: number = 0
     private _persistedMatch: string[] = []
     private _currentMatch: string[] = []
@@ -19,6 +21,10 @@ export abstract class AbstractGroupExpression implements Expression {
     }
 
     abstract currentMatch(): string[]
+
+    get matchGroups(): Array<MatchGroup> {
+        return undefined;
+    }
 
     hasNext(): boolean {
         return !this._failed && this._idx < this._expressions.length;
@@ -43,8 +49,11 @@ export abstract class AbstractGroupExpression implements Expression {
 
         const updatedMatch = this._persistedMatch.slice(0, this._persistedMatch.length - 1)
         this.reset()
-        // TODO: Does not pass last, next and isZeroPosMatch
-        updatedMatch.every(it => this.matchNext(it))
+        updatedMatch.every((it, idx) => {
+            const last = idx > 0 ? updatedMatch[idx - 1] : null
+            const next = idx < updatedMatch.length ? updatedMatch[idx + 1] : null
+            this.matchNext(it, last, next)
+        })
         this._failed = this._expressions.some(it => !it.isSuccessful())
         this._persistedMatch = this.currentMatch()
         this._currentMatch = []
