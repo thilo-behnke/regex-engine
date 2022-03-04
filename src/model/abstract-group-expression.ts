@@ -97,6 +97,7 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
             } else {
                 this._failed = true
                 this._persistedMatch = []
+                this._matchGroups = []
             }
             this._currentMatch = []
             this._idx++

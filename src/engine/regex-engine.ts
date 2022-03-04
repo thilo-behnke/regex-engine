@@ -138,15 +138,15 @@ export default class RegexEngine {
             const previous = idx > 0 ? toTest[idx - 1] : null
             const next = idx + 1 < toTest.length ? toTest[idx + 1] : null
             const matchRes = expression.matchNext(nextChar, previous, next, isAtZeroPos)
+            if (isGroupExpression(expression)) {
+                this._groups[id] = expression.matchGroups.map(group => ({match: group.match, from: startIdx + group.from, to: startIdx + group.to}))
+            }
             if (matchRes) {
-                const updatedIdx = idx + expression.lastMatchCharactersConsumed()
-                if (isGroupExpression(expression)) {
-                    this._groups[id] = expression.matchGroups.map(group => ({match: group.match, from: idx + group.from, to: idx + group.to}))
-                }
-                idx = updatedIdx
+                idx += expression.lastMatchCharactersConsumed()
             }
         }
         if (!expression.isSuccessful()) {
+            delete this._groups[id]
             return {match: false, tokensConsumed: 0, matched: []}
         }
         return {match: expression.isSuccessful(), tokensConsumed: idx - startIdx, matched: expression.currentMatch()}
