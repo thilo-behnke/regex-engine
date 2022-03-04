@@ -52,16 +52,12 @@ export default class RegexEngine {
     private tryTest = (toTest: string[], expressions: Expression[]): boolean => {
         let cursorPos = 0
         for(let expressionIdx = 0; expressionIdx < expressions.length; expressionIdx++) {
+            const cursorBeforeMatch = cursorPos
             const nextExpression = expressions[expressionIdx]
             if (!(nextExpression instanceof AssertionExpression) || nextExpression.type !== AssertionType.LOOKBEHIND) {
-                const {match, tokensConsumed, matched} = RegexEngine.tryTestExpression(nextExpression, toTest, cursorPos, this.isAtZeroPos())
+                const {match, tokensConsumed} = this.tryTestExpression([nextExpression, expressionIdx], toTest, cursorPos, this.isAtZeroPos())
                 cursorPos += tokensConsumed
                 if (match) {
-                    if (isGroupExpression(nextExpression) && matched.length) {
-                        // TODO: correct end position?
-                        this._groups[expressionIdx] = nextExpression.matchGroups.map(group => ({match: group.match, from: cursorPos - matched.length + group.from, to: cursorPos - matched.length + group.to}))
-                    }
-
                     continue
                 }
             } else {
@@ -71,7 +67,7 @@ export default class RegexEngine {
                     const lookBehindCursorPosFrom = lookbehindCursorPos - nextExpression.minimumLength
                     if (lookBehindCursorPosFrom >= 0) {
                         const sBehindCurrent = toTest.slice(lookBehindCursorPosFrom, lookbehindCursorPos)
-                        const {match: lookbehindMatch} = RegexEngine.tryTestExpression(nextExpression, sBehindCurrent, lookBehindCursorPosFrom, this.isAtZeroPos())
+                        const {match: lookbehindMatch} = this.tryTestExpression([nextExpression, expressionIdx], sBehindCurrent, lookBehindCursorPosFrom, this.isAtZeroPos())
                         if (lookbehindMatch) {
                             lookbehindSuccessful = true
                             break
@@ -82,6 +78,7 @@ export default class RegexEngine {
                 }
                 if (lookbehindSuccessful) {
                     cursorPos = lookbehindCursorPos
+                    this._groups[expressionIdx] = nextExpression.matchGroups.map(group => ({match: group.match, from: cursorBeforeMatch + group.from, to: cursorBeforeMatch + group.to}))
                     continue;
                 }
                 // lookbehind failed
@@ -100,7 +97,7 @@ export default class RegexEngine {
                 while (!backtrackSuccessful && this.tryBacktrack(previousExpression)) {
                     cursorPos--
                     nextExpression.reset()
-                    const {match: backtrackMatch, matched: backtrackMatched, tokensConsumed: backtrackTokensConsumed} = RegexEngine.tryTestExpression(nextExpression, toTest, cursorPos, this.isAtZeroPos())
+                    const {match: backtrackMatch, matched: backtrackMatched, tokensConsumed: backtrackTokensConsumed} = this.tryTestExpression([nextExpression, expressionIdx], toTest, cursorPos, this.isAtZeroPos())
                     if (isGroupExpression(previousExpression)) {
                         // TODO: correct end position?
                         this._groups[backtrackIdx] = previousExpression.matchGroups.map(group => ({match: group.match, from: cursorPos - previousExpression.currentMatch().length + group.from, to: cursorPos - previousExpression.currentMatch().length + group.to}))
@@ -109,11 +106,10 @@ export default class RegexEngine {
                         continue
                     }
                     cursorPos += backtrackTokensConsumed
-                    // backtrack successful
-                    if (isGroupExpression(nextExpression)) {
-                        // TODO: correct end position?
-                        this._groups[expressionIdx] = nextExpression.matchGroups.map(group => ({match: group.match, from: cursorPos - backtrackMatched.length + group.from, to: cursorPos - backtrackMatched.length + group.to}))
-                    }
+                    // if (isGroupExpression(nextExpression)) {
+                    //     // TODO: correct end position?
+                    //     this._groups[expressionIdx] = nextExpression.matchGroups.map(group => ({match: group.match, from: cursorPos - backtrackMatched.length + group.from, to: cursorPos - backtrackMatched.length + group.to}))
+                    // }
                     backtrackSuccessful = true
                 }
                 if (backtrackSuccessful) {
@@ -135,7 +131,7 @@ export default class RegexEngine {
         return expressions.every(it => it.isSuccessful())
     }
 
-    private static tryTestExpression = (expression: Expression, toTest: string[], startIdx: number, isAtZeroPos: boolean) => {
+    private tryTestExpression = ([expression, id]: [Expression, number], toTest: string[], startIdx: number, isAtZeroPos: boolean) => {
         let idx = startIdx
         while(expression.hasNext()) {
             const nextChar = idx < toTest.length ? toTest[idx] : null
@@ -143,7 +139,11 @@ export default class RegexEngine {
             const next = idx + 1 < toTest.length ? toTest[idx + 1] : null
             const matchRes = expression.matchNext(nextChar, previous, next, isAtZeroPos)
             if (matchRes) {
-                idx += expression.lastMatchCharactersConsumed()
+                const updatedIdx = idx + expression.lastMatchCharactersConsumed()
+                if (isGroupExpression(expression)) {
+                    this._groups[id] = expression.matchGroups.map(group => ({match: group.match, from: idx + group.from, to: idx + group.to}))
+                }
+                idx = updatedIdx
             }
         }
         if (!expression.isSuccessful()) {

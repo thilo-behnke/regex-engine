@@ -96,13 +96,13 @@ test.each([
 })
 
 test.each([
-    // {value: 'ab', pattern: 'a(?=b)', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'a'},
-    // {value: 'b', pattern: '(?=b)', shouldMatch: true, expectedMatchGroups: [], expectedMatch: ''},
-    // {value: 'b', pattern: '(?!b)', shouldMatch: false, expectedMatchGroups: [], expectedMatch: null},
-    // {value: 'test', pattern: 'test(?!b)', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'test'},
-    // {value: 'a', pattern: '(?!b)a', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'a'},
-    // {value: 'ba', pattern: '(?=b)ba', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'ba'},
-    // {value: 'bac', pattern: '(?=b)(?:b)(a)(?=c)', shouldMatch: true, expectedMatchGroups: [{match: 'a', from: 1, to: 2}], expectedMatch: 'ba'},
+    {value: 'ab', pattern: 'a(?=b)', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'a'},
+    {value: 'b', pattern: '(?=b)', shouldMatch: true, expectedMatchGroups: [], expectedMatch: ''},
+    {value: 'b', pattern: '(?!b)', shouldMatch: false, expectedMatchGroups: [], expectedMatch: null},
+    {value: 'test', pattern: 'test(?!b)', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'test'},
+    {value: 'a', pattern: '(?!b)a', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'a'},
+    {value: 'ba', pattern: '(?=b)ba', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'ba'},
+    {value: 'bac', pattern: '(?=b)(?:b)(a)(?=c)', shouldMatch: true, expectedMatchGroups: [{match: 'a', from: 1, to: 2}], expectedMatch: 'ba'},
     {value: 'bac', pattern: '(?=(b))(?:b)(a)(?=c)', shouldMatch: true, expectedMatchGroups: [{match: 'b', from: 0, to: 1}, {match: 'a', from: 1, to: 2}], expectedMatch: 'ba'},
 ]) ('should correctly handle lookahead: %s', ({value, pattern, shouldMatch, expectedMatchGroups, expectedMatch}) => {
     const engine = new RegexEngine()

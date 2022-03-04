@@ -28,7 +28,7 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
     }
 
     hasNext(): boolean {
-        return !this._failed && this._idx < this._expressions.length;
+        return !this._failed && this._idx < this._expressions.length && this._expressions[this._idx].hasNext();
     }
 
     hasNotMatched(): boolean {
