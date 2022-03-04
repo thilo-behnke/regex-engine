@@ -61,7 +61,7 @@ export default abstract class AbstractGreedyExpression implements Expression {
         return this._expression.lastMatchCharactersConsumed();
     }
 
-    backtrack(isZeroPosMatch: boolean): boolean {
+    backtrack(): boolean {
         if (!this.canBacktrack()) {
             return
         }

@@ -50,7 +50,7 @@ export class SimpleExpression implements Expression {
         return this._charactersConsumed;
     }
 
-    backtrack(isZeroPosMatch: boolean): boolean {
+    backtrack(): boolean {
         return false;
     }
 

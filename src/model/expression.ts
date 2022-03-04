@@ -7,7 +7,7 @@ export interface Expression {
     matchNext(s: IndexedToken, last: IndexedToken, next: IndexedToken): boolean
     lastMatchCharactersConsumed(): number
     canBacktrack(): boolean
-    backtrack(isZeroPosMatch: boolean): boolean
+    backtrack(): boolean
     get minimumLength(): number
     isSuccessful: () => boolean
     currentMatch: () => IndexedToken[]
