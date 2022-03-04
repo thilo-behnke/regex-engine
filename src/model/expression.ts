@@ -2,7 +2,7 @@ import Character from "./character";
 import {IndexedToken} from "../utils/string-utils";
 
 export interface Expression {
-    hasNotMatched: () => boolean
+    isInitial: () => boolean
     hasNext: () => boolean
     matchNext(s: IndexedToken, last: IndexedToken, next: IndexedToken): boolean
     lastMatchCharactersConsumed(): number

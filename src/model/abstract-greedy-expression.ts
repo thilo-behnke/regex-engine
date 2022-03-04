@@ -14,7 +14,7 @@ export default abstract class AbstractGreedyExpression implements Expression {
         this._allowNoMatch = allowNoMatch;
     }
 
-    hasNotMatched(): boolean {
+    isInitial(): boolean {
         return this._currentMatch.length === 0;
     }
 

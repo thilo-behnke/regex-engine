@@ -32,7 +32,7 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
         return !this._failed && this._idx < this._expressions.length && this._expressions[this._idx].hasNext();
     }
 
-    hasNotMatched(): boolean {
+    isInitial(): boolean {
         return this._idx == 0;
     }
 

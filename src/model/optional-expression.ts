@@ -16,12 +16,12 @@ export class OptionalExpression implements Expression {
         return this._expression.hasNext();
     }
 
-    hasNotMatched(): boolean {
-        return this._expression.hasNotMatched();
+    isInitial(): boolean {
+        return this._expression.isInitial();
     }
 
     isSuccessful(): boolean {
-        return this._expression.hasNotMatched() || this._expression.isSuccessful();
+        return this._expression.isInitial() || this._expression.isSuccessful();
     }
 
     tracksMatch(): boolean {
@@ -37,7 +37,7 @@ export class OptionalExpression implements Expression {
     }
 
     canBacktrack(): boolean {
-        return !this._expression.hasNotMatched();
+        return !this._expression.isInitial();
     }
 
     lastMatchCharactersConsumed(): number {

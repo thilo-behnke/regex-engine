@@ -110,7 +110,7 @@ export default class RegexEngine {
                 if (backtrackSuccessful) {
                     break
                 }
-                if (previousExpression.hasNotMatched() && previousExpression.isSuccessful()) {
+                if (previousExpression.isInitial() && previousExpression.isSuccessful()) {
                     backtrackIdx--
                     continue;
                 }

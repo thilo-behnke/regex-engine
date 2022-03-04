@@ -126,6 +126,19 @@ test.each([
     expect(engine.matched).toEqual(expectedMatch)
 })
 
+test.each([
+    {value: 'abc', pattern: 'a?bc', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'abc'},
+    {value: 'abc', pattern: '(a?)bc', shouldMatch: true, expectedMatchGroups: [{match: 'a', from: 0, to: 1}], expectedMatch: 'abc'},
+    {value: 'xbc', pattern: '[a-z]?bc', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'xbc'},
+    {value: 'abc', pattern: '(a)?bc', shouldMatch: true, expectedMatchGroups: [{match: 'a', from: 0, to: 1}], expectedMatch: 'abc'},
+]) ('should correctly optional modifier: %s', ({value, pattern, shouldMatch, expectedMatchGroups, expectedMatch}) => {
+    const engine = new RegexEngine()
+    const res = engine.match(value, pattern)
+    expect(res).toEqual(shouldMatch)
+    expect(engine.groups).toEqual(expectedMatchGroups)
+    expect(engine.matched).toEqual(expectedMatch)
+})
+
 // TODO: Fix.
 // test.each([
 //     // url regex

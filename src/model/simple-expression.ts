@@ -14,7 +14,7 @@ export class SimpleExpression implements Expression {
         this._characters = characters;
     }
 
-    hasNotMatched(): boolean {
+    isInitial(): boolean {
         return this._charactersConsumed === 0;
     }
 

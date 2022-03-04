@@ -21,7 +21,7 @@ export default class SquareBracketExpression implements Expression {
         return expression
     }
 
-    hasNotMatched(): boolean {
+    isInitial(): boolean {
         return this._isSuccessful === undefined;
     }
 
