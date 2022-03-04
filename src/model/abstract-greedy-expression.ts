@@ -56,14 +56,18 @@ export default abstract class AbstractGreedyExpression implements Expression {
         return this._expression.lastMatchCharactersConsumed();
     }
 
-    backtrack(): boolean {
+    backtrack(isZeroPosMatch: boolean): boolean {
         if (!this.canBacktrack()) {
             return
         }
 
         const updatedMatch = this._currentMatch.slice(0, this._currentMatch.length - 1)
         this.reset()
-        updatedMatch.every(it => this.matchNext(it))
+        updatedMatch.every((it, idx) => {
+            const last = idx > 0 ? updatedMatch[idx - 1] : null
+            const next = idx < updatedMatch.length ? updatedMatch[idx + 1] : null
+            this.matchNext(it, last, next)
+        })
         if (this._isSuccessful === undefined && this._allowNoMatch) {
             this._isSuccessful = true
         }

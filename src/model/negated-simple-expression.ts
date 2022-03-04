@@ -21,8 +21,8 @@ export class NegatedSimpleExpression implements Expression {
         return !this._delegate.isSuccessful();
     }
 
-    backtrack(): boolean {
-        return this._delegate.backtrack();
+    backtrack(isZeroPosMatch: boolean): boolean {
+        return this._delegate.backtrack(isZeroPosMatch);
     }
 
     canBacktrack(): boolean {

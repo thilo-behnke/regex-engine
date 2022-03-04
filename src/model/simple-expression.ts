@@ -45,7 +45,7 @@ export class SimpleExpression implements Expression {
         return this._charactersConsumed;
     }
 
-    backtrack(): boolean {
+    backtrack(isZeroPosMatch: boolean): boolean {
         return false;
     }
 

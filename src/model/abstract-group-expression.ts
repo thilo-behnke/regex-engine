@@ -31,7 +31,7 @@ export abstract class AbstractGroupExpression implements Expression {
 
     abstract tracksMatch(): boolean
 
-    backtrack(): boolean {
+    backtrack(isZeroPosMatch: boolean): boolean {
         if (!this.canBacktrack()) {
             return false
         }

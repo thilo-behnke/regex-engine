@@ -126,6 +126,6 @@ export default class RegexEngine {
         if (!expression.canBacktrack()) {
             return false
         }
-        return expression.backtrack()
+        return expression.backtrack(this.isAtZeroPos())
     }
 }

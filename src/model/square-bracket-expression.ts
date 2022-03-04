@@ -60,7 +60,7 @@ export default class SquareBracketExpression implements Expression {
         return this._successfulExpression?.lastMatchCharactersConsumed() || 0;
     }
 
-    backtrack(): boolean {
+    backtrack(isZeroPosMatch: boolean): boolean {
         return false;
     }
 
