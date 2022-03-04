@@ -1,15 +1,16 @@
 import Character from "./character";
+import {IndexedToken} from "../utils/string-utils";
 
 export interface Expression {
     hasNotMatched: () => boolean
     hasNext: () => boolean
-    matchNext(s: string, last: string, next: string, isZeroPosMatch: boolean): boolean
+    matchNext(s: IndexedToken, last: IndexedToken, next: IndexedToken): boolean
     lastMatchCharactersConsumed(): number
     canBacktrack(): boolean
-    backtrack(isZeroPosMatch: boolean): boolean
+    backtrack(): boolean
     get minimumLength(): number
     isSuccessful: () => boolean
-    currentMatch: () => string[]
+    currentMatch: () => IndexedToken[]
     tracksMatch: () => boolean
     reset(): void
 }

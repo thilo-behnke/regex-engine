@@ -5,6 +5,14 @@ const explode = (s: string) => {
     return s.split('').map(it => it === "" ? " " : it);
 }
 
+const explodeIndexed = (s: string): IndexedToken[] => {
+    return explode(s).map((value, idx, arr) => ({value, idx, first: idx === 0, last: idx === arr.length - 1}))
+}
+
+export type IndexedToken = {
+    idx: number, value: string, first: boolean, last: boolean
+}
+
 const explodeWithEscapes = (s: string) => {
     const chars = explode(s)
     const res: string[] = []
@@ -46,7 +54,7 @@ const isWordBoundary = (s: string) => {
 }
 
 const isDigit = (s: string) => {
-    if (s === null || s.length > 1) {
+    if (!s || s.length > 1) {
         return false
     }
     const zeroPos = "0".charCodeAt(0)
@@ -55,7 +63,7 @@ const isDigit = (s: string) => {
 }
 
 const getCharRange = (a: string, b: string): string[] => {
-    if (a === null || a.length > 1 || b === null || b.length > 1) {
+    if (!a || a.length > 1 || !b || b.length > 1) {
         return []
     }
     const posStart = a.charCodeAt(0)
@@ -69,6 +77,7 @@ const getCharRange = (a: string, b: string): string[] => {
 
 export {
     explode,
+    explodeIndexed,
     explodeWithEscapes,
     explodeToCharacters,
     isWord,

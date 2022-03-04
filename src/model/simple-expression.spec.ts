@@ -1,5 +1,5 @@
 import {SimpleExpression} from "./simple-expression";
-import {explodeToCharacters} from "../utils/string-utils";
+import {explodeIndexed, explodeToCharacters} from "../utils/string-utils";
 
 test.each([
     {expression: 'test', match: 'test', shouldMatch: true},
@@ -15,11 +15,12 @@ test.each([
 ])('should match simple expression: %s', ({expression, match, shouldMatch}) => {
     const simpleExpression = new SimpleExpression(...explodeToCharacters(expression))
     let idx = 0
+    const tokens = explodeIndexed(match)
     while(simpleExpression.hasNext()) {
         if (idx > match.length) {
             break
         }
-        simpleExpression.matchNext(match[idx], idx > 0 ? match[idx - 1] : null, idx + 1 < match.length ? match[idx + 1] : null)
+        simpleExpression.matchNext(tokens[idx], idx > 0 ? tokens[idx - 1] : null, idx + 1 < tokens.length ? tokens[idx + 1] : null)
         idx += simpleExpression.lastMatchCharactersConsumed()
     }
     expect(simpleExpression.isSuccessful()).toEqual(shouldMatch)

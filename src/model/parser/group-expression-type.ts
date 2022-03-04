@@ -1,6 +1,6 @@
 import {Expression} from "../expression";
 import {AssertionExpression} from "../assertion-expression";
-import {GroupExpression} from "../group-expression";
+import {DefaultGroupExpression} from "../default-group-expression";
 
 export enum GroupExpressionType {
     CAPTURING = 'CAPTURING',
@@ -26,9 +26,9 @@ export const isMatchGroup = (type: GroupExpressionType) => {
 export const createGroupExpression = (type: GroupExpressionType, ...expressions: Expression[]) => {
     switch(type) {
         case GroupExpressionType.CAPTURING:
-            return new GroupExpression(...expressions)
+            return new DefaultGroupExpression(...expressions)
         case GroupExpressionType.NON_CAPTURING:
-            return GroupExpression.nonCapturing(...expressions)
+            return DefaultGroupExpression.nonCapturing(...expressions)
         case GroupExpressionType.POSITIVE_LOOKAHEAD:
             return AssertionExpression.positiveLookahead(...expressions)
         case GroupExpressionType.NEGATIVE_LOOKAHEAD:

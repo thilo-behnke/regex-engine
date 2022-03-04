@@ -1,5 +1,5 @@
 import {SimpleExpression} from "./simple-expression";
-import {explodeToCharacters} from "../utils/string-utils";
+import {explodeIndexed, explodeToCharacters} from "../utils/string-utils";
 import SquareBracketExpression from "./square-bracket-expression";
 
 test.each([
@@ -10,11 +10,12 @@ test.each([
         ...explodeToCharacters(expression).map(it => new SimpleExpression(it))
     )
     let idx = 0
+    const tokens = explodeIndexed(match)
     while(bracketExpression.hasNext()) {
         if (idx > match.length) {
             break
         }
-        bracketExpression.matchNext(match[idx])
+        bracketExpression.matchNext(tokens[idx])
         idx++
     }
     expect(bracketExpression.isSuccessful()).toEqual(shouldMatch)
@@ -28,11 +29,12 @@ test.each([
         ...explodeToCharacters(expression).map(it => new SimpleExpression(it))
     )
     let idx = 0
+    const tokens = explodeIndexed(match)
     while(bracketExpression.hasNext()) {
         if (idx > match.length) {
             break
         }
-        bracketExpression.matchNext(match[idx], null, null, idx === 0)
+        bracketExpression.matchNext(tokens[idx], null, null)
         idx++
     }
     expect(bracketExpression.isSuccessful()).toEqual(shouldMatch)

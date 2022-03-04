@@ -2,6 +2,7 @@ import {SimpleExpression} from "./simple-expression";
 import {Expression} from "./expression";
 import Character from "./character";
 import {NegatedSimpleExpression} from "./negated-simple-expression";
+import {IndexedToken} from "../utils/string-utils";
 
 export default class SquareBracketExpression implements Expression {
     private readonly _expressions: (SimpleExpression|NegatedSimpleExpression)[]
@@ -9,7 +10,7 @@ export default class SquareBracketExpression implements Expression {
 
     private _isSuccessful: boolean = undefined;
     private _successfulExpression: Expression = undefined;
-    private _currentMatch: string[] = []
+    private _currentMatch: IndexedToken[] = []
 
     constructor(...expressions: (SimpleExpression|NegatedSimpleExpression)[]) {
         this._expressions = expressions;
@@ -37,10 +38,10 @@ export default class SquareBracketExpression implements Expression {
         return this._isSuccessful;
     }
 
-    matchNext(s: string, previous: string = null, next: string = null, isZeroPosMatch = false): boolean {
+    matchNext(s: IndexedToken, previous: IndexedToken = null, next: IndexedToken = null): boolean {
         for (let expression of this._expressions) {
             while(expression.hasNext()) {
-                const res = expression.matchNext(s, previous, next, isZeroPosMatch)
+                const res = expression.matchNext(s, previous, next)
                 if (!res) {
                     this._isSuccessful = false
                     this._currentMatch = []
@@ -64,7 +65,7 @@ export default class SquareBracketExpression implements Expression {
         return this._successfulExpression?.lastMatchCharactersConsumed() || 0;
     }
 
-    backtrack(isZeroPosMatch: boolean): boolean {
+    backtrack(): boolean {
         return false;
     }
 
@@ -72,7 +73,7 @@ export default class SquareBracketExpression implements Expression {
         return false;
     }
 
-    currentMatch(): string[] {
+    currentMatch(): IndexedToken[] {
         return this._currentMatch;
     }
 

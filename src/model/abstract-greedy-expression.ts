@@ -1,4 +1,5 @@
 import {Expression} from "./expression";
+import {IndexedToken} from "../utils/string-utils";
 
 export default abstract class AbstractGreedyExpression implements Expression {
     private readonly _expression: Expression
@@ -6,7 +7,7 @@ export default abstract class AbstractGreedyExpression implements Expression {
 
     private _hasNext: boolean = true
     private _isSuccessful: boolean = undefined
-    protected _currentMatch: string[] = []
+    protected _currentMatch: IndexedToken[] = []
 
     constructor(expression: Expression, allowNoMatch = true) {
         this._expression = expression;
@@ -29,14 +30,14 @@ export default abstract class AbstractGreedyExpression implements Expression {
         return !!this._isSuccessful;
     }
 
-    matchNext(s: string, previous: string = null, next: string = null, isZeroPosMatch = false): boolean {
+    matchNext(s: IndexedToken, previous: IndexedToken = null, next: IndexedToken = null): boolean {
         let wasReset = false
         if (this._expression.isSuccessful()) {
             this._expression.reset()
             wasReset = true
         }
 
-        const res = this._expression.matchNext(s, previous, next, isZeroPosMatch)
+        const res = this._expression.matchNext(s, previous, next)
 
         if (res) {
             this.storeCurrentMatch(s, wasReset)
@@ -54,13 +55,13 @@ export default abstract class AbstractGreedyExpression implements Expression {
         return res
     }
 
-    abstract storeCurrentMatch(s: string, expressionWasReset: boolean): void
+    abstract storeCurrentMatch(s: IndexedToken, expressionWasReset: boolean): void
 
     lastMatchCharactersConsumed(): number {
         return this._expression.lastMatchCharactersConsumed();
     }
 
-    backtrack(isZeroPosMatch: boolean): boolean {
+    backtrack(): boolean {
         if (!this.canBacktrack()) {
             return
         }
@@ -70,7 +71,7 @@ export default abstract class AbstractGreedyExpression implements Expression {
         updatedMatch.every((it, idx) => {
             const last = idx > 0 ? updatedMatch[idx - 1] : null
             const next = idx < updatedMatch.length ? updatedMatch[idx + 1] : null
-            this.matchNext(it, last, next)
+            return this.matchNext(it, last, next)
         })
         if (this._isSuccessful === undefined && this._allowNoMatch) {
             this._isSuccessful = true
@@ -82,7 +83,7 @@ export default abstract class AbstractGreedyExpression implements Expression {
         return this._currentMatch.length > 0;
     }
 
-    currentMatch(): string[] {
+    currentMatch(): IndexedToken[] {
         return this._currentMatch;
     }
 

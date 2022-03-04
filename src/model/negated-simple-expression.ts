@@ -1,9 +1,10 @@
 import {Expression} from "./expression";
 import {SimpleExpression} from "./simple-expression";
+import {IndexedToken} from "../utils/string-utils";
 
 export class NegatedSimpleExpression implements Expression {
     private readonly _delegate: SimpleExpression
-    private _currentMatch: string[] = []
+    private _currentMatch: IndexedToken[] = []
 
     constructor(delegate: SimpleExpression) {
         this._delegate = delegate;
@@ -25,8 +26,8 @@ export class NegatedSimpleExpression implements Expression {
         return !this._delegate.isSuccessful();
     }
 
-    backtrack(isZeroPosMatch: boolean): boolean {
-        return this._delegate.backtrack(isZeroPosMatch);
+    backtrack(): boolean {
+        return this._delegate.backtrack();
     }
 
     canBacktrack(): boolean {
@@ -37,16 +38,16 @@ export class NegatedSimpleExpression implements Expression {
         return this._delegate.lastMatchCharactersConsumed();
     }
 
-    matchNext(s: string, last?: string, next?: string, isZeroPosMatch?: boolean): boolean {
+    matchNext(s: IndexedToken, last?: IndexedToken, next?: IndexedToken): boolean {
         if (s === null) {
             return false
         }
-        const delegateRes = !this._delegate.matchNext(s, last, next, isZeroPosMatch);
+        const delegateRes = !this._delegate.matchNext(s, last, next);
         this._currentMatch = delegateRes ? [s] : []
         return delegateRes
     }
 
-    currentMatch(): string[] {
+    currentMatch(): IndexedToken[] {
         return this._currentMatch;
     }
 

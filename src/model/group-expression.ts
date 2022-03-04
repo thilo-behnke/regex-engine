@@ -1,32 +1,10 @@
+import {MatchGroup} from "./match/match-group";
 import {Expression} from "./expression";
-import {AbstractGroupExpression} from "./abstract-group-expression";
 
-export class GroupExpression extends AbstractGroupExpression {
-    protected _nonCapturing: boolean = false
+export default interface GroupExpression extends Expression {
+    get matchGroups(): Array<MatchGroup>
+}
 
-    constructor(...expressions: Expression[]) {
-        super(...expressions)
-    }
-
-    static nonCapturing(...expressions: Expression[]) {
-        const expression = new GroupExpression(...expressions)
-        expression._nonCapturing = true
-        return expression
-    }
-
-    isSuccessful(): boolean {
-        return !this._failed && !!this.currentMatch().length && this._expressions.every(it => it.isSuccessful());
-    }
-
-    lastMatchCharactersConsumed(): number {
-        return this._lastMatchConsumed;
-    }
-
-    currentMatch(): string[] {
-        return this.internalMatch
-    }
-
-    tracksMatch(): boolean {
-        return !this._nonCapturing;
-    }
+export const isGroupExpression = (expr: Expression): expr is GroupExpression => {
+    return (expr as GroupExpression).matchGroups !== undefined;
 }
