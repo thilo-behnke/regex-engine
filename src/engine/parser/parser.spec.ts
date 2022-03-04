@@ -457,6 +457,20 @@ test.each([
                 new DefaultGroupExpression(new SimpleExpression(new DefaultCharacter('c')))
             )
         ]
+    },
+    {
+        expression: "^a(b(c)?)$",
+        expected: [
+            new SimpleExpression(new AnchorStartCharacter()),
+            new SimpleExpression(new DefaultCharacter('a')),
+            new DefaultGroupExpression(
+                new SimpleExpression(new DefaultCharacter('b')),
+                new OptionalGroupExpression(
+                    new DefaultGroupExpression(new SimpleExpression(new DefaultCharacter('c')))
+                )
+            ),
+            new SimpleExpression(new AnchorEndCharacter())
+        ]
     }
 ]) ('should correctly parse optional expression: %s', ({expression, expected}) => {
     const res = new Parser().parse(expression)
