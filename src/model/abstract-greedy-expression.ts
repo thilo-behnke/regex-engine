@@ -70,7 +70,7 @@ export default abstract class AbstractGreedyExpression implements Expression {
         updatedMatch.every((it, idx) => {
             const last = idx > 0 ? updatedMatch[idx - 1] : null
             const next = idx < updatedMatch.length ? updatedMatch[idx + 1] : null
-            this.matchNext(it, last, next)
+            return this.matchNext(it, last, next, isZeroPosMatch)
         })
         if (this._isSuccessful === undefined && this._allowNoMatch) {
             this._isSuccessful = true

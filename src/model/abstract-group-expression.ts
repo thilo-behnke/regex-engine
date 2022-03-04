@@ -52,7 +52,7 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
         updatedMatch.every((it, idx) => {
             const last = idx > 0 ? updatedMatch[idx - 1] : null
             const next = idx < updatedMatch.length ? updatedMatch[idx + 1] : null
-            this.matchNext(it, last, next)
+            return this.matchNext(it, last, next, isZeroPosMatch)
         })
         this._failed = this._expressions.some(it => !it.isSuccessful())
         this._persistedMatch = this.currentMatch()
