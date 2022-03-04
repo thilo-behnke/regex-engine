@@ -34,7 +34,7 @@ export default class RegexEngine {
             const res = this.tryTest(tokens.slice(this._matchOffset), expressions)
             if (res) {
                 this._groups = Object.fromEntries(Object.entries(this._groups).map(([key, groups]) => [key, groups.map(value =>  ({...value, from: value.from + this._matchOffset, to: value.to + this._matchOffset}))]))
-                this._match = expressions.flatMap(it => it.currentMatch()).join('')
+                this._match = expressions.flatMap(it => it.currentMatch().map(it => it.value)).join('')
                 return true
             }
             this._matchOffset++;
@@ -93,7 +93,7 @@ export default class RegexEngine {
                 while (!backtrackSuccessful && this.tryBacktrack(previousExpression)) {
                     cursorPos--
                     if (isGroupExpression(previousExpression)) {
-                        this._groups[backtrackIdx] = [{match: previousExpression.currentMatch().join(''), from: cursorPos - previousExpression.currentMatch().length, to: cursorPos}]
+                        this._groups[backtrackIdx] = [{match: previousExpression.currentMatch().map(it => it.value).join(''), from: cursorPos - previousExpression.currentMatch().length, to: cursorPos}]
                     }
                     nextExpression.reset()
                     const {match: backtrackMatch, matched: backtrackMatched, tokensConsumed: backtrackTokensConsumed} = RegexEngine.tryTestExpression(nextExpression, toTest, cursorPos)
@@ -140,7 +140,7 @@ export default class RegexEngine {
         if (!expression.isSuccessful()) {
             return {match: false, tokensConsumed: 0, matched: []}
         }
-        return {match: expression.isSuccessful(), tokensConsumed: idx - startIdx, matched: expression.currentMatch()}
+        return {match: expression.isSuccessful(), tokensConsumed: idx - startIdx, matched: expression.currentMatch().map(it => it.value)}
     }
 
     private tryBacktrack = (expression: Expression) => {
