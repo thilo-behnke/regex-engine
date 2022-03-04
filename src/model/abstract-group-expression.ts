@@ -90,9 +90,11 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
                 this._matchGroups = []
                 if (this.tracksMatch()) {
                     const matchedValue = this._persistedMatch.map(it => it.value).join('')
-                    const lowerBound = this._persistedMatch[0]?.idx
-                    const upperBound = this._persistedMatch[this._persistedMatch.length - 1]?.idx + 1
-                    this._matchGroups = [{match: matchedValue, from: lowerBound, to: upperBound}]
+                    if (this._persistedMatch.length) {
+                        const lowerBound = this._persistedMatch[0].idx
+                        const upperBound = this._persistedMatch[this._persistedMatch.length - 1]?.idx + 1
+                        this._matchGroups = [{match: matchedValue, from: lowerBound, to: upperBound}]
+                    }
                 }
                 if (isGroupExpression(nextExpression)) {
                     this._matchGroups = [...this.matchGroups, ...nextExpression.matchGroups]
