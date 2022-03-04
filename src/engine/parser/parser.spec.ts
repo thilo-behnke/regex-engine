@@ -13,6 +13,7 @@ import {WhitespaceCharacter} from "../../model/whitespace-character";
 import {GreedyGroupExpression} from "../../model/greedy-group-expression";
 import {AssertionExpression} from "../../model/assertion-expression";
 import {DefaultGroupExpression} from "../../model/default-group-expression";
+import {OptionalExpression} from "../../model/optional-expression";
 
 test('should return empty expression array for empty string', () => {
     const parser = new Parser()
@@ -433,4 +434,20 @@ test.each([
     }
 ]) ('should not allow modifier in look behind: %s', ({expression}) => {
     expect(() => new Parser().parse(expression)).toThrow(Error)
+})
+
+test.each([
+    {
+        expression: "abc?",
+        expected: [
+            new SimpleExpression(new DefaultCharacter('a')),
+            new SimpleExpression(new DefaultCharacter('b')),
+            new OptionalExpression(
+                new SimpleExpression(new DefaultCharacter('c'))
+            )
+        ]
+    }
+]) ('should correctly parse optional expression: %s', ({expression, expected}) => {
+    const res = new Parser().parse(expression)
+    expect(res).toEqual(expected)
 })
