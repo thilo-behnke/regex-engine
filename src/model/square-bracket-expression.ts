@@ -1,6 +1,5 @@
 import {SimpleExpression} from "./simple-expression";
 import {Expression} from "./expression";
-import Character from "./character";
 import {NegatedSimpleExpression} from "./negated-simple-expression";
 import {IndexedToken} from "../utils/string-utils";
 

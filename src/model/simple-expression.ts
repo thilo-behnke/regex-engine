@@ -1,5 +1,4 @@
 import {Expression} from "./expression";
-import Token from "./token";
 import Character from "./character";
 import {IndexedToken} from "../utils/string-utils";
 

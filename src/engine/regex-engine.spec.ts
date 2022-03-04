@@ -66,6 +66,7 @@ test.each([
     {value: "X", pattern: "[A-Z]", shouldMatch: true},
     {value: "Y9c", pattern: "[A-Y][7-9]c", shouldMatch: true},
     {value: "atest", pattern: "^te*est$", shouldMatch: false},
+    {value: "test", pattern: "(.*)", shouldMatch: true},
 ]) ('should match: %s', ({value, pattern, shouldMatch}) => {
     const engine = new RegexEngine()
     const res = engine.match(value, pattern)
@@ -124,3 +125,16 @@ test.each([
     expect(engine.groups).toEqual(expectedMatchGroups)
     expect(engine.matched).toEqual(expectedMatch)
 })
+
+// TODO: Fix.
+// test.each([
+//     // url regex
+//     // https://stackoverflow.com/a/27755
+//     {value: 'https://www.google.com', pattern: '^((http[s]?|ftp):\\/)?\\/?([^:\\/\\s]+)((\\/\\w+)*\\/)([\\w\\-\\.]+[^#?\\s]+)(.*)?(#[\\w\\-]+)?$', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'b'},
+// ]) ('should correctly handle real world examples', ({value, pattern, shouldMatch, expectedMatchGroups, expectedMatch}) => {
+//     const engine = new RegexEngine()
+//     const res = engine.match(value, pattern)
+//     expect(res).toEqual(shouldMatch)
+//     expect(engine.groups).toEqual(expectedMatchGroups)
+//     expect(engine.matched).toEqual(expectedMatch)
+// })

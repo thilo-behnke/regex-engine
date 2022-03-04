@@ -1,4 +1,3 @@
-import Token from "./token";
 import Character from "./character";
 
 export default class DefaultCharacter implements Character {
@@ -6,10 +5,6 @@ export default class DefaultCharacter implements Character {
 
     constructor(value: string) {
         this._value = value;
-    }
-
-    static fromTokens(...tokens: Token[]): Character[] {
-        return tokens.map(it => new DefaultCharacter(it.value))
     }
 
     test(s: string): boolean {

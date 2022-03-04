@@ -1,42 +1,42 @@
-import Token, {TokenType} from "../../model/token";
 import {explode} from "../../utils/string-utils";
+import DefaultRegexToken from "../../model/token/regex-token";
 
 export default class Tokenizer {
-    tokenize(s: string): Token[] {
+    tokenize(s: string): DefaultRegexToken[] {
         const chars = explode(s)
         const tokens = chars.map((it, idx) => {
             if (it === '*' || it === '+') {
-                return Token.modifier(it)
+                return DefaultRegexToken.modifier(it)
             }
             if (it == '\\') {
-                return Token.escaped()
+                return DefaultRegexToken.escaped()
             }
             if (it === '(') {
-                return Token.bracketOpen()
+                return DefaultRegexToken.bracketOpen()
             }
             if (it == ')') {
-                return Token.bracketClose()
+                return DefaultRegexToken.bracketClose()
             }
             if (it === '[') {
-                return Token.squareBracketOpen()
+                return DefaultRegexToken.squareBracketOpen()
             }
             if (it == ']') {
-                return Token.squareBracketClose()
+                return DefaultRegexToken.squareBracketClose()
             }
             if (it == '^' && idx === 0) {
-                return Token.anchorStart()
+                return DefaultRegexToken.anchorStart()
             }
             if (it == '^') {
-                return Token.character('^')
+                return DefaultRegexToken.character('^')
             }
             if (it == '$') {
-                return Token.anchorEnd()
+                return DefaultRegexToken.anchorEnd()
             }
-            return Token.character(it)
+            return DefaultRegexToken.character(it)
         })
         return [
             ...tokens,
-            Token.eof()
+            DefaultRegexToken.eof()
         ]
     }
 }

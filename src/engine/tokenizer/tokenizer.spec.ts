@@ -1,28 +1,28 @@
 import Tokenizer from "./tokenizer";
-import Token from "../../model/token";
+import DefaultRegexToken from "../../model/token/regex-token";
 
 test('should return empty array for empty string', () => {
     const tokenizer = new Tokenizer()
     const res = tokenizer.tokenize('')
-    expect(res).toEqual([Token.eof()])
+    expect(res).toEqual([DefaultRegexToken.eof()])
 })
 
 test('should correctly detect characters vs modifiers', () => {
     const tokenizer = new Tokenizer()
     const res = tokenizer.tokenize('this+-is-m*')
     expect(res).toEqual([
-        Token.character('t'),
-        Token.character('h'),
-        Token.character('i'),
-        Token.character('s'),
-        Token.modifier('+'),
-        Token.character('-'),
-        Token.character('i'),
-        Token.character('s'),
-        Token.character('-'),
-        Token.character('m'),
-        Token.modifier('*'),
-        Token.eof()
+        DefaultRegexToken.character('t'),
+        DefaultRegexToken.character('h'),
+        DefaultRegexToken.character('i'),
+        DefaultRegexToken.character('s'),
+        DefaultRegexToken.modifier('+'),
+        DefaultRegexToken.character('-'),
+        DefaultRegexToken.character('i'),
+        DefaultRegexToken.character('s'),
+        DefaultRegexToken.character('-'),
+        DefaultRegexToken.character('m'),
+        DefaultRegexToken.modifier('*'),
+        DefaultRegexToken.eof()
     ])
 })
 
@@ -30,20 +30,20 @@ test('should correctly detect square brackets', () => {
     const tokenizer = new Tokenizer()
     const res = tokenizer.tokenize('this-is-[abc]')
     expect(res).toEqual([
-        Token.character('t'),
-        Token.character('h'),
-        Token.character('i'),
-        Token.character('s'),
-        Token.character('-'),
-        Token.character('i'),
-        Token.character('s'),
-        Token.character('-'),
-        Token.squareBracketOpen(),
-        Token.character('a'),
-        Token.character('b'),
-        Token.character('c'),
-        Token.squareBracketClose(),
-        Token.eof()
+        DefaultRegexToken.character('t'),
+        DefaultRegexToken.character('h'),
+        DefaultRegexToken.character('i'),
+        DefaultRegexToken.character('s'),
+        DefaultRegexToken.character('-'),
+        DefaultRegexToken.character('i'),
+        DefaultRegexToken.character('s'),
+        DefaultRegexToken.character('-'),
+        DefaultRegexToken.squareBracketOpen(),
+        DefaultRegexToken.character('a'),
+        DefaultRegexToken.character('b'),
+        DefaultRegexToken.character('c'),
+        DefaultRegexToken.squareBracketClose(),
+        DefaultRegexToken.eof()
     ])
 })
 
@@ -51,19 +51,19 @@ test('should correctly detect brackets', () => {
     const tokenizer = new Tokenizer()
     const res = tokenizer.tokenize('this-is-(abc)')
     expect(res).toEqual([
-        Token.character('t'),
-        Token.character('h'),
-        Token.character('i'),
-        Token.character('s'),
-        Token.character('-'),
-        Token.character('i'),
-        Token.character('s'),
-        Token.character('-'),
-        Token.bracketOpen(),
-        Token.character('a'),
-        Token.character('b'),
-        Token.character('c'),
-        Token.bracketClose(),
-        Token.eof()
+        DefaultRegexToken.character('t'),
+        DefaultRegexToken.character('h'),
+        DefaultRegexToken.character('i'),
+        DefaultRegexToken.character('s'),
+        DefaultRegexToken.character('-'),
+        DefaultRegexToken.character('i'),
+        DefaultRegexToken.character('s'),
+        DefaultRegexToken.character('-'),
+        DefaultRegexToken.bracketOpen(),
+        DefaultRegexToken.character('a'),
+        DefaultRegexToken.character('b'),
+        DefaultRegexToken.character('c'),
+        DefaultRegexToken.bracketClose(),
+        DefaultRegexToken.eof()
     ])
 })
