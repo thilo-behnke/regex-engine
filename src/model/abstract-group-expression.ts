@@ -92,7 +92,7 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
                     this._matchGroups = [{match: this._persistedMatch.join(''), from: 0, to: this._persistedMatch.length}]
                 }
                 if (isGroupExpression(nextExpression)) {
-                    this._matchGroups = [...this.matchGroups, ...nextExpression.matchGroups.map(group => ({match: group.match, from: expressionMatchFrom + group.from, to: expressionMatchFrom + group.from + group.to}))]
+                    this._matchGroups = [...this.matchGroups, ...nextExpression.matchGroups.map(group => ({match: group.match, from: expressionMatchFrom + group.from, to: expressionMatchFrom + group.to}))]
                 }
             } else {
                 this._failed = true

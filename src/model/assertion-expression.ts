@@ -1,6 +1,6 @@
 import {Expression} from "./expression";
 import {AbstractGroupExpression} from "./abstract-group-expression";
-import {GroupExpressionType} from "./parser/group-expression-type";
+import {GroupExpressionType, isLookbehind} from "./parser/group-expression-type";
 
 export class AssertionExpression extends AbstractGroupExpression {
     private _positive = true

@@ -59,7 +59,7 @@ export default class RegexEngine {
                 if (match) {
                     if (isGroupExpression(nextExpression) && matched.length) {
                         // TODO: correct end position?
-                        this._groups[expressionIdx] = nextExpression.matchGroups.map(group => ({match: group.match, from: cursorPos - matched.length + group.from, to: cursorPos - matched.length + group.from + group.to}))
+                        this._groups[expressionIdx] = nextExpression.matchGroups.map(group => ({match: group.match, from: cursorPos - matched.length + group.from, to: cursorPos - matched.length + group.to}))
                     }
 
                     continue
@@ -103,7 +103,7 @@ export default class RegexEngine {
                     const {match: backtrackMatch, matched: backtrackMatched, tokensConsumed: backtrackTokensConsumed} = RegexEngine.tryTestExpression(nextExpression, toTest, cursorPos, this.isAtZeroPos())
                     if (isGroupExpression(previousExpression)) {
                         // TODO: correct end position?
-                        this._groups[backtrackIdx] = previousExpression.matchGroups.map(group => ({match: group.match, from: cursorPos - previousExpression.currentMatch().length + group.from, to: cursorPos - previousExpression.currentMatch().length + group.from + group.to}))
+                        this._groups[backtrackIdx] = previousExpression.matchGroups.map(group => ({match: group.match, from: cursorPos - previousExpression.currentMatch().length + group.from, to: cursorPos - previousExpression.currentMatch().length + group.to}))
                     }
                     if (!backtrackMatch) {
                         continue
@@ -112,7 +112,7 @@ export default class RegexEngine {
                     // backtrack successful
                     if (isGroupExpression(nextExpression)) {
                         // TODO: correct end position?
-                        this._groups[expressionIdx] = nextExpression.matchGroups.map(group => ({match: group.match, from: cursorPos - backtrackMatched.length + group.from, to: cursorPos - backtrackMatched.length + group.from + group.to}))
+                        this._groups[expressionIdx] = nextExpression.matchGroups.map(group => ({match: group.match, from: cursorPos - backtrackMatched.length + group.from, to: cursorPos - backtrackMatched.length + group.to}))
                     }
                     backtrackSuccessful = true
                 }
