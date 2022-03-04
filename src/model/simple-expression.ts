@@ -22,6 +22,10 @@ export class SimpleExpression implements Expression {
         return this._idx < this._characters.length && this._isSuccessful != false
     }
 
+    get minimumLength(): number {
+        return this._characters.length;
+    }
+
     isSuccessful(): boolean {
         if (this._characters.length == 0) {
             return true

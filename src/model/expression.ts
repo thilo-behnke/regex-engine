@@ -7,6 +7,7 @@ export interface Expression {
     lastMatchCharactersConsumed(): number
     canBacktrack(): boolean
     backtrack(isZeroPosMatch: boolean): boolean
+    get minimumLength(): number
     isSuccessful: () => boolean
     currentMatch: () => string[]
     tracksMatch: () => boolean

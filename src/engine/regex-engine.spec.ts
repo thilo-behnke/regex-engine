@@ -34,6 +34,7 @@ test.each([
     {value: "test", pattern: "t*st", shouldMatch: true},
     {value: "test", pattern: "x*st", shouldMatch: true},
     {value: "test", pattern: "x+st", shouldMatch: false},
+    {value: "abctestdef", pattern: "test", shouldMatch: true},
     {value: "ttsseet", pattern: "[test]+", shouldMatch: true},
     {value: "ttsseetxxy", pattern: "[test]+[xyz]+", shouldMatch: true},
     {value: "testing", pattern: "test[iyz]n.", shouldMatch: true},
@@ -101,6 +102,7 @@ test.each([
     {value: 'a', pattern: '(?!b)a', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'a'},
     {value: 'ba', pattern: '(?=b)ba', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'ba'},
     {value: 'bac', pattern: '(?=b)(?:b)(a)(?=c)', shouldMatch: true, expectedMatchGroups: [{match: 'a', from: 1, to: 2}], expectedMatch: 'ba'},
+    // {value: 'bac', pattern: '(?=(b))(?:b)(a)(?=c)', shouldMatch: true, expectedMatchGroups: [{match: 'b', from: 0, to: 1}, {match: 'a', from: 1, to: 2}], expectedMatch: 'ba'},
 ]) ('should correctly handle lookahead: %s', ({value, pattern, shouldMatch, expectedMatchGroups, expectedMatch}) => {
     const engine = new RegexEngine()
     const res = engine.match(value, pattern)
@@ -109,3 +111,15 @@ test.each([
     expect(engine.matched).toEqual(expectedMatch)
 })
 
+test.each([
+    {value: 'ab', pattern: '(?<=a)b', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'b'},
+    {value: 'ab', pattern: 'a(?<=a)b', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'ab'},
+    {value: 'abctestabc', pattern: '(?<!d)test', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'test'},
+    // {value: 'ab', pattern: 'a(?<=(a))b', shouldMatch: true, expectedMatchGroups: [{match: 'a', from: 0, to: 1}], expectedMatch: 'ab'},
+]) ('should correctly handle lookbehind: %s', ({value, pattern, shouldMatch, expectedMatchGroups, expectedMatch}) => {
+    const engine = new RegexEngine()
+    const res = engine.match(value, pattern)
+    expect(res).toEqual(shouldMatch)
+    expect(engine.groups).toEqual(expectedMatchGroups)
+    expect(engine.matched).toEqual(expectedMatch)
+})

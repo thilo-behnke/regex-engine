@@ -3,6 +3,7 @@ import Parser from "./parser/parser";
 import {Expression} from "../model/expression";
 import {GroupExpression} from "../model/group-expression";
 import {MatchGroup} from "../model/match/match-group";
+import {AssertionExpression, AssertionType} from "../model/assertion-expression";
 
 export default class RegexEngine {
     private readonly _parser: Parser
@@ -50,17 +51,41 @@ export default class RegexEngine {
         let cursorPos = 0
         for(let expressionIdx = 0; expressionIdx < expressions.length; expressionIdx++) {
             const nextExpression = expressions[expressionIdx]
-            const {match, tokensConsumed, matched} = this.tryTestExpression(nextExpression, toTest, cursorPos)
-            cursorPos += tokensConsumed
+            if (!(nextExpression instanceof AssertionExpression) || nextExpression.type !== AssertionType.LOOKBEHIND) {
+                const {match, tokensConsumed, matched} = RegexEngine.tryTestExpression(nextExpression, toTest, cursorPos, this.isAtZeroPos())
+                cursorPos += tokensConsumed
+                if (match) {
+                    if (nextExpression.tracksMatch() && matched.length) {
+                        this._groups[expressionIdx] = {match: matched.join(''), from: cursorPos - matched.length, to: cursorPos}
+                    }
 
-            if (match) {
-                if (nextExpression.tracksMatch() && matched.length) {
-                    this._groups[expressionIdx] = {match: matched.join(''), from: cursorPos - matched.length, to: cursorPos}
+                    continue
                 }
-
-                continue
+            } else {
+                let lookbehindCursorPos = cursorPos
+                let lookbehindSuccessful = false
+                while(lookbehindCursorPos < toTest.length) {
+                    const lookBehindCursorPosFrom = lookbehindCursorPos - nextExpression.minimumLength
+                    if (lookBehindCursorPosFrom >= 0) {
+                        const sBehindCurrent = toTest.slice(lookBehindCursorPosFrom, lookbehindCursorPos)
+                        const {match: lookbehindMatch} = RegexEngine.tryTestExpression(nextExpression, sBehindCurrent, lookBehindCursorPosFrom, this.isAtZeroPos())
+                        if (lookbehindMatch) {
+                            lookbehindSuccessful = true
+                            break
+                        }
+                        nextExpression.reset()
+                    }
+                    lookbehindCursorPos += 1
+                }
+                if (lookbehindSuccessful) {
+                    cursorPos = lookbehindCursorPos
+                    continue;
+                }
+                // lookbehind failed
+                return false
             }
 
+            // TODO: Is this always correct?
             if (expressionIdx <= 0) {
                 return false
             }
@@ -75,7 +100,7 @@ export default class RegexEngine {
                         this._groups[backtrackIdx] = {match: previousExpression.currentMatch().join(''), from: cursorPos - previousExpression.currentMatch().length, to: cursorPos}
                     }
                     nextExpression.reset()
-                    const {match: backtrackMatch, matched: backtrackMatched, tokensConsumed: backtrackTokensConsumed} = this.tryTestExpression(nextExpression, toTest, cursorPos)
+                    const {match: backtrackMatch, matched: backtrackMatched, tokensConsumed: backtrackTokensConsumed} = RegexEngine.tryTestExpression(nextExpression, toTest, cursorPos, this.isAtZeroPos())
                     if (!backtrackMatch) {
                         continue
                     }
@@ -105,13 +130,13 @@ export default class RegexEngine {
         return expressions.every(it => it.isSuccessful())
     }
 
-    private tryTestExpression = (expression: Expression, toTest: string[], startIdx: number) => {
+    private static tryTestExpression = (expression: Expression, toTest: string[], startIdx: number, isAtZeroPos: boolean) => {
         let idx = startIdx
         while(expression.hasNext()) {
             const nextChar = idx < toTest.length ? toTest[idx] : null
             const previous = idx > 0 ? toTest[idx - 1] : null
             const next = idx + 1 < toTest.length ? toTest[idx + 1] : null
-            const matchRes = expression.matchNext(nextChar, previous, next, this.isAtZeroPos())
+            const matchRes = expression.matchNext(nextChar, previous, next, isAtZeroPos)
             if (matchRes) {
                 idx += expression.lastMatchCharactersConsumed()
             }

@@ -21,6 +21,10 @@ export default abstract class AbstractGreedyExpression implements Expression {
         return this._hasNext;
     }
 
+    get minimumLength(): number {
+        return this._allowNoMatch ? 0 : this._expression.minimumLength;
+    }
+
     isSuccessful(): boolean {
         return !!this._isSuccessful;
     }

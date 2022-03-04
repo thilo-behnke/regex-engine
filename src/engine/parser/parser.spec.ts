@@ -12,7 +12,7 @@ import AnchorEndCharacter from "../../model/anchor-end-character";
 import {WhitespaceCharacter} from "../../model/whitespace-character";
 import {GroupExpression} from "../../model/group-expression";
 import {GreedyGroupExpression} from "../../model/greedy-group-expression";
-import {LookAheadExpression} from "../../model/look-ahead-expression";
+import {AssertionExpression} from "../../model/assertion-expression";
 
 test('should return empty expression array for empty string', () => {
     const parser = new Parser()
@@ -360,7 +360,7 @@ test.each([
         expression: "a(?=b)",
         expected: [
             new SimpleExpression(new DefaultCharacter('a')),
-            LookAheadExpression.positive(
+            AssertionExpression.positiveLookahead(
                 new SimpleExpression(new DefaultCharacter('b'))
             ),
         ]
@@ -370,12 +370,67 @@ test.each([
         expected: [
             new SimpleExpression(new DefaultCharacter('d')),
             new SimpleExpression(new DefaultCharacter('e')),
-            LookAheadExpression.positive(
+            AssertionExpression.positiveLookahead(
                 new SimpleExpression(new DefaultCharacter('a'))
             ),
         ]
+    },
+    {
+        expression: "de(?=ba*)",
+        expected: [
+            new SimpleExpression(new DefaultCharacter('d')),
+            new SimpleExpression(new DefaultCharacter('e')),
+            AssertionExpression.positiveLookahead(
+                new SimpleExpression(new DefaultCharacter('b')),
+                new GreedyExpression(new SimpleExpression(new DefaultCharacter('a')))
+            ),
+        ]
+    },
+    {
+        expression: "de(?!ba*)",
+        expected: [
+            new SimpleExpression(new DefaultCharacter('d')),
+            new SimpleExpression(new DefaultCharacter('e')),
+            AssertionExpression.negativeLookahead(
+                new SimpleExpression(new DefaultCharacter('b')),
+                new GreedyExpression(new SimpleExpression(new DefaultCharacter('a')))
+            ),
+        ]
     }
-]) ('should correctly look ahead: %s', ({expression, expected}) => {
+]) ('should correctly parse look ahead: %s', ({expression, expected}) => {
     const res = new Parser().parse(expression)
     expect(res).toEqual(expected)
+})
+
+test.each([
+    {
+        expression: "(?<=a)b",
+        expected: [
+            AssertionExpression.positiveLookbehind(
+                new SimpleExpression(new DefaultCharacter('a'))
+            ),
+            new SimpleExpression(new DefaultCharacter('b')),
+        ]
+    },
+    {
+        expression: "(?<!de)a",
+        expected: [
+            AssertionExpression.negativeLookbehind(
+                new SimpleExpression(new DefaultCharacter('d')),
+                new SimpleExpression(new DefaultCharacter('e'))
+            ),
+            new SimpleExpression(new DefaultCharacter('a')),
+        ]
+    },
+]) ('should correctly parse look behind: %s', ({expression, expected}) => {
+    const res = new Parser().parse(expression)
+    expect(res).toEqual(expected)
+})
+
+test.each([
+    {
+        expression: "(?<=a*)b"
+    }
+]) ('should not allow modifier in look behind: %s', ({expression}) => {
+    expect(() => new Parser().parse(expression)).toThrow(Error)
 })

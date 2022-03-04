@@ -17,6 +17,10 @@ export class NegatedSimpleExpression implements Expression {
         return this._delegate.hasNotMatched();
     }
 
+    get minimumLength(): number {
+        return this._delegate.minimumLength;
+    }
+
     isSuccessful(): boolean {
         return !this._delegate.isSuccessful();
     }

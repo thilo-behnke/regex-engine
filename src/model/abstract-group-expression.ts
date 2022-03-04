@@ -1,4 +1,5 @@
 import {Expression} from "./expression";
+import FixedLengthExpression from "./fixed-length-expression";
 
 export abstract class AbstractGroupExpression implements Expression {
     private _idx: number = 0
@@ -25,6 +26,10 @@ export abstract class AbstractGroupExpression implements Expression {
 
     hasNotMatched(): boolean {
         return this._idx == 0;
+    }
+
+    get minimumLength(): number {
+        return this._expressions.reduce((acc, it) => acc + it.minimumLength, 0);
     }
 
     abstract isSuccessful(): boolean

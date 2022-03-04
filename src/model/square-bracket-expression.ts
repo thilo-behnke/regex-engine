@@ -29,6 +29,10 @@ export default class SquareBracketExpression implements Expression {
         return this.isSuccessful() == undefined;
     }
 
+    get minimumLength(): number {
+        return this._expressions.reduce((acc, it) => acc + it.minimumLength, 0);
+    }
+
     isSuccessful(): boolean {
         return this._isSuccessful;
     }

@@ -15,13 +15,22 @@ import SquareBracketExpression from "../../model/square-bracket-expression";
 import {GroupExpression} from "../../model/group-expression";
 import {GreedyGroupExpression} from "../../model/greedy-group-expression";
 import {getCharRange} from "../../utils/string-utils";
-import {LookAheadExpression} from "../../model/look-ahead-expression";
+import {AssertionExpression} from "../../model/assertion-expression";
+import {rangeWithValue} from "../../utils/array-utils";
+import {
+    createGroupExpression,
+    GroupExpressionType,
+    isLookbehind,
+    isMatchGroup
+} from "../../model/parser/group-expression-type";
 
 export default class Parser {
     private _lexer: Lexer
 
     private _expressions: Expression[]
     private _currentToken: Token
+
+    private _allowModifiers = true
 
     constructor(lexer: Lexer = null) {
         this._lexer = lexer ?? new Lexer();
@@ -165,41 +174,82 @@ export default class Parser {
 
     private consumeBrackets(): Expression {
         this.consume(TokenType.BRACKET_OPEN)
-        let isNonCapturing = false
-        let isPositiveLookahead = false
-        let isNegativeLookahead = false
-        if (this._currentToken.type === TokenType.CHARACTER) {
-            if (this._currentToken.value === "?" && this._lexer.lookahead()?.type === TokenType.CHARACTER && this._lexer.lookahead().value === ":") {
-                this.consume(TokenType.CHARACTER)
-                this.consume(TokenType.CHARACTER)
-                isNonCapturing = true
-            } else if (this._currentToken.value === "?" && this._lexer.lookahead()?.type === TokenType.CHARACTER && this._lexer.lookahead().value === "=") {
-                this.consume(TokenType.CHARACTER)
-                this.consume(TokenType.CHARACTER)
-                isPositiveLookahead = true
-            } else if (this._currentToken.value === "?" && this._lexer.lookahead()?.type === TokenType.CHARACTER && this._lexer.lookahead().value === "!") {
-                this.consume(TokenType.CHARACTER)
-                this.consume(TokenType.CHARACTER)
-                isNegativeLookahead = true
-            }
-        }
+        const groupType = this.tryConsumeBracketModifier()
+
         const expressions: Expression[] = []
+        // Modifiers are not allowed within brackets.
+        if (isLookbehind(groupType)) {
+            this._allowModifiers = false
+        }
         while(this._currentToken !== null && this._currentToken.type !== TokenType.BRACKET_CLOSE) {
             const withinBrackets = this.tryParseRegex()
             withinBrackets.forEach(it => expressions.push(it))
         }
+        if (isLookbehind(groupType)) {
+            this._allowModifiers = true
+        }
+
         this.consume(TokenType.BRACKET_CLOSE)
-        if (!isPositiveLookahead && !isNegativeLookahead) {
-            const bracketExpression = isNonCapturing ? GroupExpression.nonCapturing(...expressions) : new GroupExpression(...expressions)
-            return this.tryWrapInGreedyModifier(bracketExpression)
+        const groupExpression = createGroupExpression(groupType, ...expressions)
+        if (!isMatchGroup(groupType)) {
+            return groupExpression
         }
-        if (isPositiveLookahead) {
-            return LookAheadExpression.positive(...expressions)
+        return this.tryWrapInGreedyModifier(groupExpression)
+    }
+
+    private tryConsumeBracketModifier() {
+        if (this.peekNonMatchingGroup()) {
+            return GroupExpressionType.NON_CAPTURING
+        } else if (this.peekPositiveLookahead()) {
+            return GroupExpressionType.POSITIVE_LOOKAHEAD
+        } else if (this.peekNegativeLookahead()) {
+            return GroupExpressionType.NEGATIVE_LOOKAHEAD
+        } else if (this.peekPositiveLookbehind()) {
+            return GroupExpressionType.POSITIVE_LOOKBEHIND
+        } else if (this.peekNegativeLookbehind()) {
+            return GroupExpressionType.NEGATIVE_LOOKBEHIND
         }
-        if (isNegativeLookahead) {
-            return LookAheadExpression.negative(...expressions)
+        return GroupExpressionType.CAPTURING
+    }
+
+    private peekNonMatchingGroup() {
+        if (this._currentToken.type === TokenType.CHARACTER && this._currentToken.value === "?" && this._lexer.lookahead()?.type === TokenType.CHARACTER && this._lexer.lookahead().value === ":") {
+            this.consumeMultiple(TokenType.CHARACTER, 2)
+            return true
         }
-        throw new Error('Invalid bracket expression, is neither group nor lookahead.')
+        return false
+    }
+
+    private peekPositiveLookahead() {
+        if (this._currentToken.type === TokenType.CHARACTER && this._currentToken.value === "?" && this._lexer.lookahead()?.type === TokenType.CHARACTER && this._lexer.lookahead().value === "=") {
+            this.consumeMultiple(TokenType.CHARACTER, 2)
+            return true
+        }
+        return false
+    }
+
+    private peekNegativeLookahead() {
+        if (this._currentToken.type === TokenType.CHARACTER && this._currentToken.value === "?" && this._lexer.lookahead()?.type === TokenType.CHARACTER && this._lexer.lookahead().value === "!") {
+            this.consumeMultiple(TokenType.CHARACTER, 2)
+            return true
+        }
+        return false
+    }
+
+    private peekPositiveLookbehind() {
+        if (this._currentToken.type === TokenType.CHARACTER && this._currentToken.value === "?" && this._lexer.lookahead()?.type === TokenType.CHARACTER && this._lexer.lookahead().value === "<" && this._lexer.lookahead()?.type === TokenType.CHARACTER && this._lexer.lookahead(1).value === "=") {
+            this.consumeMultiple(TokenType.CHARACTER, 3)
+            return true
+        }
+        return false
+    }
+
+    private peekNegativeLookbehind() {
+        if (this._currentToken.type === TokenType.CHARACTER && this._currentToken.value === "?" && this._lexer.lookahead()?.type === TokenType.CHARACTER && this._lexer.lookahead().value === "<" && this._lexer.lookahead()?.type === TokenType.CHARACTER && this._lexer.lookahead(1).value === "!") {
+            this.consumeMultiple(TokenType.CHARACTER, 3)
+            return true
+        }
+        return false
     }
 
     private consumeCharacter() {
@@ -214,18 +264,26 @@ export default class Parser {
         return this.tryWrapInGreedyModifier(escapedExpression)
     }
 
-    private consume(type: TokenType) {
-        if (this._currentToken.type === type) {
+    private consumeMultiple(type: TokenType, n: number) {
+        this.consume(...rangeWithValue(n, type))
+    }
+
+    private consume(...types: TokenType[]) {
+        types.forEach(it => {
+            if (it !== this._currentToken.type) {
+                throw new Error(`Unable to consume expected token ${it}, found type: ${this._currentToken.type}`)
+            }
             this._currentToken = this._lexer.getNextToken()
-            return
-        }
-        throw new Error(`Unable to consume expected token ${type}, found type: ${this._currentToken.type}`)
+        })
     }
 
     private tryWrapInGreedyModifier = (baseExpression: Expression) => {
         if (!this._currentToken || this._currentToken.type != TokenType.MODIFIER) {
             return baseExpression
         } else if (this._currentToken.type == TokenType.MODIFIER) {
+            if (!this._allowModifiers) {
+                throw new Error('Modifiers not allowed at current position.')
+            }
             const expression = baseExpression instanceof GroupExpression ? new GreedyGroupExpression(baseExpression, this._currentToken.value === "*") : new GreedyExpression(baseExpression, this._currentToken.value === "*")
             this.consume(TokenType.MODIFIER)
             return expression
