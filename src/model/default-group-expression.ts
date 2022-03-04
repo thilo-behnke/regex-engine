@@ -16,7 +16,7 @@ export class DefaultGroupExpression extends AbstractGroupExpression {
     }
 
     isSuccessful(): boolean {
-        return !this._failed && !!this.currentMatch().length && this._expressions.every(it => it.isSuccessful());
+        return !this._failed && this._expressions.every(it => it.isSuccessful());
     }
 
     lastMatchCharactersConsumed(): number {
