@@ -133,9 +133,20 @@ test.each([
     {value: 'xbc', pattern: '[a-z]?bc', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'xbc'},
     {value: 'abc', pattern: '(a)?bc', shouldMatch: true, expectedMatchGroups: [{match: 'a', from: 0, to: 1}], expectedMatch: 'abc'},
     {value: 'abc', pattern: '(a*)?abc', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'abc'},
-    // TODO: Is unable to backtrack from optional group within match group (matchRes vs isSuccessful in group expression)
     {value: 'ab', pattern: '^a(b(c)?)$', shouldMatch: true, expectedMatchGroups: [{match: 'b', from: 1, to: 2}], expectedMatch: 'ab'},
-]) ('should correctly optional modifier: %s', ({value, pattern, shouldMatch, expectedMatchGroups, expectedMatch}) => {
+]) ('should correctly match optional modifier: %s', ({value, pattern, shouldMatch, expectedMatchGroups, expectedMatch}) => {
+    const engine = new RegexEngine()
+    const res = engine.match(value, pattern)
+    expect(res).toEqual(shouldMatch)
+    expect(engine.groups).toEqual(expectedMatchGroups)
+    expect(engine.matched).toEqual(expectedMatch)
+})
+
+test.each([
+    {value: 'a', pattern: 'a|b', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'a'},
+    {value: 'b', pattern: 'a|b', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'b'},
+    {value: 'c', pattern: 'a|b', shouldMatch: false, expectedMatchGroups: [], expectedMatch: ''},
+]) ('should correctly match alternatives', ({value, pattern, shouldMatch, expectedMatchGroups, expectedMatch}) => {
     const engine = new RegexEngine()
     const res = engine.match(value, pattern)
     expect(res).toEqual(shouldMatch)
