@@ -83,6 +83,19 @@ export default class RegexEngine {
 
             // TODO: Is this always correct?
             if (expressionIdx <= 0) {
+                let backtrackSuccessful = false
+                while (!backtrackSuccessful && this.tryBacktrack(nextExpression)) {
+                    cursorPos--
+                    if (isGroupExpression(nextExpression)) {
+                        this._groups[expressionIdx] = nextExpression.matchGroups
+                    }
+                    if (nextExpression.isSuccessful()) {
+                        backtrackSuccessful = true
+                    }
+                }
+                if (backtrackSuccessful) {
+                    continue
+                }
                 return false
             }
 

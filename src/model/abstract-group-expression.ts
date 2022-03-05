@@ -29,11 +29,11 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
     }
 
     hasNext(): boolean {
-        return !this._failed && this._idx < this._expressions.length && this._expressions[this._idx].hasNext();
+        return !this._failed && (this._expressions[this._idx]?.hasNext() || this._expressions[this._idx + 1]?.hasNext());
     }
 
     isInitial(): boolean {
-        return this._idx == 0;
+        return this._expressions.every(it => it.isInitial());
     }
 
     get minimumLength(): number {
@@ -69,14 +69,18 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
     }
 
     canBacktrack(): boolean {
-        return this._expressions[this._idx - 1].canBacktrack()
+        return this._expressions[this._idx].canBacktrack()
     }
 
     abstract lastMatchCharactersConsumed(): number
 
     matchNext(s: IndexedToken, last: IndexedToken = null, next: IndexedToken = null): boolean {
-        if (!this.hasNext()) {
+        if (this._failed) {
             return false
+        }
+
+        if (!this._expressions[this._idx].hasNext() && this._expressions[this._idx + 1].hasNext()) {
+            this._idx++
         }
         const nextExpression = this._expressions[this._idx]
         const res = nextExpression.matchNext(s, last, next);
@@ -105,7 +109,6 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
                 this._matchGroups = []
             }
             this._currentMatch = []
-            this._idx++
         }
         return res
     }
