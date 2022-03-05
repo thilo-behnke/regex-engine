@@ -64,11 +64,11 @@ test('should correctly parse alternative expression', () => {
     const parser = new Parser()
     const res = parser.parse('a|b')
     const expected = [
-        new AlternativeExpression(
+        DefaultGroupExpression.nonCapturing(
             new SimpleExpression(new DefaultCharacter('a')),
         ),
-        new AlternativeExpression(
-            new SimpleExpression(new DefaultCharacter('b'))
+        DefaultGroupExpression.nonCapturing(
+            new SimpleExpression(new DefaultCharacter('b')),
         )
     ]
     expect(res).toEqual(expected)
@@ -348,25 +348,25 @@ test.each([
             )
         ]
     },
-    // {
-    //     expression: "(abc|def)",
-    //     expected: [
-    //         new DefaultGroupExpression(
-    //             new AlternativeExpression(
-    //                 new DefaultGroupExpression(
-    //                     new SimpleExpression(new DefaultCharacter('a')),
-    //                     new SimpleExpression(new DefaultCharacter('b')),
-    //                     new SimpleExpression(new DefaultCharacter('c')),
-    //                 ),
-    //                 new DefaultGroupExpression(
-    //                     new SimpleExpression(new DefaultCharacter('d')),
-    //                     new SimpleExpression(new DefaultCharacter('e')),
-    //                     new SimpleExpression(new DefaultCharacter('f')),
-    //                 ),
-    //             )
-    //         )
-    //     ]
-    // }
+    {
+        expression: "(abc|def)",
+        expected: [
+            new DefaultGroupExpression(
+                new AlternativeExpression(
+                    new DefaultGroupExpression(
+                        new SimpleExpression(new DefaultCharacter('a')),
+                        new SimpleExpression(new DefaultCharacter('b')),
+                        new SimpleExpression(new DefaultCharacter('c')),
+                    ),
+                    new DefaultGroupExpression(
+                        new SimpleExpression(new DefaultCharacter('d')),
+                        new SimpleExpression(new DefaultCharacter('e')),
+                        new SimpleExpression(new DefaultCharacter('f')),
+                    ),
+                )
+            )
+        ]
+    }
 ]) ('should correctly parse group: %s', ({expression, expected}) => {
     const res = new Parser().parse(expression)
     expect(res).toEqual(expected)

@@ -27,6 +27,7 @@ import {OptionalExpression} from "../../model/optional-expression";
 import {isGroupExpression} from "../../model/group-expression";
 import {OptionalGroupExpression} from "../../model/optional-group-expression";
 import AlternativeExpression from "../../model/alternative-expression";
+import {DefaultGroupExpression} from "../../model/default-group-expression";
 
 export default class Parser {
     private _lexer: Lexer
@@ -46,14 +47,16 @@ export default class Parser {
         this._expressions = []
         this._currentToken = this._lexer.getNextToken()
         while (this._currentToken !== null) {
-            const expressions = this.tryParseAlternatives(RegexTokenType.EOF)
-            expressions.forEach(it => this._expressions.push(it))
+            const alternative = this.tryParseAlternatives(RegexTokenType.EOF)
+            if (alternative) {
+                this._expressions.push(alternative)
+            }
         }
         return this._expressions
     }
 
 
-    private tryParseAlternatives = (stopToken: RegexTokenType): Expression[] => {
+    private tryParseAlternatives = (stopToken: RegexTokenType): Expression => {
         const alternatives: Expression[][] = []
         let currentAlternative: Expression[] = []
         while (this._currentToken !== null && this._currentToken.type !== stopToken) {
@@ -72,12 +75,9 @@ export default class Parser {
         this.consume(stopToken)
 
         if (!alternatives.length) {
-            return []
+            return null
         }
-        if (alternatives.length === 1) {
-            return alternatives[0]
-        }
-        return alternatives.map(it => new AlternativeExpression(...it))
+        return new AlternativeExpression(...alternatives.map(it => DefaultGroupExpression.nonCapturing(...it)))
     }
 
     private tryParseRegex = (): Expression[] => {
@@ -236,7 +236,10 @@ export default class Parser {
         }
 
         const withinBrackets = this.tryParseAlternatives(RegexTokenType.BRACKET_CLOSE)
-        withinBrackets.forEach(it => expressions.push(it))
+        if (!withinBrackets) {
+            this.throwParseError('Empty group')
+        }
+        expressions.push(withinBrackets)
 
         if (isLookbehind(groupType)) {
             this._allowModifiers = true

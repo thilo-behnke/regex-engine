@@ -42,7 +42,7 @@ export default class AlternativeExpression implements Expression {
     }
 
     matchNext(s: IndexedToken, last: IndexedToken, next: IndexedToken): boolean {
-        if (this._expressions[this._idx].hasNext()) {
+        if (!this._expressions[this._idx].hasNext()) {
             this._idx++
         }
         if (!this.hasNext()) {
@@ -58,7 +58,7 @@ export default class AlternativeExpression implements Expression {
             }
         }
 
-        return res || !!this._expressions[this._idx + 1]
+        return res || this._expressions[this._idx].hasNext() || !!this._expressions[this._idx + 1]
     }
 
     get minimumLength(): number {
