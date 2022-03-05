@@ -25,6 +25,10 @@ export default class DefaultRegexToken implements RegexToken {
         return new DefaultRegexToken(s, RegexTokenType.MODIFIER)
     }
 
+    static alternative(): DefaultRegexToken {
+        return new DefaultRegexToken('|', RegexTokenType.ALTERNATIVE)
+    }
+
     static bracketOpen(): DefaultRegexToken {
         return new DefaultRegexToken('(', RegexTokenType.BRACKET_OPEN)
     }

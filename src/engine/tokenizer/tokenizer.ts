@@ -8,6 +8,9 @@ export default class Tokenizer {
             if (it === '*' || it === '+' || it === '?') {
                 return DefaultRegexToken.modifier(it)
             }
+            if (it === '|') {
+                return DefaultRegexToken.alternative()
+            }
             if (it == '\\') {
                 return DefaultRegexToken.escaped()
             }
