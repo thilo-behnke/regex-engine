@@ -46,17 +46,17 @@ export default class Parser {
         this._expressions = []
         this._currentToken = this._lexer.getNextToken()
         while (this._currentToken !== null) {
-            const expressions = this.tryParseAlternatives()
+            const expressions = this.tryParseAlternatives(RegexTokenType.EOF)
             expressions.forEach(it => this._expressions.push(it))
         }
         return this._expressions
     }
 
 
-    private tryParseAlternatives = (): Expression[] => {
+    private tryParseAlternatives = (stopToken: RegexTokenType): Expression[] => {
         const alternatives: Expression[][] = []
         let currentAlternative: Expression[] = []
-        while (this._currentToken !== null && this._currentToken.type !== RegexTokenType.EOF) {
+        while (this._currentToken !== null && this._currentToken.type !== stopToken) {
             if (this._currentToken.type === RegexTokenType.ALTERNATIVE) {
                 this.consume(RegexTokenType.ALTERNATIVE)
                 alternatives.push(currentAlternative)
@@ -69,7 +69,7 @@ export default class Parser {
             alternatives.push(currentAlternative)
         }
 
-        this.consume(RegexTokenType.EOF)
+        this.consume(stopToken)
 
         if (!alternatives.length) {
             return []
@@ -234,15 +234,14 @@ export default class Parser {
         if (isLookbehind(groupType)) {
             this._allowModifiers = false
         }
-        while(this._currentToken !== null && this._currentToken.type !== RegexTokenType.BRACKET_CLOSE) {
-            const withinBrackets = this.tryParseAlternatives()
-            withinBrackets.forEach(it => expressions.push(it))
-        }
+
+        const withinBrackets = this.tryParseAlternatives(RegexTokenType.BRACKET_CLOSE)
+        withinBrackets.forEach(it => expressions.push(it))
+
         if (isLookbehind(groupType)) {
             this._allowModifiers = true
         }
 
-        this.consume(RegexTokenType.BRACKET_CLOSE)
         const groupExpression = createGroupExpression(groupType, ...expressions)
         if (!isMatchGroup(groupType)) {
             return groupExpression
