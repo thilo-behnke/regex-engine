@@ -3,11 +3,13 @@ import FixedLengthExpression from "./fixed-length-expression";
 import GroupExpression, {isGroupExpression} from "./group-expression";
 import {MatchGroup} from "./match/match-group";
 import {IndexedToken} from "../utils/string-utils";
+import Parser from "../engine/parser/parser";
 
 export abstract class AbstractGroupExpression implements Expression, GroupExpression {
     private _idx: number = 0
     private _persistedMatch: IndexedToken[] = []
     private _currentMatch: IndexedToken[] = []
+    private _backtracked: IndexedToken[] = []
     private _matchGroups: MatchGroup[] = []
 
     protected readonly _expressions: Expression[]
@@ -48,19 +50,47 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
         if (!this.canBacktrack()) {
             return false
         }
+        this._backtracked = []
 
-        const updatedMatch = this._persistedMatch.slice(0, this._persistedMatch.length - 1)
-        this.reset()
-        let sIdx = 0
-        // TODO: Basically a regex engine within the group?
-        let hasMatched = true
-        while(hasMatched) {
-            const thisChar = updatedMatch[sIdx]
-            const last = sIdx > 0 ? updatedMatch[sIdx - 1] : null
-            const next = sIdx < updatedMatch.length ? updatedMatch[sIdx + 1] : null
-            hasMatched = this.matchNext(thisChar, last, next)
-            sIdx++
+        let currentExpression = this._expressions[this._idx]
+        while(currentExpression.canBacktrack()) {
+            currentExpression = this._expressions[this._idx]
+            const backtrackRes = currentExpression.backtrack()
+            if (!backtrackRes) {
+                return false
+            }
+
+            this._backtracked.push(this._persistedMatch[this._persistedMatch.length - 1])
+            this._persistedMatch = this._persistedMatch.slice(1, this._persistedMatch.length - 1)
+            // Shortcut
+            this._failed = this._expressions.some(it => !it.isSuccessful())
+            if (!this._failed) {
+                return true
+            }
+
+            // Now try forward match
+            while() {
+
+            }
+
+            if (currentExpression.isInitial() && currentExpression.isSuccessful()) {
+                this._idx--
+                continue
+            }
         }
+
+        // const updatedMatch = this._persistedMatch.slice(0, this._persistedMatch.length - 1)
+        // this.reset()
+        // let sIdx = 0
+        // // TODO: Basically a regex engine within the group?
+        // let hasMatched = true
+        // while(hasMatched) {
+        //     const thisChar = updatedMatch[sIdx]
+        //     const last = sIdx > 0 ? updatedMatch[sIdx - 1] : null
+        //     const next = sIdx < updatedMatch.length ? updatedMatch[sIdx + 1] : null
+        //     hasMatched = this.matchNext(thisChar, last, next)
+        //     sIdx++
+        // }
 
         this._failed = this._expressions.some(it => !it.isSuccessful())
         this._persistedMatch = this.currentMatch()
@@ -118,6 +148,7 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
         this._expressions.forEach(it => it.reset())
         this._currentMatch = []
         this._persistedMatch = []
+        this._backtracked = []
         this._matchGroups = []
         this._failed = false
     }
