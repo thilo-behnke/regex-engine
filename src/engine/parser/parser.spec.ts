@@ -471,6 +471,16 @@ test.each([
             ),
             new SimpleExpression(new AnchorEndCharacter())
         ]
+    },
+    {
+        expression: "[ab?]",
+        expected: [
+            new SquareBracketExpression(
+                new SimpleExpression(new DefaultCharacter('a')),
+                new SimpleExpression(new DefaultCharacter('b')),
+                new SimpleExpression(new DefaultCharacter('?'))
+            ),
+        ]
     }
 ]) ('should correctly parse optional expression: %s', ({expression, expected}) => {
     const res = new Parser().parse(expression)

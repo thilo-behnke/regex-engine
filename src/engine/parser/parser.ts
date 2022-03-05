@@ -11,7 +11,6 @@ import {WhitespaceCharacter} from "../../model/whitespace-character";
 import {Lexer} from "../lexer/lexer";
 import DefaultCharacter from "../../model/default-character";
 import SquareBracketExpression from "../../model/square-bracket-expression";
-import {DefaultGroupExpression} from "../../model/default-group-expression";
 import {GreedyGroupExpression} from "../../model/greedy-group-expression";
 import {getCharRange} from "../../utils/string-utils";
 import {rangeWithValue} from "../../utils/array-utils";
@@ -182,6 +181,13 @@ export default class Parser {
                     const escapedExpression = this.tryParseEscaped()
                     expressions.push(escapedExpression)
                     break
+                case RegexTokenType.MODIFIER:
+                    const token = this._currentToken
+                    if (token.value === "?") {
+                        this.consume(RegexTokenType.MODIFIER)
+                        expressions.push(new SimpleExpression(new DefaultCharacter(token.value)))
+                        break
+                    }
                 default:
                     this.throwParseError('Unknown token in brackets')
             }
