@@ -14,7 +14,7 @@ export default class AlternativeExpression implements Expression {
     }
 
     currentMatch(): IndexedToken[] {
-        return [];
+        return this._expressions[this._idx].currentMatch();
     }
 
     hasNext(): boolean {
