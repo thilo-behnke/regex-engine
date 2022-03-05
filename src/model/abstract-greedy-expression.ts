@@ -5,7 +5,7 @@ export default abstract class AbstractGreedyExpression implements Expression {
     private readonly _expression: Expression
     private readonly _allowNoMatch: boolean
 
-    private _hasNext: boolean = true
+    private _hasNext = true
     private _isSuccessful: boolean = undefined
     protected _currentMatch: IndexedToken[] = []
 
@@ -14,12 +14,12 @@ export default abstract class AbstractGreedyExpression implements Expression {
         this._allowNoMatch = allowNoMatch;
     }
 
-    hasNotMatched(): boolean {
+    isInitial(): boolean {
         return this._currentMatch.length === 0;
     }
 
     hasNext(): boolean {
-        return this._hasNext;
+        return this._hasNext
     }
 
     get minimumLength(): number {
@@ -43,13 +43,11 @@ export default abstract class AbstractGreedyExpression implements Expression {
             this.storeCurrentMatch(s, wasReset)
         }
 
-        if (!this._expression.hasNext()) {
-            if (this._expression.isSuccessful()) {
-                this._isSuccessful = true
-            } else {
-                this._isSuccessful = this._allowNoMatch || this._isSuccessful
-                this._hasNext = false
-            }
+        if (this._expression.isSuccessful()) {
+            this._isSuccessful = true
+        } else {
+            this._isSuccessful = this._allowNoMatch || this._isSuccessful
+            this._hasNext = false
         }
 
         return res
@@ -85,10 +83,6 @@ export default abstract class AbstractGreedyExpression implements Expression {
 
     currentMatch(): IndexedToken[] {
         return this._currentMatch;
-    }
-
-    tracksMatch(): boolean {
-        return false;
     }
 
     reset(): void {

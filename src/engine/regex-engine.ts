@@ -47,7 +47,7 @@ export default class RegexEngine {
         for(let expressionIdx = 0; expressionIdx < expressions.length; expressionIdx++) {
             const nextExpression = expressions[expressionIdx]
             if (!(nextExpression instanceof AssertionExpression) || nextExpression.type !== AssertionType.LOOKBEHIND) {
-                const {match, tokensConsumed, matched} = RegexEngine.tryTestExpression(nextExpression, toTest, cursorPos)
+                const {match, tokensConsumed} = RegexEngine.tryTestExpression(nextExpression, toTest, cursorPos)
                 cursorPos += tokensConsumed
                 if (match) {
                     if (isGroupExpression(nextExpression)) {
@@ -110,7 +110,7 @@ export default class RegexEngine {
                 if (backtrackSuccessful) {
                     break
                 }
-                if (previousExpression.hasNotMatched() && previousExpression.isSuccessful()) {
+                if (previousExpression.isInitial() && previousExpression.isSuccessful()) {
                     backtrackIdx--
                     continue;
                 }
@@ -133,9 +133,10 @@ export default class RegexEngine {
             const previous = idx > 0 ? toTest[idx - 1] : null
             const next = idx + 1 < toTest.length ? toTest[idx + 1] : null
             const matchRes = expression.matchNext(nextChar, previous, next)
-            if (matchRes) {
-                idx += expression.lastMatchCharactersConsumed()
+            if (!matchRes) {
+                break
             }
+            idx += expression.lastMatchCharactersConsumed()
         }
         if (!expression.isSuccessful()) {
             return {match: false, tokensConsumed: 0, matched: []}

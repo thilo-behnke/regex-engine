@@ -5,7 +5,7 @@ export default class Tokenizer {
     tokenize(s: string): DefaultRegexToken[] {
         const chars = explode(s)
         const tokens = chars.map((it, idx) => {
-            if (it === '*' || it === '+') {
+            if (it === '*' || it === '+' || it === '?') {
                 return DefaultRegexToken.modifier(it)
             }
             if (it == '\\') {

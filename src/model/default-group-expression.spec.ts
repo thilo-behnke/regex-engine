@@ -99,14 +99,15 @@ test.each([
     }
 ])('should correctly match group of characters: %s', ({expressions, toTest, expectedRes, expectedMatch}) => {
     const expression = new DefaultGroupExpression(...expressions)
-    let res = false
     let stringIdx = 0
     const tokens = explodeIndexed(toTest)
     while(expression.hasNext()) {
-        expression.matchNext(tokens[stringIdx])
-        res = expression.isSuccessful()
+        const matchRes = expression.matchNext(tokens[stringIdx])
+        if (!matchRes) {
+            break
+        }
         stringIdx++
     }
-    expect(res).toEqual(expectedRes)
+    expect(expression.isSuccessful()).toEqual(expectedRes)
     expect(expression.currentMatch().map(it => it.value)).toEqual(expectedMatch)
 })

@@ -26,7 +26,7 @@ export class GreedyGroupExpression extends AbstractGreedyExpression implements G
         this._matchGroups = this._groupExpression.matchGroups
     }
 
-    tracksMatch(): boolean {
-        return this._groupExpression.tracksMatch()
+    get tracksMatch(): boolean {
+        return this._groupExpression.tracksMatch
     }
 }

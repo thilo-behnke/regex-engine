@@ -14,7 +14,7 @@ export class SimpleExpression implements Expression {
         this._characters = characters;
     }
 
-    hasNotMatched(): boolean {
+    isInitial(): boolean {
         return this._charactersConsumed === 0;
     }
 
@@ -39,7 +39,10 @@ export class SimpleExpression implements Expression {
         }
 
         this._isSuccessful = this._characters[this._idx].test(s?.value, last?.value, next?.value, s?.first)
-        this._currentMatch = this._isSuccessful && s ? [s] : []
+        // TODO: This does not create a full current match, only the match of the latest char is included.
+        if (!this._characters[this._idx].cursorOnly() && this._isSuccessful && s) {
+            this._currentMatch = [...this.currentMatch(), s]
+        }
         this._charactersConsumed = this._characters[this._idx].cursorOnly() ? 0 : 1;
         this._idx++
         return this._isSuccessful
@@ -59,10 +62,6 @@ export class SimpleExpression implements Expression {
 
     currentMatch(): IndexedToken[] {
         return this._currentMatch;
-    }
-
-    tracksMatch(): boolean {
-        return false;
     }
 
     reset(): void {

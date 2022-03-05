@@ -60,7 +60,7 @@ export class AssertionExpression extends AbstractGroupExpression {
         return this._positive && successful || !this._positive && !successful;
     }
 
-    tracksMatch(): boolean {
+    get tracksMatch(): boolean {
         return false;
     }
 }

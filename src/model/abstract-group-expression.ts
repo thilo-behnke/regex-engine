@@ -32,7 +32,7 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
         return !this._failed && this._idx < this._expressions.length && this._expressions[this._idx].hasNext();
     }
 
-    hasNotMatched(): boolean {
+    isInitial(): boolean {
         return this._idx == 0;
     }
 
@@ -42,7 +42,7 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
 
     abstract isSuccessful(): boolean
 
-    abstract tracksMatch(): boolean
+    abstract get tracksMatch(): boolean
 
     backtrack(): boolean {
         if (!this.canBacktrack()) {
@@ -88,11 +88,13 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
             if (nextExpression.isSuccessful()) {
                 this._persistedMatch = this.currentMatch()
                 this._matchGroups = []
-                if (this.tracksMatch()) {
+                if (this.tracksMatch) {
                     const matchedValue = this._persistedMatch.map(it => it.value).join('')
-                    const lowerBound = this._persistedMatch[0]?.idx
-                    const upperBound = this._persistedMatch[this._persistedMatch.length - 1]?.idx + 1
-                    this._matchGroups = [{match: matchedValue, from: lowerBound, to: upperBound}]
+                    if (this._persistedMatch.length) {
+                        const lowerBound = this._persistedMatch[0].idx
+                        const upperBound = this._persistedMatch[this._persistedMatch.length - 1]?.idx + 1
+                        this._matchGroups = [{match: matchedValue, from: lowerBound, to: upperBound}]
+                    }
                 }
                 if (isGroupExpression(nextExpression)) {
                     this._matchGroups = [...this.matchGroups, ...nextExpression.matchGroups]

@@ -13,7 +13,7 @@ import DefaultCharacter from "../../model/default-character";
 import SquareBracketExpression from "../../model/square-bracket-expression";
 import {DefaultGroupExpression} from "../../model/default-group-expression";
 import {GreedyGroupExpression} from "../../model/greedy-group-expression";
-import {getCharRange, IndexedToken} from "../../utils/string-utils";
+import {getCharRange} from "../../utils/string-utils";
 import {rangeWithValue} from "../../utils/array-utils";
 import {
     createGroupExpression,
@@ -21,9 +21,12 @@ import {
     isLookbehind,
     isMatchGroup
 } from "../../model/parser/group-expression-type";
-import {RegexToken, RegexTokenType} from "../../model/token/regex-token";
+import {RegexTokenType} from "../../model/token/regex-token";
 import {IndexedRegexToken} from "../../model/token/indexed-regex-token";
 import {ParseError} from "../../exception/parse-error";
+import {OptionalExpression} from "../../model/optional-expression";
+import {isGroupExpression} from "../../model/group-expression";
+import {OptionalGroupExpression} from "../../model/optional-group-expression";
 
 export default class Parser {
     private _lexer: Lexer
@@ -71,7 +74,7 @@ export default class Parser {
 
         if (this._currentToken.type === RegexTokenType.CHARACTER && this._currentToken.value === '.') {
             this.consume(RegexTokenType.CHARACTER)
-            const expression = this.tryWrapInGreedyModifier(new SimpleExpression(new WildcardCharacter()))
+            const expression = this.tryWrapInModifier(new SimpleExpression(new WildcardCharacter()))
             return [expression]
         }
 
@@ -185,7 +188,7 @@ export default class Parser {
         }
         this.consume(RegexTokenType.SQUARE_BRACKET_CLOSE)
         const bracketExpression = negated ? SquareBracketExpression.negated(...expressions) : new SquareBracketExpression(...expressions)
-        return this.tryWrapInGreedyModifier(bracketExpression)
+        return this.tryWrapInModifier(bracketExpression)
     }
 
     private consumeBrackets(): Expression {
@@ -210,7 +213,7 @@ export default class Parser {
         if (!isMatchGroup(groupType)) {
             return groupExpression
         }
-        return this.tryWrapInGreedyModifier(groupExpression)
+        return this.tryWrapInModifier(groupExpression)
     }
 
     private tryConsumeBracketModifier() {
@@ -229,40 +232,40 @@ export default class Parser {
     }
 
     private peekNonMatchingGroup() {
-        if (this._currentToken.type === RegexTokenType.CHARACTER && this._currentToken.value === "?" && this._lexer.lookahead()?.type === RegexTokenType.CHARACTER && this._lexer.lookahead().value === ":") {
-            this.consumeMultiple(RegexTokenType.CHARACTER, 2)
+        if (this._currentToken.type === RegexTokenType.MODIFIER && this._currentToken.value === "?" && this._lexer.lookahead()?.type === RegexTokenType.CHARACTER && this._lexer.lookahead().value === ":") {
+            this.consume(RegexTokenType.MODIFIER, RegexTokenType.CHARACTER)
             return true
         }
         return false
     }
 
     private peekPositiveLookahead() {
-        if (this._currentToken.type === RegexTokenType.CHARACTER && this._currentToken.value === "?" && this._lexer.lookahead()?.type === RegexTokenType.CHARACTER && this._lexer.lookahead().value === "=") {
-            this.consumeMultiple(RegexTokenType.CHARACTER, 2)
+        if (this._currentToken.type === RegexTokenType.MODIFIER && this._currentToken.value === "?" && this._lexer.lookahead()?.type === RegexTokenType.CHARACTER && this._lexer.lookahead().value === "=") {
+            this.consume(RegexTokenType.MODIFIER, RegexTokenType.CHARACTER)
             return true
         }
         return false
     }
 
     private peekNegativeLookahead() {
-        if (this._currentToken.type === RegexTokenType.CHARACTER && this._currentToken.value === "?" && this._lexer.lookahead()?.type === RegexTokenType.CHARACTER && this._lexer.lookahead().value === "!") {
-            this.consumeMultiple(RegexTokenType.CHARACTER, 2)
+        if (this._currentToken.type === RegexTokenType.MODIFIER && this._currentToken.value === "?" && this._lexer.lookahead()?.type === RegexTokenType.CHARACTER && this._lexer.lookahead().value === "!") {
+            this.consume(RegexTokenType.MODIFIER, RegexTokenType.CHARACTER)
             return true
         }
         return false
     }
 
     private peekPositiveLookbehind() {
-        if (this._currentToken.type === RegexTokenType.CHARACTER && this._currentToken.value === "?" && this._lexer.lookahead()?.type === RegexTokenType.CHARACTER && this._lexer.lookahead().value === "<" && this._lexer.lookahead()?.type === RegexTokenType.CHARACTER && this._lexer.lookahead(1).value === "=") {
-            this.consumeMultiple(RegexTokenType.CHARACTER, 3)
+        if (this._currentToken.type === RegexTokenType.MODIFIER && this._currentToken.value === "?" && this._lexer.lookahead()?.type === RegexTokenType.CHARACTER && this._lexer.lookahead().value === "<" && this._lexer.lookahead()?.type === RegexTokenType.CHARACTER && this._lexer.lookahead(1).value === "=") {
+            this.consume(RegexTokenType.MODIFIER, RegexTokenType.CHARACTER, RegexTokenType.CHARACTER)
             return true
         }
         return false
     }
 
     private peekNegativeLookbehind() {
-        if (this._currentToken.type === RegexTokenType.CHARACTER && this._currentToken.value === "?" && this._lexer.lookahead()?.type === RegexTokenType.CHARACTER && this._lexer.lookahead().value === "<" && this._lexer.lookahead()?.type === RegexTokenType.CHARACTER && this._lexer.lookahead(1).value === "!") {
-            this.consumeMultiple(RegexTokenType.CHARACTER, 3)
+        if (this._currentToken.type === RegexTokenType.MODIFIER && this._currentToken.value === "?" && this._lexer.lookahead()?.type === RegexTokenType.CHARACTER && this._lexer.lookahead().value === "<" && this._lexer.lookahead()?.type === RegexTokenType.CHARACTER && this._lexer.lookahead(1).value === "!") {
+            this.consume(RegexTokenType.MODIFIER, RegexTokenType.CHARACTER, RegexTokenType.CHARACTER)
             return true
         }
         return false
@@ -271,13 +274,13 @@ export default class Parser {
     private consumeCharacter() {
         const charExpression = new SimpleExpression(new DefaultCharacter(this._currentToken.value))
         this.consume(RegexTokenType.CHARACTER)
-        return this.tryWrapInGreedyModifier(charExpression)
+        return this.tryWrapInModifier(charExpression)
     }
 
     private consumeEscaped() {
         this.consume(RegexTokenType.ESCAPED)
         const escapedExpression = this.tryParseEscaped()
-        return this.tryWrapInGreedyModifier(escapedExpression)
+        return this.tryWrapInModifier(escapedExpression)
     }
 
     private consumeMultiple(type: RegexTokenType, n: number) {
@@ -294,18 +297,25 @@ export default class Parser {
         })
     }
 
-    private tryWrapInGreedyModifier = (baseExpression: Expression) => {
+    private tryWrapInModifier = (baseExpression: Expression) => {
         if (!this._currentToken || this._currentToken.type != RegexTokenType.MODIFIER) {
             return baseExpression
         } else if (this._currentToken.type == RegexTokenType.MODIFIER) {
             if (!this._allowModifiers) {
                 this.throwParseError('Modifiers not allowed at current position')
             }
-            const expression = baseExpression instanceof DefaultGroupExpression ? new GreedyGroupExpression(baseExpression, this._currentToken.value === "*") : new GreedyExpression(baseExpression, this._currentToken.value === "*")
-            this.consume(RegexTokenType.MODIFIER)
-            return expression
+            if (this._currentToken.value === "*" || this._currentToken.value === "+") {
+                const expression = isGroupExpression(baseExpression) ? new GreedyGroupExpression(baseExpression, this._currentToken.value === "*") : new GreedyExpression(baseExpression, this._currentToken.value === "*")
+                this.consume(RegexTokenType.MODIFIER)
+                return expression
+            } else if (this._currentToken.value === "?") {
+                const expression = isGroupExpression(baseExpression) ? new OptionalGroupExpression(baseExpression) : new OptionalExpression(baseExpression)
+                this.consume(RegexTokenType.MODIFIER)
+                return expression
+            }
+            this.throwParseError('Unknown modifier')
         } else {
-            this.throwParseError('Unknown modifier token encountered')
+            this.throwParseError('Expected modifier but received different token')
         }
     }
 

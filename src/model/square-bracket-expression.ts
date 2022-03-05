@@ -21,7 +21,7 @@ export default class SquareBracketExpression implements Expression {
         return expression
     }
 
-    hasNotMatched(): boolean {
+    isInitial(): boolean {
         return this._isSuccessful === undefined;
     }
 
@@ -74,10 +74,6 @@ export default class SquareBracketExpression implements Expression {
 
     currentMatch(): IndexedToken[] {
         return this._currentMatch;
-    }
-
-    tracksMatch(): boolean {
-        return false;
     }
 
     reset(): void {

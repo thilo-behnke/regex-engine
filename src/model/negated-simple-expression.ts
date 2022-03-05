@@ -14,8 +14,8 @@ export class NegatedSimpleExpression implements Expression {
         return this._delegate.hasNext();
     }
 
-    hasNotMatched(): boolean {
-        return this._delegate.hasNotMatched();
+    isInitial(): boolean {
+        return this._delegate.isInitial();
     }
 
     get minimumLength(): number {
@@ -49,10 +49,6 @@ export class NegatedSimpleExpression implements Expression {
 
     currentMatch(): IndexedToken[] {
         return this._currentMatch;
-    }
-
-    tracksMatch(): boolean {
-        return false;
     }
 
     reset(): void {
