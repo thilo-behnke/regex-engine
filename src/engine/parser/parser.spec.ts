@@ -15,6 +15,8 @@ import {AssertionExpression} from "../../model/assertion-expression";
 import {DefaultGroupExpression} from "../../model/default-group-expression";
 import {OptionalExpression} from "../../model/optional-expression";
 import {OptionalGroupExpression} from "../../model/optional-group-expression";
+import {AlternativeGroupExpression} from "../../model/alternative-group-expression";
+import AlternativeExpression from "../../model/alternative-expression";
 
 test('should return empty expression array for empty string', () => {
     const parser = new Parser()
@@ -55,6 +57,18 @@ test('should correctly parse greedy at least once modifier for single character'
     const expected = [
         new SimpleExpression(new DefaultCharacter('s')),
         new GreedyExpression(new SimpleExpression(new DefaultCharacter('t')), false)
+    ]
+    expect(res).toEqual(expected)
+})
+
+test('should correctly alternative expression', () => {
+    const parser = new Parser()
+    const res = parser.parse('a|b')
+    const expected = [
+        new AlternativeExpression(
+            new SimpleExpression(new DefaultCharacter('a')),
+            new SimpleExpression(new DefaultCharacter('b'))
+        )
     ]
     expect(res).toEqual(expected)
 })
@@ -313,6 +327,23 @@ test.each([
                     new SimpleExpression(new DefaultCharacter('f')),
                 ),
                 false
+            )
+        ]
+    },
+    {
+        expression: "(abc|def)",
+        expected: [
+            new AlternativeGroupExpression(
+                new DefaultGroupExpression(
+                    new SimpleExpression(new DefaultCharacter('a')),
+                    new SimpleExpression(new DefaultCharacter('b')),
+                    new SimpleExpression(new DefaultCharacter('c')),
+                ),
+                new DefaultGroupExpression(
+                    new SimpleExpression(new DefaultCharacter('d')),
+                    new SimpleExpression(new DefaultCharacter('e')),
+                    new SimpleExpression(new DefaultCharacter('f')),
+                ),
             )
         ]
     }

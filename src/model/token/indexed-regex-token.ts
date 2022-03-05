@@ -1,8 +1,8 @@
 import DefaultRegexToken, {RegexToken, RegexTokenType} from "./regex-token";
 
 export class IndexedRegexToken implements RegexToken {
-    private _token: DefaultRegexToken
-    private _idx: number
+    private readonly _token: DefaultRegexToken
+    private readonly _idx: number
 
     constructor(token: DefaultRegexToken, idx: number) {
         this._token = token;
