@@ -30,10 +30,13 @@ export default class RegexEngine {
         const tokens = explodeIndexed(s)
 
         while(this._matchOffset < tokens.length) {
-            const expressions = this._parser.parse(p)
-            const res = this.tryTest(tokens.slice(this._matchOffset), expressions)
+            const expression = this._parser.parse(p)
+            let res = RegexEngine.tryTestExpression(expression, tokens.slice(this._matchOffset)).match
+            if (!res) {
+                res = expression.backtrack()
+            }
             if (res) {
-                this._match = expressions.flatMap(it => it.currentMatch().map(it => it.value)).join('')
+                this._match = expression.currentMatch().join('')
                 return true
             }
             this._matchOffset++;
@@ -91,7 +94,7 @@ export default class RegexEngine {
         return expressions.every(it => it.isSuccessful())
     }
 
-    private static tryTestExpression = (expression: Expression, toTest: IndexedToken[], startIdx: number) => {
+    private static tryTestExpression = (expression: Expression, toTest: IndexedToken[], startIdx: number = 0) => {
         let idx = startIdx
         while(expression.hasNext()) {
             const nextChar = idx < toTest.length ? toTest[idx] : null

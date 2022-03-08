@@ -59,19 +59,20 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
             if (!backtrackRes) {
                 return false
             }
-            backtrackedMatches.unshift(last(this._currentMatch))
+            backtrackedMatches.unshift(last(this._persistedMatch))
             this._persistedMatch = this._currentMatch.slice(0, this._currentMatch.length)
             this._idx = backtrackIdx + 1
             this._expressions.slice(this._idx, this._expressions.length).forEach(it => it.reset())
 
             let forwardFailed = false
             let tokenIdx = 0
-            while (this.hasNext()) {
+            while (this.hasNext() && backtrackedMatches[tokenIdx]) {
                 const matchRes = this.matchNext(backtrackedMatches[tokenIdx], backtrackedMatches[tokenIdx - 1], backtrackedMatches[tokenIdx + 1])
                 if (!matchRes.matched) {
                     forwardFailed = true
                     break
                 }
+                tokenIdx++
             }
             if (forwardFailed) {
                 backtrackIdx--

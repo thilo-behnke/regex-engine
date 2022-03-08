@@ -26,6 +26,7 @@ import {ParseError} from "../../exception/parse-error";
 import {OptionalExpression} from "../../model/optional-expression";
 import {isGroupExpression} from "../../model/group-expression";
 import {OptionalGroupExpression} from "../../model/optional-group-expression";
+import {DefaultGroupExpression} from "../../model/default-group-expression";
 
 export default class Parser {
     private _lexer: Lexer
@@ -40,7 +41,7 @@ export default class Parser {
         this._lexer = lexer ?? new Lexer();
     }
 
-    parse(s: string): Expression[] {
+    parse(s: string): Expression {
         this._lexer.load(s)
         this._expressions = []
         this._currentToken = this._lexer.getNextToken()
@@ -48,7 +49,7 @@ export default class Parser {
             const expressions = this.tryParseRegex()
             expressions.forEach(it => this._expressions.push(it))
         }
-        return this._expressions
+        return DefaultGroupExpression.nonCapturing(...this._expressions)
     }
 
     private tryParseRegex = (): Expression[] => {
