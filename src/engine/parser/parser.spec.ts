@@ -179,7 +179,7 @@ test('should correctly parse word boundary character \b', () => {
 test('should correctly parse word wildcard character \w', () => {
     const parser = new Parser()
     const res = parser.parse('test\\w029')
-    const expected = [
+    const expected = DefaultGroupExpression.nonCapturing(...[
         new SimpleExpression(new DefaultCharacter('t')),
         new SimpleExpression(new DefaultCharacter('e')),
         new SimpleExpression(new DefaultCharacter('s')),
@@ -188,7 +188,7 @@ test('should correctly parse word wildcard character \w', () => {
         new SimpleExpression(new DefaultCharacter('0')),
         new SimpleExpression(new DefaultCharacter('2')),
         new SimpleExpression(new DefaultCharacter('9')),
-    ]
+    ])
     expect(res).toEqual(expected)
 })
 

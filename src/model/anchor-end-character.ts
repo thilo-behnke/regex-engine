@@ -1,8 +1,9 @@
 import Character from "./character";
+import {IndexedToken} from "../utils/string-utils";
 
 export default class AnchorEndCharacter implements Character {
-    test(s: string, previous: string = null, next: string = null, isZeroPosMatch = false): boolean {
-        return next == null
+    test(s: IndexedToken, last: IndexedToken, next: IndexedToken): boolean {
+        return !next || s?.last
     }
 
     cursorOnly(): boolean {

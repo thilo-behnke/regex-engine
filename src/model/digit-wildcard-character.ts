@@ -1,9 +1,9 @@
 import Character from "./character";
-import {isDigit} from "../utils/string-utils";
+import {IndexedToken, isDigit} from "../utils/string-utils";
 
 export default class DigitWildcardCharacter implements Character {
-    test(s: string): boolean {
-        return isDigit(s);
+    test(s: IndexedToken): boolean {
+        return isDigit(s?.value);
     }
     cursorOnly(): boolean {
         return false;
