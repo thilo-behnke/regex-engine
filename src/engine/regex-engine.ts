@@ -81,42 +81,7 @@ export default class RegexEngine {
                 return false
             }
 
-            // TODO: Is this always correct?
-            if (expressionIdx <= 0) {
-                return false
-            }
-
-            let backtrackIdx = expressionIdx - 1
-            let backtrackSuccessful = false
-            while(backtrackIdx >= 0) {
-                const previousExpression = expressions[backtrackIdx]
-                while (!backtrackSuccessful && this.tryBacktrack(previousExpression)) {
-                    cursorPos--
-                    if (isGroupExpression(previousExpression)) {
-                        this._groups[backtrackIdx] = previousExpression.matchGroups
-                    }
-                    nextExpression.reset()
-                    const {match: backtrackMatch, matched: backtrackMatched, tokensConsumed: backtrackTokensConsumed} = RegexEngine.tryTestExpression(nextExpression, toTest, cursorPos)
-                    if (!backtrackMatch) {
-                        continue
-                    }
-                    cursorPos += backtrackTokensConsumed
-                    // backtrack successful
-                    if (isGroupExpression(nextExpression)) {
-                        this._groups[backtrackIdx] = nextExpression.matchGroups
-                    }
-                    backtrackSuccessful = true
-                }
-                if (backtrackSuccessful) {
-                    break
-                }
-                if (previousExpression.isInitial() && previousExpression.isSuccessful()) {
-                    backtrackIdx--
-                    continue;
-                }
-                // backtrack failed
-                return false
-            }
+            const backtrackSuccessful = nextExpression.backtrack()
             if (!backtrackSuccessful) {
                 return false
             }

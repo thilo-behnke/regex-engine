@@ -4,6 +4,7 @@ import GroupExpression, {isGroupExpression} from "./group-expression";
 import {MatchGroup} from "./match/match-group";
 import {IndexedToken} from "../utils/string-utils";
 import {matchFailed, MatchIteration} from "./expression/match-iteration";
+import {last} from "../utils/array-utils";
 
 export abstract class AbstractGroupExpression implements Expression, GroupExpression {
     private _idx: number = 0
@@ -29,7 +30,7 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
     }
 
     hasNext(): boolean {
-        return !this._failed && this._idx < this._expressions.length && this._expressions[this._idx].hasNext();
+        return !this._failed && this._idx < this._expressions.length && this._expressions[this._idx]?.hasNext();
     }
 
     isInitial(): boolean {
@@ -49,27 +50,41 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
             return false
         }
 
-        const updatedMatch = this._persistedMatch.slice(0, this._persistedMatch.length - 1)
-        this.reset()
-        let sIdx = 0
-        // TODO: Basically a regex engine within the group?
-        let hasMatched = true
-        while(hasMatched) {
-            const thisChar = updatedMatch[sIdx]
-            const last = sIdx > 0 ? updatedMatch[sIdx - 1] : null
-            const next = sIdx < updatedMatch.length ? updatedMatch[sIdx + 1] : null
-            hasMatched = this.matchNext(thisChar, last, next).matched
-            sIdx++
-        }
+        let backtrackedMatches = []
+        let backtrackIdx = this._idx - 1
+        while (backtrackIdx > 0) {
+            const expression = this._expressions[backtrackIdx]
+            const backtrackRes = expression.backtrack()
+            // backtrack failed
+            if (!backtrackRes) {
+                return false
+            }
+            backtrackedMatches.unshift(last(this._currentMatch))
+            this._persistedMatch = this._currentMatch.slice(0, this._currentMatch.length)
+            this._idx = backtrackIdx + 1
+            this._expressions.slice(this._idx, this._expressions.length).forEach(it => it.reset())
 
-        this._failed = this._expressions.some(it => !it.isSuccessful())
-        this._persistedMatch = this.currentMatch()
-        this._currentMatch = []
+            let forwardFailed = false
+            let tokenIdx = 0
+            while (this.hasNext()) {
+                const matchRes = this.matchNext(backtrackedMatches[tokenIdx], backtrackedMatches[tokenIdx - 1], backtrackedMatches[tokenIdx + 1])
+                if (!matchRes.matched) {
+                    forwardFailed = true
+                    break
+                }
+            }
+            if (forwardFailed) {
+                backtrackIdx--
+                continue
+            }
+            break
+        }
         return this.isSuccessful()
     }
 
+
     canBacktrack(): boolean {
-        return this._expressions[this._idx - 1].canBacktrack()
+        return this._expressions[this._idx - 1]?.canBacktrack()
     }
 
     matchNext(s: IndexedToken, last: IndexedToken = null, next: IndexedToken = null): MatchIteration {

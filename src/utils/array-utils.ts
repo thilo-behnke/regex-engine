@@ -7,7 +7,12 @@ const rangeWithValue = <T>(n: number, v: T) => {
     return range(0, n - 1).map(() => v)
 }
 
+const last = <T>(arr: T[]): T => {
+    return arr[arr.length - 1]
+}
+
 export {
     range,
-    rangeWithValue
+    rangeWithValue,
+    last
 }
