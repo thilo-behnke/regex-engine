@@ -16,10 +16,10 @@ import {DefaultGroupExpression} from "../../model/default-group-expression";
 import {OptionalExpression} from "../../model/optional-expression";
 import {OptionalGroupExpression} from "../../model/optional-group-expression";
 
-test('should return empty expression array for empty string', () => {
+test('should return empty group expression for empty string', () => {
     const parser = new Parser()
     const res = parser.parse('')
-    expect(res).toEqual([])
+    expect(res).toEqual(DefaultGroupExpression.nonCapturing())
 })
 
 test('should correctly parse character literal', () => {

@@ -42,7 +42,7 @@ export default class RegexEngine {
                 res = RegexEngine.tryTestExpression(expression, tokensNotMatched)
             }
             if (res.match) {
-                this._match = expression.currentMatch().join('')
+                this._match = expression.currentMatch().map(it => it.value).join('')
                 return true
             }
             this._matchOffset++;
