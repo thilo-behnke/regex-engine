@@ -1,5 +1,6 @@
 import {Expression} from "./expression";
 import {IndexedToken} from "../utils/string-utils";
+import {MatchIteration} from "./expression/match-iteration";
 
 export class OptionalExpression implements Expression {
     private _expression: Expression
@@ -36,11 +37,7 @@ export class OptionalExpression implements Expression {
         return !this._expression.isInitial();
     }
 
-    lastMatchCharactersConsumed(): number {
-        return this._expression.lastMatchCharactersConsumed();
-    }
-
-    matchNext(s: IndexedToken, last: IndexedToken, next: IndexedToken): boolean {
+    matchNext(s: IndexedToken, last: IndexedToken, next: IndexedToken): MatchIteration {
         return this._expression.matchNext(s, last, next);
     }
 

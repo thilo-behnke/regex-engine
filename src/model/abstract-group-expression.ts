@@ -3,6 +3,7 @@ import FixedLengthExpression from "./fixed-length-expression";
 import GroupExpression, {isGroupExpression} from "./group-expression";
 import {MatchGroup} from "./match/match-group";
 import {IndexedToken} from "../utils/string-utils";
+import {matchFailed, MatchIteration} from "./expression/match-iteration";
 
 export abstract class AbstractGroupExpression implements Expression, GroupExpression {
     private _idx: number = 0
@@ -12,7 +13,6 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
 
     protected readonly _expressions: Expression[]
     protected _failed = false
-    protected _lastMatchConsumed = 0
 
     protected constructor(...expressions: Expression[]) {
         this._expressions = expressions;
@@ -58,7 +58,7 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
             const thisChar = updatedMatch[sIdx]
             const last = sIdx > 0 ? updatedMatch[sIdx - 1] : null
             const next = sIdx < updatedMatch.length ? updatedMatch[sIdx + 1] : null
-            hasMatched = this.matchNext(thisChar, last, next)
+            hasMatched = this.matchNext(thisChar, last, next).matched
             sIdx++
         }
 
@@ -72,18 +72,13 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
         return this._expressions[this._idx - 1].canBacktrack()
     }
 
-    abstract lastMatchCharactersConsumed(): number
-
-    matchNext(s: IndexedToken, last: IndexedToken = null, next: IndexedToken = null): boolean {
+    matchNext(s: IndexedToken, last: IndexedToken = null, next: IndexedToken = null): MatchIteration {
         if (!this.hasNext()) {
-            return false
+            return matchFailed()
         }
         const nextExpression = this._expressions[this._idx]
         const res = nextExpression.matchNext(s, last, next);
-        if (res) {
-            this._lastMatchConsumed = nextExpression.lastMatchCharactersConsumed()
-        }
-        this._currentMatch = res || nextExpression.isSuccessful() ? nextExpression.currentMatch() : []
+        this._currentMatch = res.matched || nextExpression.isSuccessful() ? nextExpression.currentMatch() : []
         if (!nextExpression.hasNext()) {
             if (nextExpression.isSuccessful()) {
                 this._persistedMatch = this.currentMatch()

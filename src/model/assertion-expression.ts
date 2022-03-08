@@ -1,6 +1,7 @@
 import {Expression} from "./expression";
 import {AbstractGroupExpression} from "./abstract-group-expression";
 import {IndexedToken} from "../utils/string-utils";
+import {MatchIteration} from "./expression/match-iteration";
 
 export class AssertionExpression extends AbstractGroupExpression {
     private _positive = true
@@ -42,13 +43,9 @@ export class AssertionExpression extends AbstractGroupExpression {
         return expression
     }
 
-    matchNext(s: IndexedToken, last: IndexedToken = null, next: IndexedToken = null): boolean {
+    matchNext(s: IndexedToken, last: IndexedToken = null, next: IndexedToken = null): MatchIteration {
         const matchRes = super.matchNext(s, last, next);
-        return this._positive && matchRes || !this._positive && !matchRes;
-    }
-
-    lastMatchCharactersConsumed(): number {
-        return 0;
+        return {matched: matchRes.matched || !this._positive, consumed: 0}
     }
 
     currentMatch(): IndexedToken[] {

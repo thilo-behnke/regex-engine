@@ -1,5 +1,6 @@
 import {Expression} from "./expression";
 import {IndexedToken} from "../utils/string-utils";
+import {MatchIteration} from "./expression/match-iteration";
 
 export default abstract class AbstractGreedyExpression implements Expression {
     private readonly _expression: Expression
@@ -30,7 +31,7 @@ export default abstract class AbstractGreedyExpression implements Expression {
         return !!this._isSuccessful;
     }
 
-    matchNext(s: IndexedToken, previous: IndexedToken = null, next: IndexedToken = null): boolean {
+    matchNext(s: IndexedToken, previous: IndexedToken = null, next: IndexedToken = null): MatchIteration {
         let wasReset = false
         if (this._expression.isSuccessful()) {
             this._expression.reset()
@@ -39,7 +40,7 @@ export default abstract class AbstractGreedyExpression implements Expression {
 
         const res = this._expression.matchNext(s, previous, next)
 
-        if (res) {
+        if (res.matched) {
             this.storeCurrentMatch(s, wasReset)
         }
 
@@ -54,10 +55,6 @@ export default abstract class AbstractGreedyExpression implements Expression {
     }
 
     abstract storeCurrentMatch(s: IndexedToken, expressionWasReset: boolean): void
-
-    lastMatchCharactersConsumed(): number {
-        return this._expression.lastMatchCharactersConsumed();
-    }
 
     backtrack(): boolean {
         if (!this.canBacktrack()) {

@@ -1,6 +1,7 @@
 import {Expression} from "./expression";
 import {SimpleExpression} from "./simple-expression";
 import {IndexedToken} from "../utils/string-utils";
+import {matchFailed, MatchIteration} from "./expression/match-iteration";
 
 export class NegatedSimpleExpression implements Expression {
     private readonly _delegate: SimpleExpression
@@ -34,17 +35,13 @@ export class NegatedSimpleExpression implements Expression {
         return this._delegate.canBacktrack();
     }
 
-    lastMatchCharactersConsumed(): number {
-        return this._delegate.lastMatchCharactersConsumed();
-    }
-
-    matchNext(s: IndexedToken, last?: IndexedToken, next?: IndexedToken): boolean {
+    matchNext(s: IndexedToken, last?: IndexedToken, next?: IndexedToken): MatchIteration {
         if (s === null) {
-            return false
+            return matchFailed()
         }
-        const delegateRes = !this._delegate.matchNext(s, last, next);
-        this._currentMatch = delegateRes ? [s] : []
-        return delegateRes
+        const delegateRes = this._delegate.matchNext(s, last, next);
+        this._currentMatch = !delegateRes.matched ? [s] : []
+        return delegateRes.matched ? matchFailed() : {matched: true, consumed: delegateRes.cursorOnly ? 0 : 1}
     }
 
     currentMatch(): IndexedToken[] {

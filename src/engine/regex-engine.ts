@@ -133,10 +133,10 @@ export default class RegexEngine {
             const previous = idx > 0 ? toTest[idx - 1] : null
             const next = idx + 1 < toTest.length ? toTest[idx + 1] : null
             const matchRes = expression.matchNext(nextChar, previous, next)
-            if (!matchRes) {
+            if (!matchRes.matched) {
                 break
             }
-            idx += expression.lastMatchCharactersConsumed()
+            idx += matchRes.consumed
         }
         if (!expression.isSuccessful()) {
             return {match: false, tokensConsumed: 0, matched: []}

@@ -1,13 +1,13 @@
 import {Expression} from "./expression";
 import Character from "./character";
 import {IndexedToken} from "../utils/string-utils";
+import {matchFailed, MatchIteration} from "./expression/match-iteration";
 
 export class SimpleExpression implements Expression {
     private readonly _characters: Character[]
 
     private _idx = 0
     private _isSuccessful: boolean = undefined
-    private _charactersConsumed = 0
     private _currentMatch: IndexedToken[] = []
 
     constructor(...characters: Character[]) {
@@ -15,7 +15,7 @@ export class SimpleExpression implements Expression {
     }
 
     isInitial(): boolean {
-        return this._charactersConsumed === 0;
+        return !this._currentMatch.length;
     }
 
     hasNext(): boolean {
@@ -33,9 +33,9 @@ export class SimpleExpression implements Expression {
         return this._isSuccessful;
     }
 
-    matchNext(s: IndexedToken, last: IndexedToken = null, next: IndexedToken = null): boolean {
+    matchNext(s: IndexedToken, last: IndexedToken = null, next: IndexedToken = null): MatchIteration & {cursorOnly: boolean} {
         if (!this.hasNext()) {
-            return false
+            return {...matchFailed(), cursorOnly: false}
         }
 
         this._isSuccessful = this._characters[this._idx].test(s?.value, last?.value, next?.value, s?.first)
@@ -43,13 +43,10 @@ export class SimpleExpression implements Expression {
         if (!this._characters[this._idx].cursorOnly() && this._isSuccessful && s) {
             this._currentMatch = [...this.currentMatch(), s]
         }
-        this._charactersConsumed = this._characters[this._idx].cursorOnly() ? 0 : 1;
+        const cursorOnly = this._characters[this._idx].cursorOnly()
+        const consumed =  cursorOnly ? 0 : 1;
         this._idx++
-        return this._isSuccessful
-    }
-
-    lastMatchCharactersConsumed(): number {
-        return this._charactersConsumed;
+        return this._isSuccessful ? {matched: true, consumed, cursorOnly} : {...matchFailed(), cursorOnly}
     }
 
     backtrack(): boolean {

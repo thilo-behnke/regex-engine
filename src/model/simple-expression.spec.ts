@@ -24,7 +24,7 @@ test.each([
         if (!matchRes) {
             break
         }
-        idx += simpleExpression.lastMatchCharactersConsumed()
+        idx += matchRes.consumed
     }
     expect(simpleExpression.isSuccessful()).toEqual(shouldMatch)
     expect(simpleExpression.currentMatch().map(it => it.value).join('')).toEqual(expectedMatch)
