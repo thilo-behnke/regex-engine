@@ -31,7 +31,7 @@ test('should detect match for character literals using greedy modifier +', () =>
 })
 
 test.each([
-    // {value: "test", pattern: "t*st", shouldMatch: true},
+    {value: "test", pattern: "t*st", shouldMatch: true},
     // {value: "test", pattern: "x*st", shouldMatch: true},
     // {value: "test", pattern: "x+st", shouldMatch: false},
     // {value: "abctestdef", pattern: "test", shouldMatch: true},
@@ -45,7 +45,7 @@ test.each([
     // {value: " ", pattern: "\\w+", shouldMatch: false},
     // {value: "092934", pattern: "\\d+", shouldMatch: true},
     // {value: "word", pattern: "\\d", shouldMatch: false},
-    {value: "testtttest", pattern: "test+test", shouldMatch: true},
+    // {value: "testtttest", pattern: "test+test", shouldMatch: true},
     // {value: "testest", pattern: "test+test", shouldMatch: false},
     // {value: "test", pattern: "^test$", shouldMatch: true},
     // {value: "test-word", pattern: "^test$", shouldMatch: false},

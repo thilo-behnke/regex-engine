@@ -31,11 +31,17 @@ export default class RegexEngine {
 
         while(this._matchOffset < tokens.length) {
             const expression = this._parser.parse(p)
-            let res = RegexEngine.tryTestExpression(expression, tokens.slice(this._matchOffset)).match
-            if (!res) {
-                res = expression.backtrack()
+            const tokensAfterOffset = tokens.slice(this._matchOffset)
+            let res = RegexEngine.tryTestExpression(expression, tokensAfterOffset)
+            while (!res.match && expression.canBacktrack()) {
+                const backtrackRes = expression.backtrack()
+                if (!backtrackRes) {
+                    break
+                }
+                const tokensNotMatched = tokensAfterOffset.slice(res.tokensConsumed)
+                res = RegexEngine.tryTestExpression(expression, tokensNotMatched)
             }
-            if (res) {
+            if (res.match) {
                 this._match = expression.currentMatch().join('')
                 return true
             }
@@ -101,13 +107,7 @@ export default class RegexEngine {
             const previous = idx > 0 ? toTest[idx - 1] : null
             const next = idx + 1 < toTest.length ? toTest[idx + 1] : null
             const matchRes = expression.matchNext(nextChar, previous, next)
-            if (!matchRes.matched) {
-                break
-            }
             idx += matchRes.consumed
-        }
-        if (!expression.isSuccessful()) {
-            return {match: false, tokensConsumed: 0, matched: []}
         }
         return {match: expression.isSuccessful(), tokensConsumed: idx - startIdx, matched: expression.currentMatch().map(it => it.value)}
     }

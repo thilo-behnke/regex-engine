@@ -74,13 +74,13 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
                 }
                 tokenIdx++
             }
-            if (forwardFailed) {
+            if (forwardFailed || this._failed) {
                 backtrackIdx--
                 continue
             }
             break
         }
-        return this.isSuccessful()
+        return true
     }
 
 
