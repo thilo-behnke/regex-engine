@@ -98,6 +98,7 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
         if (!nextExpression.hasNext()) {
             if (nextExpression.isSuccessful()) {
                 this._persistedMatch = this.currentMatch()
+                this._currentMatch = []
                 this._matchGroups = []
                 if (this.tracksMatch) {
                     const matchedValue = this._persistedMatch.map(it => it.value).join('')
@@ -110,13 +111,13 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
                 if (isGroupExpression(nextExpression)) {
                     this._matchGroups = [...this.matchGroups, ...nextExpression.matchGroups]
                 }
+                this._idx++
             } else {
                 this._failed = true
                 this._persistedMatch = []
                 this._matchGroups = []
+                this._currentMatch = []
             }
-            this._currentMatch = []
-            this._idx++
         }
         return res
     }
