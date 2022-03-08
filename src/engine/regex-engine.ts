@@ -9,14 +9,14 @@ export default class RegexEngine {
     private readonly _parser: Parser
     private _matchOffset: number = 0
     private _match: string = null
-    private _groups: {[key: string]: MatchGroup[]} = {}
+    private _groups: MatchGroup[] = []
 
     constructor(parser: Parser = new Parser()) {
         this._parser = parser;
     }
 
     get groups(): MatchGroup[] {
-        return Object.values(this._groups).flat()
+        return this._groups
     }
 
     get matched(): string {
@@ -25,7 +25,7 @@ export default class RegexEngine {
 
     match = (s: string, p: string): boolean => {
         this._matchOffset = 0;
-        this._groups = {}
+        this._groups = []
         this._match = null
         const tokens = explodeIndexed(s)
 
@@ -43,6 +43,9 @@ export default class RegexEngine {
             }
             if (res.match) {
                 this._match = expression.currentMatch().map(it => it.value).join('')
+                if (isGroupExpression(expression)) {
+                    this._groups = expression.matchGroups
+                }
                 return true
             }
             this._matchOffset++;
@@ -51,54 +54,54 @@ export default class RegexEngine {
         return false
     }
 
-    private tryTest = (toTest: IndexedToken[], expressions: Expression[]): boolean => {
-        let cursorPos = 0
-        for(let expressionIdx = 0; expressionIdx < expressions.length; expressionIdx++) {
-            const nextExpression = expressions[expressionIdx]
-            if (!(nextExpression instanceof AssertionExpression) || nextExpression.type !== AssertionType.LOOKBEHIND) {
-                const {match, tokensConsumed} = RegexEngine.tryTestExpression(nextExpression, toTest, cursorPos)
-                cursorPos += tokensConsumed
-                if (match) {
-                    if (isGroupExpression(nextExpression)) {
-                        this._groups[expressionIdx] = nextExpression.matchGroups
-                    }
-
-                    continue
-                }
-            } else {
-                let lookbehindCursorPos = cursorPos
-                let lookbehindSuccessful = false
-                while(lookbehindCursorPos < toTest.length) {
-                    const lookBehindCursorPosFrom = lookbehindCursorPos - nextExpression.minimumLength
-                    if (lookBehindCursorPosFrom >= 0) {
-                        const sBehindCurrent = toTest.slice(lookBehindCursorPosFrom, lookbehindCursorPos)
-                        const {match: lookbehindMatch} = RegexEngine.tryTestExpression(nextExpression, sBehindCurrent, lookBehindCursorPosFrom)
-                        if (lookbehindMatch) {
-                            lookbehindSuccessful = true
-                            break
-                        }
-                        nextExpression.reset()
-                    }
-                    lookbehindCursorPos += 1
-                }
-                if (lookbehindSuccessful) {
-                    this._groups[expressionIdx] = nextExpression.matchGroups
-                    cursorPos = lookbehindCursorPos
-                    continue;
-                }
-                // lookbehind failed
-                return false
-            }
-
-            const backtrackSuccessful = nextExpression.backtrack()
-            if (!backtrackSuccessful) {
-                return false
-            }
-        }
-
-        // Sanity check, should not be necessary (?)
-        return expressions.every(it => it.isSuccessful())
-    }
+    // private tryTest = (toTest: IndexedToken[], expressions: Expression[]): boolean => {
+    //     let cursorPos = 0
+    //     for(let expressionIdx = 0; expressionIdx < expressions.length; expressionIdx++) {
+    //         const nextExpression = expressions[expressionIdx]
+    //         if (!(nextExpression instanceof AssertionExpression) || nextExpression.type !== AssertionType.LOOKBEHIND) {
+    //             const {match, tokensConsumed} = RegexEngine.tryTestExpression(nextExpression, toTest, cursorPos)
+    //             cursorPos += tokensConsumed
+    //             if (match) {
+    //                 if (isGroupExpression(nextExpression)) {
+    //                     this._groups[expressionIdx] = nextExpression.matchGroups
+    //                 }
+    //
+    //                 continue
+    //             }
+    //         } else {
+    //             let lookbehindCursorPos = cursorPos
+    //             let lookbehindSuccessful = false
+    //             while(lookbehindCursorPos < toTest.length) {
+    //                 const lookBehindCursorPosFrom = lookbehindCursorPos - nextExpression.minimumLength
+    //                 if (lookBehindCursorPosFrom >= 0) {
+    //                     const sBehindCurrent = toTest.slice(lookBehindCursorPosFrom, lookbehindCursorPos)
+    //                     const {match: lookbehindMatch} = RegexEngine.tryTestExpression(nextExpression, sBehindCurrent, lookBehindCursorPosFrom)
+    //                     if (lookbehindMatch) {
+    //                         lookbehindSuccessful = true
+    //                         break
+    //                     }
+    //                     nextExpression.reset()
+    //                 }
+    //                 lookbehindCursorPos += 1
+    //             }
+    //             if (lookbehindSuccessful) {
+    //                 this._groups[expressionIdx] = nextExpression.matchGroups
+    //                 cursorPos = lookbehindCursorPos
+    //                 continue;
+    //             }
+    //             // lookbehind failed
+    //             return false
+    //         }
+    //
+    //         const backtrackSuccessful = nextExpression.backtrack()
+    //         if (!backtrackSuccessful) {
+    //             return false
+    //         }
+    //     }
+    //
+    //     // Sanity check, should not be necessary (?)
+    //     return expressions.every(it => it.isSuccessful())
+    // }
 
     private static tryTestExpression = (expression: Expression, toTest: IndexedToken[], startIdx: number = 0) => {
         let idx = startIdx
