@@ -3,7 +3,7 @@ import {IndexedToken} from "../utils/string-utils";
 
 export default class AnchorEndCharacter implements Character {
     test(s: IndexedToken, last: IndexedToken, next: IndexedToken): boolean {
-        return !next || s?.last
+        return last?.last
     }
 
     cursorOnly(): boolean {
