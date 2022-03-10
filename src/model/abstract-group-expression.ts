@@ -61,8 +61,9 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
             if (!backtrackRes) {
                 return false
             }
+            // TODO: What if persistedMatch is empty?
             backtrackedMatches.unshift(last(this._persistedMatch))
-            this._persistedMatch = this._currentMatch.slice(0, this._currentMatch.length)
+            this._persistedMatch = this._persistedMatch.slice(0, this._persistedMatch.length - 1)
             this._idx = backtrackIdx + 1
             this._expressions.slice(this._idx, this._expressions.length).forEach(it => it.reset())
 
@@ -100,33 +101,42 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
             this._idx++
         }
 
-        const nextExpression = this._expressions[this._idx]
-        const res = nextExpression.matchNext(s, last, next);
-        this._currentMatch = res.matched || nextExpression.isSuccessful() ? nextExpression.currentMatch() : []
-        if (!nextExpression.hasNext()) {
-            if (nextExpression.isSuccessful()) {
-                this._persistedMatch = this.currentMatch()
-                this._currentMatch = []
-                this._matchGroups = []
-                if (this.tracksMatch) {
-                    const matchedValue = this._persistedMatch.map(it => it.value).join('')
-                    if (this._persistedMatch.length) {
-                        const lowerBound = this._persistedMatch[0].idx
-                        const upperBound = this._persistedMatch[this._persistedMatch.length - 1]?.idx + 1
-                        this._matchGroups = [{match: matchedValue, from: lowerBound, to: upperBound}]
+        let res
+        while (this._idx < this._expressions.length) {
+            const nextExpression = this._expressions[this._idx]
+            res = nextExpression.matchNext(s, last, next)
+            this._currentMatch = res.matched || nextExpression.isSuccessful() ? nextExpression.currentMatch() : []
+            if (!nextExpression.hasNext()) {
+                if (nextExpression.isSuccessful()) {
+                    this._persistedMatch = this.currentMatch()
+                    this._currentMatch = []
+                    this._matchGroups = []
+                    if (this.tracksMatch) {
+                        const matchedValue = this._persistedMatch.map(it => it.value).join('')
+                        if (this._persistedMatch.length) {
+                            const lowerBound = this._persistedMatch[0].idx
+                            const upperBound = this._persistedMatch[this._persistedMatch.length - 1]?.idx + 1
+                            this._matchGroups = [{match: matchedValue, from: lowerBound, to: upperBound}]
+                        }
                     }
+                    if (isGroupExpression(nextExpression)) {
+                        this._matchGroups = [...this.matchGroups, ...nextExpression.matchGroups]
+                    }
+                } else {
+                    this._failed = true
+                    this._currentMatch = []
                 }
-                if (isGroupExpression(nextExpression)) {
-                    this._matchGroups = [...this.matchGroups, ...nextExpression.matchGroups]
+
+                if (!res.matched) {
+                    this._idx++
+                    continue;
                 }
-            } else {
-                this._failed = true
-                this._currentMatch = []
-                this._persistedMatch = []
-                this._matchGroups = []
+            }
+            if (res.matched) {
+                return res
             }
         }
-        return res
+        return matchFailed()
     }
 
     reset(): void {

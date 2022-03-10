@@ -111,6 +111,9 @@ export default class RegexEngine {
             const next = idx + 1 < toTest.length ? toTest[idx + 1] : null
             const matchRes = expression.matchNext(nextChar, previous, next)
             idx += matchRes.consumed
+            if (!matchRes.matched) {
+                break
+            }
         }
         return {match: expression.isSuccessful(), tokensConsumed: idx - startIdx, matched: expression.currentMatch().map(it => it.value)}
     }

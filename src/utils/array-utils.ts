@@ -8,7 +8,7 @@ const rangeWithValue = <T>(n: number, v: T) => {
 }
 
 const last = <T>(arr: T[]): T => {
-    return arr[arr.length - 1]
+    return arr[arr.length - 1] ?? null
 }
 
 export {
