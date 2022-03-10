@@ -22,7 +22,7 @@ test.each([
         ],
         toTest: 'aa',
         expectedRes: false,
-        expectedMatch: []
+        expectedMatch: ['a']
     },
     {
         expressions: [
@@ -32,7 +32,7 @@ test.each([
         ],
         toTest: 'a',
         expectedRes: false,
-        expectedMatch: []
+        expectedMatch: ['a']
     },
     {
         expressions: [
@@ -52,7 +52,7 @@ test.each([
         ],
         toTest: 'abce',
         expectedRes: false,
-        expectedMatch: []
+        expectedMatch: ['a', 'b']
     },
     {
         expressions: [
@@ -81,7 +81,7 @@ test.each([
         ],
         toTest: 'abdd',
         expectedRes: false,
-        expectedMatch: []
+        expectedMatch: ['a']
     },
     {
         expressions: [
