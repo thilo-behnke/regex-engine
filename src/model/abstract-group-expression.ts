@@ -122,6 +122,8 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
             } else {
                 this._failed = true
                 this._currentMatch = []
+                this._persistedMatch = []
+                this._matchGroups = []
             }
         }
         return res
