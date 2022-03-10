@@ -32,16 +32,24 @@ export default class RegexEngine {
         while(this._matchOffset < tokens.length) {
             const expression = this._parser.parse(p)
             const tokensAfterOffset = tokens.slice(this._matchOffset)
-            let res = RegexEngine.tryTestExpression(expression, tokensAfterOffset)
-            while (!res.match && expression.canBacktrack()) {
+            const res = RegexEngine.tryTestExpression(expression, tokensAfterOffset)
+            let matchSuccessful = res.match
+            let tokensConsumed = res.tokensConsumed
+            while (!matchSuccessful && expression.canBacktrack()) {
                 const backtrackRes = expression.backtrack()
                 if (!backtrackRes) {
                     break
                 }
-                const tokensNotMatched = tokensAfterOffset.slice(res.tokensConsumed)
-                res = RegexEngine.tryTestExpression(expression, tokensNotMatched)
+                const tokensNotMatched = tokensAfterOffset.slice(tokensConsumed)
+                if (!tokensNotMatched.length) {
+                    matchSuccessful = true
+                    break
+                }
+                const res = RegexEngine.tryTestExpression(expression, tokensNotMatched)
+                matchSuccessful = res.match
+                tokensConsumed = res.tokensConsumed
             }
-            if (res.match) {
+            if (matchSuccessful) {
                 this._match = expression.currentMatch().map(it => it.value).join('')
                 if (isGroupExpression(expression)) {
                     this._groups = expression.matchGroups
