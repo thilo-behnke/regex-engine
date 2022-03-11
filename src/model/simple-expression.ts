@@ -33,12 +33,12 @@ export class SimpleExpression implements Expression {
         return this._isSuccessful;
     }
 
-    matchNext(s: IndexedToken, last: IndexedToken = null, next: IndexedToken = null): MatchIteration & {cursorOnly: boolean} {
+    matchNext(s: IndexedToken, last: IndexedToken, next: IndexedToken, tokens: IndexedToken[], cursorPos: number): MatchIteration & {cursorOnly: boolean} {
         if (!this.hasNext()) {
             return {...matchFailed(), cursorOnly: false}
         }
 
-        this._isSuccessful = this._characters[this._idx].test(s?.value, last?.value, next?.value, s?.first)
+        this._isSuccessful = this._characters[this._idx].test(s, last, next)
         // TODO: This does not create a full current match, only the match of the latest char is included.
         if (!this._characters[this._idx].cursorOnly() && this._isSuccessful && s) {
             this._currentMatch = [...this.currentMatch(), s]

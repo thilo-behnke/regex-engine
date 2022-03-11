@@ -18,11 +18,11 @@ export class GreedyGroupExpression extends AbstractGreedyExpression implements G
     }
 
     storeCurrentMatch(s: IndexedToken, expressionWasReset: boolean): void {
-        if (expressionWasReset) {
-            this._currentMatch = [s]
-        } else {
-            this._currentMatch.push(s)
-        }
+        // if (expressionWasReset) {
+        //     this._currentMatch = [s]
+        // } else {
+        this._currentMatch.push(s)
+        // }
         this._matchGroups = this._groupExpression.matchGroups
     }
 

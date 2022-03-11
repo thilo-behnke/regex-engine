@@ -1,9 +1,9 @@
 import Character from "./character";
-import {isWord} from "../utils/string-utils";
+import {IndexedToken, isWord} from "../utils/string-utils";
 
 export default class WordWildcardCharacter implements Character {
-    test(s: string): boolean {
-        return isWord(s)
+    test(s: IndexedToken): boolean {
+        return isWord(s?.value)
     }
 
     cursorOnly(): boolean {

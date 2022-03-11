@@ -22,7 +22,7 @@ test.each([
         ],
         toTest: 'aa',
         expectedRes: false,
-        expectedMatch: []
+        expectedMatch: ['a']
     },
     {
         expressions: [
@@ -32,7 +32,7 @@ test.each([
         ],
         toTest: 'a',
         expectedRes: false,
-        expectedMatch: []
+        expectedMatch: ['a']
     },
     {
         expressions: [
@@ -52,7 +52,7 @@ test.each([
         ],
         toTest: 'abce',
         expectedRes: false,
-        expectedMatch: []
+        expectedMatch: ['a', 'b']
     },
     {
         expressions: [
@@ -81,7 +81,7 @@ test.each([
         ],
         toTest: 'abdd',
         expectedRes: false,
-        expectedMatch: []
+        expectedMatch: ['a']
     },
     {
         expressions: [
@@ -102,7 +102,7 @@ test.each([
     let stringIdx = 0
     const tokens = explodeIndexed(toTest)
     while(expression.hasNext()) {
-        const matchRes = expression.matchNext(tokens[stringIdx])
+        const matchRes = expression.matchNext(tokens[stringIdx], null, null, tokens, stringIdx)
         if (!matchRes) {
             break
         }
