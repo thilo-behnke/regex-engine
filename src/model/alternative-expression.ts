@@ -2,6 +2,7 @@ import {Expression} from "./expression";
 import {IndexedToken} from "../utils/string-utils";
 import GroupExpression from "./group-expression";
 import {MatchGroup} from "./match/match-group";
+import {matchFailed, MatchIteration} from "./expression/match-iteration";
 
 export default class AlternativeExpression implements Expression {
     private readonly _expressions: Expression[]

@@ -1,6 +1,7 @@
 import {Expression} from "./expression";
 import {AbstractGroupExpression} from "./abstract-group-expression";
 import {IndexedToken} from "../utils/string-utils";
+import {MatchIteration} from "./expression/match-iteration";
 
 export class AssertionExpression extends AbstractGroupExpression {
     private _positive = true
@@ -42,13 +43,26 @@ export class AssertionExpression extends AbstractGroupExpression {
         return expression
     }
 
-    matchNext(s: IndexedToken, last: IndexedToken = null, next: IndexedToken = null): boolean {
-        const matchRes = super.matchNext(s, last, next);
-        return this._positive && matchRes || !this._positive && !matchRes;
-    }
+    matchNext(s: IndexedToken, last: IndexedToken = null, next: IndexedToken = null, toTest: IndexedToken[], cursorPos: number): MatchIteration {
+        if (this.type === AssertionType.LOOKBEHIND) {
+            const toCheck = toTest.slice(cursorPos - this.minimumLength, cursorPos)
+            if (toCheck.length < this.minimumLength) {
+                this._failed = true
+            } else {
+                let tokenIdx = 0
+                while(super.hasNext()) {
+                    const nextChar = toCheck[tokenIdx]
+                    const matchRes = super.matchNext(nextChar, toCheck[tokenIdx - 1], toCheck[tokenIdx + 1], toTest, cursorPos);
+                    if (!matchRes.matched) {
+                        break
+                    }
+                }
+            }
+            return {matched: this.isSuccessful(), consumed: 0};
+        }
 
-    lastMatchCharactersConsumed(): number {
-        return 0;
+        const matchRes = super.matchNext(s, last, next, this.currentMatch(), cursorPos);
+        return {matched: matchRes.matched || !this._positive, consumed: 0}
     }
 
     currentMatch(): IndexedToken[] {

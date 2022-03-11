@@ -42,7 +42,7 @@ export default class Parser {
         this._lexer = lexer ?? new Lexer();
     }
 
-    parse(s: string): Expression[] {
+    parse(s: string): Expression {
         this._lexer.load(s)
         this._expressions = []
         this._currentToken = this._lexer.getNextToken()
@@ -52,7 +52,7 @@ export default class Parser {
                 this._expressions.push(alternative)
             }
         }
-        return this._expressions
+        return DefaultGroupExpression.nonCapturing(...this._expressions)
     }
 
 

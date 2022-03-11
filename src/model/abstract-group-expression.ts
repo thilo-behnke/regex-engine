@@ -1,39 +1,43 @@
 import {Expression} from "./expression";
-import FixedLengthExpression from "./fixed-length-expression";
 import GroupExpression, {isGroupExpression} from "./group-expression";
 import {MatchGroup} from "./match/match-group";
 import {IndexedToken} from "../utils/string-utils";
+import {matchFailed, MatchIteration} from "./expression/match-iteration";
+import {last} from "../utils/array-utils";
+import orderBy = require("lodash.orderby");
 
 export abstract class AbstractGroupExpression implements Expression, GroupExpression {
     private _idx: number = 0
-    private _persistedMatch: IndexedToken[] = []
-    private _currentMatch: IndexedToken[] = []
-    private _matchGroups: MatchGroup[] = []
+    private _currentMatch: Array<[number, IndexedToken]> = []
 
     protected readonly _expressions: Expression[]
     protected _failed = false
-    protected _lastMatchConsumed = 0
 
     protected constructor(...expressions: Expression[]) {
         this._expressions = expressions;
     }
 
-    protected get internalMatch() {
-        return [...this._persistedMatch, ...this._currentMatch];
+    protected get internalMatch(): IndexedToken[] {
+        return this._currentMatch.map(([,token]) => token);
     }
 
     abstract currentMatch(): IndexedToken[]
 
+    // TODO: Cache
     get matchGroups(): Array<MatchGroup> {
-        return this._matchGroups;
+        const innerMatchGroups = this._expressions.filter(it => it.isSuccessful() && isGroupExpression(it)).flatMap(it => (it as GroupExpression).matchGroups)
+        return [
+            ...this.getMatchGroups(),
+            ...innerMatchGroups
+        ]
     }
 
     hasNext(): boolean {
-        return !this._failed && this._idx < this._expressions.length && this._expressions[this._idx].hasNext();
+        return !this._failed && (this._idx < this._expressions.length && this._expressions[this._idx]?.hasNext() || this._idx + 1 < this._expressions.length && this._expressions[this._idx + 1]?.hasNext());
     }
 
     isInitial(): boolean {
-        return this._idx == 0;
+        return this._idx === 0;
     }
 
     get minimumLength(): number {
@@ -44,78 +48,127 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
 
     abstract get tracksMatch(): boolean
 
-    backtrack(): boolean {
+    backtrack(toTest: IndexedToken[], cursorPos: number): boolean {
         if (!this.canBacktrack()) {
             return false
         }
 
-        const updatedMatch = this._persistedMatch.slice(0, this._persistedMatch.length - 1)
-        this.reset()
-        let sIdx = 0
-        // TODO: Basically a regex engine within the group?
-        let hasMatched = true
-        while(hasMatched) {
-            const thisChar = updatedMatch[sIdx]
-            const last = sIdx > 0 ? updatedMatch[sIdx - 1] : null
-            const next = sIdx < updatedMatch.length ? updatedMatch[sIdx + 1] : null
-            hasMatched = this.matchNext(thisChar, last, next)
-            sIdx++
+        let backtrackedMatches = []
+        // TODO: What if the current expression is not exhausted? E.g. in case of a greedy expression.
+        let backtrackIdx = this._expressions.lastIndexOf(last(this._expressions.filter(it => !it.isInitial() && it.isSuccessful() && it.canBacktrack())))
+        // TODO: What if the backtracked expression is the last expression?
+        if (backtrackIdx === this._expressions.length - 1) {
+            const expression = this._expressions[backtrackIdx]
+            // TODO: Update cursorPos based on backtracking?
+            const backtrackRes = expression.backtrack(toTest, cursorPos)
+            // backtrack failed
+            if (!backtrackRes) {
+                return false
+            }
+            const updatedExpressionMatch = expression.isSuccessful() ? expression.currentMatch() : []
+            this._currentMatch = orderBy([
+                ...this._currentMatch.filter(([idx, ]) => idx !== backtrackIdx),
+                ...updatedExpressionMatch.map(it => [backtrackIdx, it] as [number, IndexedToken])
+            ], [0])
+            return true
         }
 
-        this._failed = this._expressions.some(it => !it.isSuccessful())
-        this._persistedMatch = this.currentMatch()
-        this._currentMatch = []
-        return this.isSuccessful()
+        let backtrackSuccessful = false
+        while (backtrackIdx >= 0) {
+            const expression = this._expressions[backtrackIdx]
+            const backtrackRes = expression.backtrack(toTest, cursorPos)
+            // backtrack failed
+            if (!backtrackRes) {
+                return false
+            }
+            // TODO: What if persistedMatch is empty?
+            const lastToken = last(this._currentMatch)[1]
+            backtrackedMatches.unshift(lastToken)
+            this._currentMatch = this._currentMatch.slice(0, this._currentMatch.length - 1)
+
+            this._idx = backtrackIdx + 1
+            this._expressions.slice(this._idx, this._expressions.length).forEach(it => it.reset())
+
+            this._failed = false
+            let forwardFailed = false
+            let tokenIdx = 0
+            while (this.hasNext() && backtrackedMatches[tokenIdx]) {
+                const matchRes = this.matchNext(backtrackedMatches[tokenIdx], backtrackedMatches[tokenIdx - 1], backtrackedMatches[tokenIdx + 1], toTest, cursorPos)
+                if (!matchRes.matched) {
+                    forwardFailed = true
+                    break
+                }
+                tokenIdx++
+            }
+            if (forwardFailed || this._failed) {
+                backtrackIdx--
+                continue
+            }
+            backtrackSuccessful = true
+            break
+        }
+        return backtrackSuccessful
     }
 
     canBacktrack(): boolean {
-        return this._expressions[this._idx - 1].canBacktrack()
+        return this._expressions.some(it => it.isSuccessful() && it.canBacktrack())
     }
 
-    abstract lastMatchCharactersConsumed(): number
-
-    matchNext(s: IndexedToken, last: IndexedToken = null, next: IndexedToken = null): boolean {
-        if (!this.hasNext()) {
-            return false
-        }
-        const nextExpression = this._expressions[this._idx]
-        const res = nextExpression.matchNext(s, last, next);
-        if (res) {
-            this._lastMatchConsumed = nextExpression.lastMatchCharactersConsumed()
-        }
-        this._currentMatch = res || nextExpression.isSuccessful() ? nextExpression.currentMatch() : []
-        if (!nextExpression.hasNext()) {
-            if (nextExpression.isSuccessful()) {
-                this._persistedMatch = this.currentMatch()
-                this._matchGroups = []
-                if (this.tracksMatch) {
-                    const matchedValue = this._persistedMatch.map(it => it.value).join('')
-                    if (this._persistedMatch.length) {
-                        const lowerBound = this._persistedMatch[0].idx
-                        const upperBound = this._persistedMatch[this._persistedMatch.length - 1]?.idx + 1
-                        this._matchGroups = [{match: matchedValue, from: lowerBound, to: upperBound}]
-                    }
-                }
-                if (isGroupExpression(nextExpression)) {
-                    this._matchGroups = [...this.matchGroups, ...nextExpression.matchGroups]
-                }
-            } else {
-                this._failed = true
-                this._persistedMatch = []
-                this._matchGroups = []
+    matchNext(s: IndexedToken, last: IndexedToken = null, next: IndexedToken = null, toTest: IndexedToken[], cursorPos: number): MatchIteration {
+        if (!this._expressions[this._idx].hasNext()) {
+            if (!this._expressions[this._idx + 1]) {
+                return matchFailed()
             }
-            this._currentMatch = []
+
             this._idx++
         }
-        return res
+
+        let res
+        while (this._idx < this._expressions.length) {
+            const nextExpression = this._expressions[this._idx]
+            res = nextExpression.matchNext(s, last, next, toTest, cursorPos)
+            const updatedExpressionMatch = res.matched || nextExpression.isSuccessful() ? nextExpression.currentMatch() : []
+            this._currentMatch = orderBy([
+                ...this._currentMatch.filter(([idx, ]) => idx !== this._idx),
+                ...updatedExpressionMatch.map(it => [this._idx, it] as [number, IndexedToken])
+            ], [0])
+            if (!nextExpression.hasNext()) {
+                if (nextExpression.isSuccessful()) {
+                } else {
+                    this._failed = true
+                    return res
+                }
+
+                if (!res.matched) {
+                    this._idx++
+                    continue;
+                }
+            }
+            if (res.matched) {
+                return res
+            }
+        }
+        return matchFailed()
     }
 
     reset(): void {
         this._idx = 0
         this._expressions.forEach(it => it.reset())
         this._currentMatch = []
-        this._persistedMatch = []
-        this._matchGroups = []
         this._failed = false
+    }
+
+    private getMatchGroups(): MatchGroup[] {
+        if (!this.tracksMatch) {
+            return []
+        }
+        const currentMatch = this.currentMatch()
+        const matchedValue = currentMatch.map(it => it.value).join('')
+        if (!currentMatch.length) {
+            return []
+        }
+        const lowerBound = currentMatch[0].idx
+        const upperBound = currentMatch[currentMatch.length - 1]?.idx + 1
+        return [{match: matchedValue, from: lowerBound, to: upperBound}]
     }
 }

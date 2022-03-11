@@ -19,10 +19,6 @@ export class DefaultGroupExpression extends AbstractGroupExpression {
         return !this._failed && this._expressions.every(it => it.isSuccessful());
     }
 
-    lastMatchCharactersConsumed(): number {
-        return this._lastMatchConsumed;
-    }
-
     currentMatch(): IndexedToken[] {
         return this.internalMatch
     }

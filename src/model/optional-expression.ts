@@ -1,5 +1,6 @@
 import {Expression} from "./expression";
 import {IndexedToken} from "../utils/string-utils";
+import {MatchIteration} from "./expression/match-iteration";
 
 export class OptionalExpression implements Expression {
     private _expression: Expression
@@ -24,24 +25,20 @@ export class OptionalExpression implements Expression {
         return true
     }
 
-    backtrack(): boolean {
+    backtrack(toTest: IndexedToken[], cursorPos: number): boolean {
         if (!this.canBacktrack()) {
             return false
         }
 
-        return this._expression.backtrack()
+        return this._expression.backtrack(toTest, cursorPos)
     }
 
     canBacktrack(): boolean {
         return !this._expression.isInitial();
     }
 
-    lastMatchCharactersConsumed(): number {
-        return this._expression.lastMatchCharactersConsumed();
-    }
-
-    matchNext(s: IndexedToken, last: IndexedToken, next: IndexedToken): boolean {
-        return this._expression.matchNext(s, last, next);
+    matchNext(s: IndexedToken, last: IndexedToken, next: IndexedToken, toTest: IndexedToken[], cursorPos: number): MatchIteration {
+        return this._expression.matchNext(s, last, next, toTest, cursorPos);
     }
 
     get minimumLength(): number {

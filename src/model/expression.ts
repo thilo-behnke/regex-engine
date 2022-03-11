@@ -1,5 +1,6 @@
 import Character from "./character";
 import {IndexedToken} from "../utils/string-utils";
+import {MatchIteration} from "./expression/match-iteration";
 
 export interface Expression {
     /**
@@ -18,14 +19,9 @@ export interface Expression {
      * @param s token to check (nullable!)
      * @param last token before current (nullable!)
      * @param next token after current (nullable!)
+     * @return MatchIteration
      */
-    matchNext(s: IndexedToken, last: IndexedToken, next: IndexedToken): boolean
-
-    /**
-     * Get the consumed characters from the last match, i.e. the result of the last execution of matchNext.
-     * Will be empty if the expression does not consume characters, but only positions the cursor.
-     */
-    lastMatchCharactersConsumed(): number
+    matchNext(s: IndexedToken, last: IndexedToken, next: IndexedToken, toTest: IndexedToken[], cursorPos: number): MatchIteration
 
     /**
      * Returns true if the expression is able to backtrack, i.e. check states before the latest match.
@@ -35,7 +31,7 @@ export interface Expression {
     /**
      * Execute backtrack (one token at a time) and return true if the updated state still matches.
      */
-    backtrack(): boolean
+    backtrack(toTest: IndexedToken[], cursorPos: number): boolean
 
     /**
      * Return the length of the shortest possible match.

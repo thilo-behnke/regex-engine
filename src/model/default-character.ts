@@ -1,4 +1,5 @@
 import Character from "./character";
+import {IndexedToken} from "../utils/string-utils";
 
 export default class DefaultCharacter implements Character {
     private readonly _value
@@ -7,8 +8,8 @@ export default class DefaultCharacter implements Character {
         this._value = value;
     }
 
-    test(s: string): boolean {
-        return this._value == s
+    test(s: IndexedToken): boolean {
+        return this._value == s?.value
     }
 
     cursorOnly(): boolean {

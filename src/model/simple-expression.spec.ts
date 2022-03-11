@@ -20,11 +20,11 @@ test.each([
         if (idx > match.length) {
             break
         }
-        const matchRes = simpleExpression.matchNext(tokens[idx], idx > 0 ? tokens[idx - 1] : null, idx + 1 < tokens.length ? tokens[idx + 1] : null)
+        const matchRes = simpleExpression.matchNext(tokens[idx], idx > 0 ? tokens[idx - 1] : null, idx + 1 < tokens.length ? tokens[idx + 1] : null, tokens, idx)
         if (!matchRes) {
             break
         }
-        idx += simpleExpression.lastMatchCharactersConsumed()
+        idx += matchRes.consumed
     }
     expect(simpleExpression.isSuccessful()).toEqual(shouldMatch)
     expect(simpleExpression.currentMatch().map(it => it.value).join('')).toEqual(expectedMatch)
