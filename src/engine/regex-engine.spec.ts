@@ -120,6 +120,8 @@ test.each([
     {value: 'ab', pattern: 'a(?<=a)b', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'ab'},
     {value: 'abctestabc', pattern: '(?<!d)test', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'test'},
     {value: 'ab', pattern: 'a(?<=(a))b', shouldMatch: true, expectedMatchGroups: [{match: 'a', from: 0, to: 1}], expectedMatch: 'ab'},
+    {value: 'abcdef', pattern: 'abc(?<!x)d(?<=d)ef', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'abcdef'},
+    {value: 'xyzabcdef', pattern: '(?<=abc)def', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'def'},
 ]) ('should correctly handle lookbehind: %s', ({value, pattern, shouldMatch, expectedMatchGroups, expectedMatch}) => {
     const engine = new RegexEngine()
     const res = engine.match(value, pattern)

@@ -1,7 +1,7 @@
 import {Expression} from "./expression";
 import {AbstractGroupExpression} from "./abstract-group-expression";
 import {IndexedToken} from "../utils/string-utils";
-import {MatchIteration} from "./expression/match-iteration";
+import {matchFailed, MatchIteration} from "./expression/match-iteration";
 
 export class AssertionExpression extends AbstractGroupExpression {
     private _positive = true
@@ -45,21 +45,33 @@ export class AssertionExpression extends AbstractGroupExpression {
 
     matchNext(s: IndexedToken, last: IndexedToken = null, next: IndexedToken = null, toTest: IndexedToken[]): MatchIteration {
         if (this.type === AssertionType.LOOKBEHIND) {
-            const cursorPos = s?.idx ?? toTest.length
-            const toCheck = toTest.slice(cursorPos - this.minimumLength, cursorPos)
-            if (toCheck.length < this.minimumLength) {
-                this._failed = true
-            } else {
-                let tokenIdx = 0
-                while(super.hasNext()) {
-                    const nextChar = toCheck[tokenIdx]
-                    const matchRes = super.matchNext(nextChar, toCheck[tokenIdx - 1], toCheck[tokenIdx + 1], toTest);
-                    if (!matchRes.matched) {
+            if (toTest.length < this.minimumLength) {
+                return matchFailed()
+            }
+
+            const initialCursorPos = s?.idx ?? toTest.length
+            let cursorPos = initialCursorPos
+            while (cursorPos < toTest.length) {
+                const toCheck = toTest.slice(cursorPos - this.minimumLength, cursorPos)
+                if (toCheck.length >= this.minimumLength) {
+                    let tokenIdx = 0
+                    while(super.hasNext()) {
+                        const nextChar = toCheck[tokenIdx]
+                        const matchRes = super.matchNext(nextChar, toCheck[tokenIdx - 1], toCheck[tokenIdx + 1], toTest);
+                        if (!matchRes.matched) {
+                            break
+                        }
+                        tokenIdx++
+                    }
+                    if (this.isSuccessful()) {
                         break
                     }
+                    this.reset()
                 }
+
+                cursorPos++
             }
-            return {matched: this.isSuccessful(), consumed: 0};
+            return {matched: this.isSuccessful(), consumed: cursorPos - initialCursorPos};
         }
 
         const matchRes = super.matchNext(s, last, next, this.currentMatch());
