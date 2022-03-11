@@ -53,8 +53,27 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
         let backtrackedMatches = []
         // TODO: What if the current expression is not exhausted? E.g. in case of a greedy expression.
         let backtrackIdx = this._expressions.lastIndexOf(last(this._expressions.filter(it => !it.isInitial() && it.isSuccessful() && it.canBacktrack())))
+        // TODO: What if the backtracked expression is the last expression?
+        if (backtrackIdx === this._expressions.length - 1) {
+            const expression = this._expressions[backtrackIdx]
+            const backtrackRes = expression.backtrack()
+            // backtrack failed
+            if (!backtrackRes) {
+                return false
+            }
+            const updatedExpressionMatch = expression.isSuccessful() ? expression.currentMatch() : []
+            this._currentMatch = orderBy([
+                ...this._currentMatch.filter(([idx, ]) => idx !== this._idx),
+                ...updatedExpressionMatch.map(it => [this._idx, it] as [number, IndexedToken])
+            ], [0])
+            if (isGroupExpression(expression)) {
+                this._matchGroups[backtrackIdx] = expression.matchGroups
+            }
+            return true
+        }
+
         let backtrackSuccessful = false
-        while (backtrackIdx > 0) {
+        while (backtrackIdx >= 0) {
             const expression = this._expressions[backtrackIdx]
             const backtrackRes = expression.backtrack()
             // backtrack failed
@@ -65,6 +84,7 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
             const lastToken = last(this._currentMatch)[1]
             backtrackedMatches.unshift(lastToken)
             this._currentMatch = this._currentMatch.slice(0, this._currentMatch.length - 1)
+
             this._idx = backtrackIdx + 1
             this._expressions.slice(this._idx, this._expressions.length).forEach(it => it.reset())
 
