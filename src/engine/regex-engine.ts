@@ -35,7 +35,7 @@ export default class RegexEngine {
             let matchSuccessful = res.match
             let tokensConsumed = res.tokensConsumed
             while (!matchSuccessful && expression.canBacktrack()) {
-                const backtrackRes = expression.backtrack(tokens, tokensConsumed)
+                const backtrackRes = expression.backtrack(tokens)
                 if (!backtrackRes) {
                     break
                 }
@@ -67,7 +67,7 @@ export default class RegexEngine {
             const nextChar = idx < toTest.length ? toTest[idx] : null
             const previous = idx > 0 ? toTest[idx - 1] : null
             const next = idx + 1 < toTest.length ? toTest[idx + 1] : null
-            const matchRes = expression.matchNext(nextChar, previous, next, toTest, idx)
+            const matchRes = expression.matchNext(nextChar, previous, next, toTest)
             idx += matchRes.consumed
             if (!matchRes.matched) {
                 break

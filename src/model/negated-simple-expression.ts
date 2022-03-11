@@ -27,19 +27,19 @@ export class NegatedSimpleExpression implements Expression {
         return !this._delegate.isSuccessful();
     }
 
-    backtrack(): boolean {
-        return this._delegate.backtrack();
+    backtrack(toTest: IndexedToken[]): boolean {
+        return this._delegate.backtrack(toTest);
     }
 
     canBacktrack(): boolean {
         return this._delegate.canBacktrack();
     }
 
-    matchNext(s: IndexedToken, last: IndexedToken, next: IndexedToken, toTest: IndexedToken[], cursorPos: number): MatchIteration {
+    matchNext(s: IndexedToken, last: IndexedToken, next: IndexedToken, toTest: IndexedToken[]): MatchIteration {
         if (s === null) {
             return matchFailed()
         }
-        const delegateRes = this._delegate.matchNext(s, last, next, toTest, cursorPos);
+        const delegateRes = this._delegate.matchNext(s, last, next, toTest);
         this._currentMatch = !delegateRes.matched ? [s] : []
         return delegateRes.matched ? matchFailed() : {matched: true, consumed: delegateRes.cursorOnly ? 0 : 1}
     }

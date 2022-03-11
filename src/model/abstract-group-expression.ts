@@ -48,7 +48,7 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
 
     abstract get tracksMatch(): boolean
 
-    backtrack(toTest: IndexedToken[], cursorPos: number): boolean {
+    backtrack(toTest: IndexedToken[]): boolean {
         if (!this.canBacktrack()) {
             return false
         }
@@ -60,7 +60,7 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
         if (backtrackIdx === this._expressions.length - 1) {
             const expression = this._expressions[backtrackIdx]
             // TODO: Update cursorPos based on backtracking?
-            const backtrackRes = expression.backtrack(toTest, cursorPos)
+            const backtrackRes = expression.backtrack(toTest)
             // backtrack failed
             if (!backtrackRes) {
                 return false
@@ -76,7 +76,7 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
         let backtrackSuccessful = false
         while (backtrackIdx >= 0) {
             const expression = this._expressions[backtrackIdx]
-            const backtrackRes = expression.backtrack(toTest, cursorPos)
+            const backtrackRes = expression.backtrack(toTest)
             // backtrack failed
             if (!backtrackRes) {
                 return false
@@ -93,7 +93,7 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
             let forwardFailed = false
             let tokenIdx = 0
             while (this.hasNext() && backtrackedMatches[tokenIdx]) {
-                const matchRes = this.matchNext(backtrackedMatches[tokenIdx], backtrackedMatches[tokenIdx - 1], backtrackedMatches[tokenIdx + 1], toTest, cursorPos)
+                const matchRes = this.matchNext(backtrackedMatches[tokenIdx], backtrackedMatches[tokenIdx - 1], backtrackedMatches[tokenIdx + 1], toTest)
                 if (!matchRes.matched) {
                     forwardFailed = true
                     break
@@ -114,7 +114,7 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
         return this._expressions.some(it => it.isSuccessful() && it.canBacktrack())
     }
 
-    matchNext(s: IndexedToken, last: IndexedToken = null, next: IndexedToken = null, toTest: IndexedToken[], cursorPos: number): MatchIteration {
+    matchNext(s: IndexedToken, last: IndexedToken = null, next: IndexedToken = null, toTest: IndexedToken[]): MatchIteration {
         if (!this._expressions[this._idx].hasNext()) {
             if (!this._expressions[this._idx + 1]) {
                 return matchFailed()
@@ -126,7 +126,7 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
         let res
         while (this._idx < this._expressions.length) {
             const nextExpression = this._expressions[this._idx]
-            res = nextExpression.matchNext(s, last, next, toTest, cursorPos)
+            res = nextExpression.matchNext(s, last, next, toTest)
             const updatedExpressionMatch = res.matched || nextExpression.isSuccessful() ? nextExpression.currentMatch() : []
             this._currentMatch = orderBy([
                 ...this._currentMatch.filter(([idx, ]) => idx !== this._idx),

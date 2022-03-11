@@ -15,7 +15,7 @@ test.each([
         if (idx > match.length) {
             break
         }
-        bracketExpression.matchNext(tokens[idx], null, null, tokens, idx)
+        bracketExpression.matchNext(tokens[idx], null, null, tokens)
         idx++
     }
     expect(bracketExpression.isSuccessful()).toEqual(shouldMatch)
@@ -34,7 +34,7 @@ test.each([
         if (idx > match.length) {
             break
         }
-        bracketExpression.matchNext(tokens[idx], null, null, tokens, idx)
+        bracketExpression.matchNext(tokens[idx], null, null, tokens)
         idx++
     }
     expect(bracketExpression.isSuccessful()).toEqual(shouldMatch)

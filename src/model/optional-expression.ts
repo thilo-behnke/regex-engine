@@ -25,20 +25,20 @@ export class OptionalExpression implements Expression {
         return true
     }
 
-    backtrack(toTest: IndexedToken[], cursorPos: number): boolean {
+    backtrack(toTest: IndexedToken[]): boolean {
         if (!this.canBacktrack()) {
             return false
         }
 
-        return this._expression.backtrack(toTest, cursorPos)
+        return this._expression.backtrack(toTest)
     }
 
     canBacktrack(): boolean {
         return !this._expression.isInitial();
     }
 
-    matchNext(s: IndexedToken, last: IndexedToken, next: IndexedToken, toTest: IndexedToken[], cursorPos: number): MatchIteration {
-        return this._expression.matchNext(s, last, next, toTest, cursorPos);
+    matchNext(s: IndexedToken, last: IndexedToken, next: IndexedToken, toTest: IndexedToken[]): MatchIteration {
+        return this._expression.matchNext(s, last, next, toTest);
     }
 
     get minimumLength(): number {

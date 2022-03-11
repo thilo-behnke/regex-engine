@@ -31,14 +31,14 @@ export default abstract class AbstractGreedyExpression implements Expression {
         return !!this._isSuccessful;
     }
 
-    matchNext(s: IndexedToken, previous: IndexedToken = null, next: IndexedToken = null, toTest: IndexedToken[], cursorPos: number): MatchIteration {
+    matchNext(s: IndexedToken, previous: IndexedToken = null, next: IndexedToken = null, toTest: IndexedToken[]): MatchIteration {
         let wasReset = false
         if (this._expression.isSuccessful()) {
             this._expression.reset()
             wasReset = true
         }
 
-        const res = this._expression.matchNext(s, previous, next, toTest, cursorPos)
+        const res = this._expression.matchNext(s, previous, next, toTest)
 
         if (res.matched) {
             this.storeCurrentMatch(s, wasReset)
@@ -56,7 +56,7 @@ export default abstract class AbstractGreedyExpression implements Expression {
 
     abstract storeCurrentMatch(s: IndexedToken, expressionWasReset: boolean): void
 
-    backtrack(toTest: IndexedToken[], cursorPos: number): boolean {
+    backtrack(toTest: IndexedToken[]): boolean {
         if (!this.canBacktrack()) {
             return
         }
@@ -66,7 +66,7 @@ export default abstract class AbstractGreedyExpression implements Expression {
         updatedMatch.every((it, idx) => {
             const last = idx > 0 ? updatedMatch[idx - 1] : null
             const next = idx < updatedMatch.length ? updatedMatch[idx + 1] : null
-            return this.matchNext(it, last, next, toTest, cursorPos)
+            return this.matchNext(it, last, next, toTest)
         })
         if (this._isSuccessful === undefined && this._allowNoMatch) {
             this._isSuccessful = true
