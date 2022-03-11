@@ -330,9 +330,9 @@ test('should correctly parse group', () => {
     const parser = new Parser()
     const res = parser.parse('(abc)')
     const expected = new DefaultGroupExpression(
-            new SimpleExpression(new DefaultCharacter('a')),
-            new SimpleExpression(new DefaultCharacter('b')),
-            new SimpleExpression(new DefaultCharacter('c')),
+        new SimpleExpression(new DefaultCharacter('a')),
+        new SimpleExpression(new DefaultCharacter('b')),
+        new SimpleExpression(new DefaultCharacter('c')),
     )
     expect(res).toEqual(expected)
 })
@@ -370,22 +370,20 @@ test.each([
     },
     {
         expression: "(abc|def)",
-        expected: [
-            new DefaultGroupExpression(
-                new AlternativeExpression(
-                    new DefaultGroupExpression(
-                        new SimpleExpression(new DefaultCharacter('a')),
-                        new SimpleExpression(new DefaultCharacter('b')),
-                        new SimpleExpression(new DefaultCharacter('c')),
-                    ),
-                    new DefaultGroupExpression(
-                        new SimpleExpression(new DefaultCharacter('d')),
-                        new SimpleExpression(new DefaultCharacter('e')),
-                        new SimpleExpression(new DefaultCharacter('f')),
-                    ),
-                )
+        expected: new DefaultGroupExpression(
+            new AlternativeExpression(
+                DefaultGroupExpression.nonCapturing(
+                    new SimpleExpression(new DefaultCharacter('a')),
+                    new SimpleExpression(new DefaultCharacter('b')),
+                    new SimpleExpression(new DefaultCharacter('c')),
+                ),
+                DefaultGroupExpression.nonCapturing(
+                    new SimpleExpression(new DefaultCharacter('d')),
+                    new SimpleExpression(new DefaultCharacter('e')),
+                    new SimpleExpression(new DefaultCharacter('f')),
+                ),
             )
-        ]
+        )
     }
 ])('should correctly parse group: %s', ({expression, expected}) => {
     const res = new Parser().parse(expression)
@@ -545,13 +543,11 @@ test.each([
     },
     {
         expression: "[ab?]",
-        expected: DefaultGroupExpression.nonCapturing(...[
-            new SquareBracketExpression(
-                new SimpleExpression(new DefaultCharacter('a')),
-                new SimpleExpression(new DefaultCharacter('b')),
-                new SimpleExpression(new DefaultCharacter('?'))
-            ),
-        ])
+        expected: new SquareBracketExpression(
+            new SimpleExpression(new DefaultCharacter('a')),
+            new SimpleExpression(new DefaultCharacter('b')),
+            new SimpleExpression(new DefaultCharacter('?'))
+        )
     }
 ])('should correctly parse optional expression: %s', ({expression, expected}) => {
     const res = new Parser().parse(expression)

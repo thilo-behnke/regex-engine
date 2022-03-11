@@ -49,7 +49,8 @@ export default class Parser {
         while (this._currentToken !== null) {
             const alternativeExpression = this.tryParseAlternatives(RegexTokenType.EOF)
             if (alternativeExpression) {
-                this._expressions.push(alternativeExpression)
+                const expression = alternativeExpression.length === 1 ? alternativeExpression[0] : DefaultGroupExpression.nonCapturing(...alternativeExpression)
+                this._expressions.push(expression)
             }
         }
         if (!this._expressions.length) {
@@ -62,7 +63,7 @@ export default class Parser {
     }
 
 
-    private tryParseAlternatives = (stopToken: RegexTokenType): Expression => {
+    private tryParseAlternatives = (stopToken: RegexTokenType): Expression[] => {
         const alternatives: Expression[][] = []
         let currentAlternative: Expression[] = []
         while (this._currentToken !== null && this._currentToken.type !== stopToken) {
@@ -83,13 +84,11 @@ export default class Parser {
         if (!alternatives.length) {
             return null
         }
-        const innerExpressions = alternatives.map(alt => {
-            if (alt.length === 1) {
-                return alt[0]
-            }
-            return DefaultGroupExpression.nonCapturing(...alt)
-        })
-        return innerExpressions.length === 1 ? innerExpressions[0] : new AlternativeExpression(...innerExpressions)
+        if (alternatives.length === 1) {
+            return alternatives[0]
+        }
+
+        return [new AlternativeExpression(...alternatives.map(it => it.length === 1 ? it[0] : DefaultGroupExpression.nonCapturing(...it)))]
     }
 
     private tryParseRegex = (): Expression[] => {
@@ -251,7 +250,7 @@ export default class Parser {
         if (!withinBrackets) {
             this.throwParseError('Empty group')
         }
-        expressions.push(withinBrackets)
+        withinBrackets.forEach(it => expressions.push(it))
 
         if (isLookbehind(groupType)) {
             this._allowModifiers = true
