@@ -31,8 +31,7 @@ export default class RegexEngine {
 
         while(this._matchOffset < tokens.length) {
             const expression = this._parser.parse(p)
-            const tokensAfterOffset = tokens.slice(this._matchOffset)
-            const res = RegexEngine.tryTestExpression(expression, tokensAfterOffset)
+            const res = RegexEngine.tryTestExpression(expression, tokens, this._matchOffset)
             let matchSuccessful = res.match
             let tokensConsumed = res.tokensConsumed
             while (!matchSuccessful && expression.canBacktrack()) {
@@ -40,12 +39,12 @@ export default class RegexEngine {
                 if (!backtrackRes) {
                     break
                 }
-                const tokensNotMatched = tokensAfterOffset.slice(tokensConsumed)
-                if (!tokensNotMatched.length) {
+                const  unmatchedTokenOffset = this._matchOffset + tokensConsumed
+                if ( unmatchedTokenOffset >= tokens.length) {
                     matchSuccessful = true
                     break
                 }
-                const res = RegexEngine.tryTestExpression(expression, tokensNotMatched)
+                const res = RegexEngine.tryTestExpression(expression, tokens, unmatchedTokenOffset)
                 matchSuccessful = res.match
                 tokensConsumed = res.tokensConsumed
             }
@@ -111,8 +110,8 @@ export default class RegexEngine {
     //     return expressions.every(it => it.isSuccessful())
     // }
 
-    private static tryTestExpression = (expression: Expression, toTest: IndexedToken[], startIdx: number = 0) => {
-        let idx = startIdx
+    private static tryTestExpression = (expression: Expression, toTest: IndexedToken[], offset: number) => {
+        let idx = offset
         while(expression.hasNext()) {
             const nextChar = idx < toTest.length ? toTest[idx] : null
             const previous = idx > 0 ? toTest[idx - 1] : null
@@ -123,6 +122,6 @@ export default class RegexEngine {
                 break
             }
         }
-        return {match: expression.isSuccessful(), tokensConsumed: idx - startIdx, matched: expression.currentMatch().map(it => it.value)}
+        return {match: expression.isSuccessful(), tokensConsumed: idx - offset, matched: expression.currentMatch().map(it => it.value)}
     }
 }
