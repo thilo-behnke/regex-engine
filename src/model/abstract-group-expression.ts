@@ -5,11 +5,11 @@ import {MatchGroup} from "./match/match-group";
 import {IndexedToken} from "../utils/string-utils";
 import {matchFailed, MatchIteration} from "./expression/match-iteration";
 import {last} from "../utils/array-utils";
+import orderBy = require("lodash.orderby");
 
 export abstract class AbstractGroupExpression implements Expression, GroupExpression {
     private _idx: number = 0
-    private _persistedMatch: IndexedToken[] = []
-    private _currentMatch: IndexedToken[] = []
+    private _currentMatch: Array<[number, IndexedToken]> = []
     private _matchGroups: MatchGroup[] = []
 
     protected readonly _expressions: Expression[]
@@ -19,8 +19,8 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
         this._expressions = expressions;
     }
 
-    protected get internalMatch() {
-        return [...this._persistedMatch, ...this._currentMatch];
+    protected get internalMatch(): IndexedToken[] {
+        return this._currentMatch.map(([,token]) => token);
     }
 
     abstract currentMatch(): IndexedToken[]
@@ -62,8 +62,9 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
                 return false
             }
             // TODO: What if persistedMatch is empty?
-            backtrackedMatches.unshift(last(this._persistedMatch))
-            this._persistedMatch = this._persistedMatch.slice(0, this._persistedMatch.length - 1)
+            const lastToken = last(this._currentMatch)[1]
+            backtrackedMatches.unshift(lastToken)
+            this._currentMatch = this._currentMatch.slice(0, this._currentMatch.length - 1)
             this._idx = backtrackIdx + 1
             this._expressions.slice(this._idx, this._expressions.length).forEach(it => it.reset())
 
@@ -105,17 +106,20 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
         while (this._idx < this._expressions.length) {
             const nextExpression = this._expressions[this._idx]
             res = nextExpression.matchNext(s, last, next)
-            this._currentMatch = res.matched || nextExpression.isSuccessful() ? nextExpression.currentMatch() : []
+            const updatedExpressionMatch = res.matched || nextExpression.isSuccessful() ? nextExpression.currentMatch() : []
+            this._currentMatch = orderBy([
+                ...this._currentMatch.filter(([idx, ]) => idx !== this._idx),
+                ...updatedExpressionMatch.map(it => [this._idx, it] as [number, IndexedToken])
+            ], [0])
             if (!nextExpression.hasNext()) {
                 if (nextExpression.isSuccessful()) {
-                    this._persistedMatch = this.currentMatch()
-                    this._currentMatch = []
                     this._matchGroups = []
                     if (this.tracksMatch) {
-                        const matchedValue = this._persistedMatch.map(it => it.value).join('')
-                        if (this._persistedMatch.length) {
-                            const lowerBound = this._persistedMatch[0].idx
-                            const upperBound = this._persistedMatch[this._persistedMatch.length - 1]?.idx + 1
+                        const currentMatch = this.currentMatch()
+                        const matchedValue = currentMatch.map(it => it.value).join('')
+                        if (currentMatch.length) {
+                            const lowerBound = currentMatch[0].idx
+                            const upperBound = currentMatch[currentMatch.length - 1]?.idx + 1
                             this._matchGroups = [{match: matchedValue, from: lowerBound, to: upperBound}]
                         }
                     }
@@ -124,7 +128,6 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
                     }
                 } else {
                     this._failed = true
-                    this._currentMatch = []
                     return res
                 }
 
@@ -144,7 +147,6 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
         this._idx = 0
         this._expressions.forEach(it => it.reset())
         this._currentMatch = []
-        this._persistedMatch = []
         this._matchGroups = []
         this._failed = false
     }
