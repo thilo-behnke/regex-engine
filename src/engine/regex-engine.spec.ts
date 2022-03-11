@@ -74,22 +74,22 @@ test.each([
 })
 
 test.each([
-    // {value: 'abc', pattern: '(a)', shouldMatch: true, expectedMatch: 'a', expectedMatchGroups: [{match: 'a', from: 0, to: 1}]},
-    // {value: 'abc', pattern: '(ad*)', shouldMatch: true, expectedMatch: 'a', expectedMatchGroups: [{match: 'a', from: 0, to: 1}]},
-    // {value: 'abc', pattern: '(ad+)', shouldMatch: false, expectedMatch: null, expectedMatchGroups: []},
-    // {value: 'abc', pattern: '(ab+)c', shouldMatch: true, expectedMatch: 'abc', expectedMatchGroups: [{match: 'ab', from: 0, to: 2}]},
-    // {value: 'abc', pattern: 'a(b+)c', shouldMatch: true, expectedMatch: 'abc', expectedMatchGroups: [{match: 'b', from: 1, to: 2}]},
-    // {value: 'abc', pattern: 'a(d*)b', shouldMatch: true, expectedMatch: 'ab', expectedMatchGroups: []},
-    // {value: 'abc', pattern: 'a(d+)b', shouldMatch: false, expectedMatch: null, expectedMatchGroups: []},
-    // {value: 'abc', pattern: 'a(d)*b', shouldMatch: true, expectedMatch: 'ab', expectedMatchGroups: []},
-    // {value: 'addb', pattern: 'a(d)*b', shouldMatch: true, expectedMatch: 'addb', expectedMatchGroups: [{match: 'd', from: 2, to: 3}]},
-    // {value: 'abc', pattern: 'a(?:bc)', shouldMatch: true, expectedMatch: 'abc', expectedMatchGroups: []},
-    // {value: 'abcde', pattern: 'a(?:bc)(de)', shouldMatch: true, expectedMatch: 'abcde', expectedMatchGroups: [{match: 'de', from: 3, to: 5}]},
-    // {value: 'abcdddef', pattern: 'abcd*(de)f', shouldMatch: true, expectedMatch: 'abcdddef', expectedMatchGroups: [{match: 'de', from: 5, to: 7}]},
+    {value: 'abc', pattern: '(a)', shouldMatch: true, expectedMatch: 'a', expectedMatchGroups: [{match: 'a', from: 0, to: 1}]},
+    {value: 'abc', pattern: '(ad*)', shouldMatch: true, expectedMatch: 'a', expectedMatchGroups: [{match: 'a', from: 0, to: 1}]},
+    {value: 'abc', pattern: '(ad+)', shouldMatch: false, expectedMatch: null, expectedMatchGroups: []},
+    {value: 'abc', pattern: '(ab+)c', shouldMatch: true, expectedMatch: 'abc', expectedMatchGroups: [{match: 'ab', from: 0, to: 2}]},
+    {value: 'abc', pattern: 'a(b+)c', shouldMatch: true, expectedMatch: 'abc', expectedMatchGroups: [{match: 'b', from: 1, to: 2}]},
+    {value: 'abc', pattern: 'a(d*)b', shouldMatch: true, expectedMatch: 'ab', expectedMatchGroups: []},
+    {value: 'abc', pattern: 'a(d+)b', shouldMatch: false, expectedMatch: null, expectedMatchGroups: []},
+    {value: 'abc', pattern: 'a(d)*b', shouldMatch: true, expectedMatch: 'ab', expectedMatchGroups: []},
+    {value: 'addb', pattern: 'a(d)*b', shouldMatch: true, expectedMatch: 'addb', expectedMatchGroups: [{match: 'd', from: 2, to: 3}]},
+    {value: 'abc', pattern: 'a(?:bc)', shouldMatch: true, expectedMatch: 'abc', expectedMatchGroups: []},
+    {value: 'abcde', pattern: 'a(?:bc)(de)', shouldMatch: true, expectedMatch: 'abcde', expectedMatchGroups: [{match: 'de', from: 3, to: 5}]},
+    {value: 'abcdddef', pattern: 'abcd*(de)f', shouldMatch: true, expectedMatch: 'abcdddef', expectedMatchGroups: [{match: 'de', from: 5, to: 7}]},
     {value: 'abcddde', pattern: 'abc(d*)de', shouldMatch: true, expectedMatch: 'abcddde', expectedMatchGroups: [{match: 'dd', from: 3, to: 5}]},
-    // {value: 'test', pattern: 't*(st)', shouldMatch: true, expectedMatch: 'st', expectedMatchGroups: [{match: 'st', from: 2, to: 4}]},
-    // {value: 'test', pattern: 't*st', shouldMatch: true, expectedMatch: 'st', expectedMatchGroups: []},
-    // {value: 'abc', pattern: '(a(b(c)))', shouldMatch: true, expectedMatch: 'abc', expectedMatchGroups: [{match: 'abc', from: 0, to: 3}, {match: 'bc', from: 1, to: 3}, {match: 'c', from: 2, to: 3}]},
+    {value: 'test', pattern: 't*(st)', shouldMatch: true, expectedMatch: 'st', expectedMatchGroups: [{match: 'st', from: 2, to: 4}]},
+    {value: 'test', pattern: 't*st', shouldMatch: true, expectedMatch: 'st', expectedMatchGroups: []},
+    {value: 'abc', pattern: '(a(b(c)))', shouldMatch: true, expectedMatch: 'abc', expectedMatchGroups: [{match: 'abc', from: 0, to: 3}, {match: 'bc', from: 1, to: 3}, {match: 'c', from: 2, to: 3}]},
 ]) ('should correctly match groups: %s', ({value, pattern, shouldMatch, expectedMatch, expectedMatchGroups}) => {
     const engine = new RegexEngine()
     const res = engine.match(value, pattern)
