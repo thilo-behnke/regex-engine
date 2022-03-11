@@ -61,55 +61,6 @@ export default class RegexEngine {
         return false
     }
 
-    // private tryTest = (toTest: IndexedToken[], expressions: Expression[]): boolean => {
-    //     let cursorPos = 0
-    //     for(let expressionIdx = 0; expressionIdx < expressions.length; expressionIdx++) {
-    //         const nextExpression = expressions[expressionIdx]
-    //         if (!(nextExpression instanceof AssertionExpression) || nextExpression.type !== AssertionType.LOOKBEHIND) {
-    //             const {match, tokensConsumed} = RegexEngine.tryTestExpression(nextExpression, toTest, cursorPos)
-    //             cursorPos += tokensConsumed
-    //             if (match) {
-    //                 if (isGroupExpression(nextExpression)) {
-    //                     this._groups[expressionIdx] = nextExpression.matchGroups
-    //                 }
-    //
-    //                 continue
-    //             }
-    //         } else {
-    //             let lookbehindCursorPos = cursorPos
-    //             let lookbehindSuccessful = false
-    //             while(lookbehindCursorPos < toTest.length) {
-    //                 const lookBehindCursorPosFrom = lookbehindCursorPos - nextExpression.minimumLength
-    //                 if (lookBehindCursorPosFrom >= 0) {
-    //                     const sBehindCurrent = toTest.slice(lookBehindCursorPosFrom, lookbehindCursorPos)
-    //                     const {match: lookbehindMatch} = RegexEngine.tryTestExpression(nextExpression, sBehindCurrent, lookBehindCursorPosFrom)
-    //                     if (lookbehindMatch) {
-    //                         lookbehindSuccessful = true
-    //                         break
-    //                     }
-    //                     nextExpression.reset()
-    //                 }
-    //                 lookbehindCursorPos += 1
-    //             }
-    //             if (lookbehindSuccessful) {
-    //                 this._groups[expressionIdx] = nextExpression.matchGroups
-    //                 cursorPos = lookbehindCursorPos
-    //                 continue;
-    //             }
-    //             // lookbehind failed
-    //             return false
-    //         }
-    //
-    //         const backtrackSuccessful = nextExpression.backtrack()
-    //         if (!backtrackSuccessful) {
-    //             return false
-    //         }
-    //     }
-    //
-    //     // Sanity check, should not be necessary (?)
-    //     return expressions.every(it => it.isSuccessful())
-    // }
-
     private static tryTestExpression = (expression: Expression, toTest: IndexedToken[], offset: number) => {
         let idx = offset
         while(expression.hasNext()) {
