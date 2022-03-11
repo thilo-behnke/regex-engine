@@ -33,7 +33,7 @@ export class SimpleExpression implements Expression {
         return this._isSuccessful;
     }
 
-    matchNext(s: IndexedToken, last: IndexedToken = null, next: IndexedToken = null): MatchIteration & {cursorOnly: boolean} {
+    matchNext(s: IndexedToken, last: IndexedToken, next: IndexedToken, tokens: IndexedToken[], cursorPos: number): MatchIteration & {cursorOnly: boolean} {
         if (!this.hasNext()) {
             return {...matchFailed(), cursorOnly: false}
         }

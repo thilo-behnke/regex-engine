@@ -38,7 +38,7 @@ export default class SquareBracketExpression implements Expression {
         return this._isSuccessful;
     }
 
-    matchNext(s: IndexedToken, previous: IndexedToken = null, next: IndexedToken = null): MatchIteration {
+    matchNext(s: IndexedToken, previous: IndexedToken, next: IndexedToken, toTest: IndexedToken[], cursorPos: number): MatchIteration {
         if (!this.hasNext()) {
             return matchFailed()
         }
@@ -49,7 +49,7 @@ export default class SquareBracketExpression implements Expression {
         let consumed = 0
         for (let expression of this._expressions) {
             while(expression.hasNext()) {
-                const res = expression.matchNext(s, previous, next)
+                const res = expression.matchNext(s, previous, next, toTest, cursorPos)
                 if (!res.matched) {
                     this._isSuccessful = false
                     this._currentMatch = []

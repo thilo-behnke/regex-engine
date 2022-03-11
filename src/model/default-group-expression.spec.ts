@@ -102,7 +102,7 @@ test.each([
     let stringIdx = 0
     const tokens = explodeIndexed(toTest)
     while(expression.hasNext()) {
-        const matchRes = expression.matchNext(tokens[stringIdx])
+        const matchRes = expression.matchNext(tokens[stringIdx], null, null, tokens, stringIdx)
         if (!matchRes) {
             break
         }

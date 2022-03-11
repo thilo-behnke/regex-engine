@@ -43,8 +43,30 @@ export class AssertionExpression extends AbstractGroupExpression {
         return expression
     }
 
-    matchNext(s: IndexedToken, last: IndexedToken = null, next: IndexedToken = null): MatchIteration {
-        const matchRes = super.matchNext(s, last, next);
+    matchNext(s: IndexedToken, last: IndexedToken = null, next: IndexedToken = null, toTest: IndexedToken[], cursorPos: number): MatchIteration {
+        if (this.type === AssertionType.LOOKBEHIND) {
+            let updatedCursorPos = cursorPos
+            while(updatedCursorPos < toTest.length) {
+                const toCheck = toTest.slice(updatedCursorPos - this.minimumLength, updatedCursorPos)
+                let tokenIdx = 0
+                while(super.hasNext()) {
+                    const nextChar = toCheck[tokenIdx]
+                    const matchRes = super.matchNext(nextChar, toCheck[tokenIdx - 1], toCheck[tokenIdx + 1], toTest, updatedCursorPos);
+                    if (!matchRes.matched) {
+                        break
+                    }
+                }
+                if (this.isSuccessful()) {
+                    break;
+                }
+                updatedCursorPos++
+            }
+            if (!this.isSuccessful()) {
+                this.reset()
+            }
+            return this.isSuccessful() ? {matched: true, consumed: updatedCursorPos - cursorPos} : {matched: false, consumed: 0};
+        }
+        const matchRes = super.matchNext(s, last, next, this.currentMatch(), cursorPos);
         return {matched: matchRes.matched || !this._positive, consumed: 0}
     }
 

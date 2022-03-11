@@ -18,7 +18,7 @@ test.each([
         if (idx >= match.length) {
             break
         }
-        greedyExpression.matchNext(tokens[idx])
+        greedyExpression.matchNext(tokens[idx], null, null, tokens, idx)
         idx++
     }
     expect(greedyExpression.isSuccessful()).toEqual(shouldMatch)
@@ -39,7 +39,7 @@ test.each([
         if (idx >= match.length) {
             break
         }
-        greedyExpression.matchNext(tokens[idx])
+        greedyExpression.matchNext(tokens[idx], null, null, tokens, idx)
         idx++
     }
     expect(greedyExpression.isSuccessful()).toEqual(shouldMatch)
