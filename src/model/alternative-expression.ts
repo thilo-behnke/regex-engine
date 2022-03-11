@@ -38,28 +38,23 @@ export default class AlternativeExpression implements Expression {
         return false;
     }
 
-    lastMatchCharactersConsumed(): number {
-        return this._expressions[this._idx].lastMatchCharactersConsumed();
-    }
-
-    matchNext(s: IndexedToken, last: IndexedToken, next: IndexedToken): boolean {
+    matchNext(s: IndexedToken, last: IndexedToken, next: IndexedToken, toTest: IndexedToken[], cursorPos: number): MatchIteration {
         if (!this._expressions[this._idx].hasNext()) {
             this._idx++
         }
         if (!this.hasNext()) {
-            return false
+            return matchFailed()
         }
 
-        const currentExpression = this._expressions[this._idx]
-        const res = currentExpression.matchNext(s, last, next)
+        let anyMatch = false
+        this._expressions.filter(it => it.hasNext()).forEach(it => {
+            // TODO: What about the consumed tokens here? Should always be 1 or 0 in the end?
+            anyMatch = it.matchNext(s, last, next, toTest, cursorPos).matched
+        })
 
-        if (!currentExpression.hasNext()) {
-            if (currentExpression.isSuccessful()) {
-                this._successfulExpression = currentExpression
-            }
-        }
+        // this._successfulExpression = this._e
 
-        return res || this._expressions[this._idx].hasNext() || !!this._expressions[this._idx + 1]
+        return {matched: anyMatch, consumed: anyMatch ? 1 : 0}
     }
 
     get minimumLength(): number {

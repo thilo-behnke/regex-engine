@@ -346,8 +346,7 @@ test.each([
                 ),
                 false
             )
-<<<<<<< HEAD
-        ]
+        ])
     },
     {
         expression: "(abc|def)",
@@ -367,9 +366,6 @@ test.each([
                 )
             )
         ]
-=======
-        ])
->>>>>>> master
     }
 ]) ('should correctly parse group: %s', ({expression, expected}) => {
     const res = new Parser().parse(expression)

@@ -77,7 +77,11 @@ export default class Parser {
         if (!alternatives.length) {
             return null
         }
-        return new AlternativeExpression(...alternatives.map(it => DefaultGroupExpression.nonCapturing(...it)))
+        const innerExpressions = alternatives.map(it => DefaultGroupExpression.nonCapturing(...it))
+        if (innerExpressions.length === 1) {
+            return innerExpressions[0]
+        }
+        return new AlternativeExpression(...innerExpressions)
     }
 
     private tryParseRegex = (): Expression[] => {
