@@ -10,7 +10,7 @@ import orderBy = require("lodash.orderby");
 export abstract class AbstractGroupExpression implements Expression, GroupExpression {
     private _idx: number = 0
     private _currentMatch: Array<[number, IndexedToken]> = []
-    private _matchGroups: MatchGroup[] = []
+    private _matchGroups: {[idx: number]: MatchGroup[]} = {}
 
     protected readonly _expressions: Expression[]
     protected _failed = false
@@ -26,7 +26,7 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
     abstract currentMatch(): IndexedToken[]
 
     get matchGroups(): Array<MatchGroup> {
-        return this._matchGroups;
+        return Object.values(this._matchGroups).flat();
     }
 
     hasNext(): boolean {
@@ -113,18 +113,17 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
             ], [0])
             if (!nextExpression.hasNext()) {
                 if (nextExpression.isSuccessful()) {
-                    this._matchGroups = []
                     if (this.tracksMatch) {
                         const currentMatch = this.currentMatch()
                         const matchedValue = currentMatch.map(it => it.value).join('')
                         if (currentMatch.length) {
                             const lowerBound = currentMatch[0].idx
                             const upperBound = currentMatch[currentMatch.length - 1]?.idx + 1
-                            this._matchGroups = [{match: matchedValue, from: lowerBound, to: upperBound}]
+                            this._matchGroups[-1] = [{match: matchedValue, from: lowerBound, to: upperBound}]
                         }
                     }
                     if (isGroupExpression(nextExpression)) {
-                        this._matchGroups = [...this.matchGroups, ...nextExpression.matchGroups]
+                        this._matchGroups[this._idx] = nextExpression.matchGroups
                     }
                 } else {
                     this._failed = true
