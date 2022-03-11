@@ -26,7 +26,7 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
     abstract currentMatch(): IndexedToken[]
 
     get matchGroups(): Array<MatchGroup> {
-        return Object.values(this._matchGroups).flat();
+        return orderBy(Object.entries(this._matchGroups), [0]).flatMap(([, groups]) => groups);
     }
 
     hasNext(): boolean {
