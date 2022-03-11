@@ -25,6 +25,10 @@ export default class DefaultRegexToken implements RegexToken {
         return new DefaultRegexToken(s, RegexTokenType.MODIFIER)
     }
 
+    static alternative(): DefaultRegexToken {
+        return new DefaultRegexToken('|', RegexTokenType.ALTERNATIVE)
+    }
+
     static bracketOpen(): DefaultRegexToken {
         return new DefaultRegexToken('(', RegexTokenType.BRACKET_OPEN)
     }
@@ -66,6 +70,7 @@ export enum RegexTokenType {
     CHARACTER = 'CHARACTER',
     ESCAPED = 'ESCAPED',
     MODIFIER = 'MODIFIER',
+    ALTERNATIVE = 'ALTERNATIVE',
     BRACKET_OPEN = 'BRACKET_OPEN',
     BRACKET_CLOSE = 'BRACKET_CLOSE',
     SQUARE_BRACKET_OPEN = 'SQUARE_BRACKET_OPEN',

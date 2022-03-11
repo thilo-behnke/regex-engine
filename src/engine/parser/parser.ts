@@ -26,6 +26,7 @@ import {ParseError} from "../../exception/parse-error";
 import {OptionalExpression} from "../../model/optional-expression";
 import {isGroupExpression} from "../../model/group-expression";
 import {OptionalGroupExpression} from "../../model/optional-group-expression";
+import AlternativeExpression from "../../model/alternative-expression";
 import {DefaultGroupExpression} from "../../model/default-group-expression";
 
 export default class Parser {
@@ -46,10 +47,48 @@ export default class Parser {
         this._expressions = []
         this._currentToken = this._lexer.getNextToken()
         while (this._currentToken !== null) {
-            const expressions = this.tryParseRegex()
-            expressions.forEach(it => this._expressions.push(it))
+            const alternativeExpression = this.tryParseAlternatives(RegexTokenType.EOF)
+            if (alternativeExpression) {
+                const expression = alternativeExpression.length === 1 ? alternativeExpression[0] : DefaultGroupExpression.nonCapturing(...alternativeExpression)
+                this._expressions.push(expression)
+            }
+        }
+        if (!this._expressions.length) {
+            return DefaultGroupExpression.nonCapturing()
+        }
+        if (this._expressions.length === 1) {
+            return this._expressions[0]
         }
         return DefaultGroupExpression.nonCapturing(...this._expressions)
+    }
+
+
+    private tryParseAlternatives = (stopToken: RegexTokenType): Expression[] => {
+        const alternatives: Expression[][] = []
+        let currentAlternative: Expression[] = []
+        while (this._currentToken !== null && this._currentToken.type !== stopToken) {
+            if (this._currentToken.type === RegexTokenType.ALTERNATIVE) {
+                this.consume(RegexTokenType.ALTERNATIVE)
+                alternatives.push(currentAlternative)
+                currentAlternative = []
+            }
+            const nextExpressions = this.tryParseRegex()
+            nextExpressions.forEach(it => currentAlternative.push(it))
+        }
+        if (currentAlternative.length) {
+            alternatives.push(currentAlternative)
+        }
+
+        this.consume(stopToken)
+
+        if (!alternatives.length) {
+            return null
+        }
+        if (alternatives.length === 1) {
+            return alternatives[0]
+        }
+
+        return [new AlternativeExpression(...alternatives.map(it => it.length === 1 ? it[0] : DefaultGroupExpression.nonCapturing(...it)))]
     }
 
     private tryParseRegex = (): Expression[] => {
@@ -83,9 +122,13 @@ export default class Parser {
             return [characterExpression]
         }
 
-        if (this._currentToken.type == RegexTokenType.ESCAPED) {
+        if (this._currentToken.type === RegexTokenType.ESCAPED) {
             const escapedExpression = this.consumeEscaped()
             return [escapedExpression]
+        }
+
+        if (this._currentToken.type === RegexTokenType.ALTERNATIVE) {
+            return []
         }
 
         if (this._currentToken.type == RegexTokenType.MODIFIER) {
@@ -98,11 +141,6 @@ export default class Parser {
 
         if (this._currentToken.type == RegexTokenType.BRACKET_CLOSE) {
             this.throwParseError('Found orphaned closing bracket')
-        }
-
-        if (this._currentToken.type == RegexTokenType.EOF) {
-            this.consume(RegexTokenType.EOF)
-            return []
         }
 
         this.throwParseError('Unexpected token')
@@ -207,15 +245,17 @@ export default class Parser {
         if (isLookbehind(groupType)) {
             this._allowModifiers = false
         }
-        while(this._currentToken !== null && this._currentToken.type !== RegexTokenType.BRACKET_CLOSE) {
-            const withinBrackets = this.tryParseRegex()
-            withinBrackets.forEach(it => expressions.push(it))
+
+        const withinBrackets = this.tryParseAlternatives(RegexTokenType.BRACKET_CLOSE)
+        if (!withinBrackets) {
+            this.throwParseError('Empty group')
         }
+        withinBrackets.forEach(it => expressions.push(it))
+
         if (isLookbehind(groupType)) {
             this._allowModifiers = true
         }
 
-        this.consume(RegexTokenType.BRACKET_CLOSE)
         const groupExpression = createGroupExpression(groupType, ...expressions)
         if (!isMatchGroup(groupType)) {
             return groupExpression
