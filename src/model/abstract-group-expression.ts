@@ -63,12 +63,13 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
             }
             const updatedExpressionMatch = expression.isSuccessful() ? expression.currentMatch() : []
             this._currentMatch = orderBy([
-                ...this._currentMatch.filter(([idx, ]) => idx !== this._idx),
-                ...updatedExpressionMatch.map(it => [this._idx, it] as [number, IndexedToken])
+                ...this._currentMatch.filter(([idx, ]) => idx !== backtrackIdx),
+                ...updatedExpressionMatch.map(it => [backtrackIdx, it] as [number, IndexedToken])
             ], [0])
             if (isGroupExpression(expression)) {
                 this._matchGroups[backtrackIdx] = expression.matchGroups
             }
+            this.updateMatchGroups()
             return true
         }
 
@@ -76,6 +77,10 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
         while (backtrackIdx >= 0) {
             const expression = this._expressions[backtrackIdx]
             const backtrackRes = expression.backtrack()
+            if (isGroupExpression(expression)) {
+                this._matchGroups[backtrackIdx] = expression.matchGroups
+            }
+            this.updateMatchGroups()
             // backtrack failed
             if (!backtrackRes) {
                 return false
@@ -131,20 +136,12 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
                 ...this._currentMatch.filter(([idx, ]) => idx !== this._idx),
                 ...updatedExpressionMatch.map(it => [this._idx, it] as [number, IndexedToken])
             ], [0])
+            if (isGroupExpression(nextExpression)) {
+                this._matchGroups[this._idx] = nextExpression.matchGroups
+            }
+            this.updateMatchGroups()
             if (!nextExpression.hasNext()) {
                 if (nextExpression.isSuccessful()) {
-                    if (this.tracksMatch) {
-                        const currentMatch = this.currentMatch()
-                        const matchedValue = currentMatch.map(it => it.value).join('')
-                        if (currentMatch.length) {
-                            const lowerBound = currentMatch[0].idx
-                            const upperBound = currentMatch[currentMatch.length - 1]?.idx + 1
-                            this._matchGroups[-1] = [{match: matchedValue, from: lowerBound, to: upperBound}]
-                        }
-                    }
-                    if (isGroupExpression(nextExpression)) {
-                        this._matchGroups[this._idx] = nextExpression.matchGroups
-                    }
                 } else {
                     this._failed = true
                     return res
@@ -168,5 +165,18 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
         this._currentMatch = []
         this._matchGroups = []
         this._failed = false
+    }
+
+    private updateMatchGroups() {
+        if (!this.tracksMatch) {
+            return
+        }
+        const currentMatch = this.currentMatch()
+        const matchedValue = currentMatch.map(it => it.value).join('')
+        if (currentMatch.length) {
+            const lowerBound = currentMatch[0].idx
+            const upperBound = currentMatch[currentMatch.length - 1]?.idx + 1
+            this._matchGroups[-1] = [{match: matchedValue, from: lowerBound, to: upperBound}]
+        }
     }
 }
