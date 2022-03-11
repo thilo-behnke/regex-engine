@@ -52,6 +52,12 @@ export default class Parser {
                 this._expressions.push(alternative)
             }
         }
+        if (!this._expressions.length) {
+            return DefaultGroupExpression.nonCapturing()
+        }
+        if (this._expressions.length === 1) {
+            return this._expressions[0]
+        }
         return DefaultGroupExpression.nonCapturing(...this._expressions)
     }
 
@@ -77,7 +83,7 @@ export default class Parser {
         if (!alternatives.length) {
             return null
         }
-        const innerExpressions = alternatives.map(it => DefaultGroupExpression.nonCapturing(...it))
+        const innerExpressions = alternatives.map(it => it.length === 1 ? it[0] : DefaultGroupExpression.nonCapturing(...it))
         if (innerExpressions.length === 1) {
             return innerExpressions[0]
         }

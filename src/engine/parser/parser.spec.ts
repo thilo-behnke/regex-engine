@@ -63,60 +63,68 @@ test('should correctly parse greedy at least once modifier for single character'
 test('should correctly parse alternative expression', () => {
     const parser = new Parser()
     const res = parser.parse('a|b')
-    const expected = [
+    const expected = new AlternativeExpression(...[
+        new SimpleExpression(new DefaultCharacter('a')),
+        new SimpleExpression(new DefaultCharacter('b')),
+    ])
+    expect(res).toEqual(expected)
+})
+
+test('should correctly parse longer alternative expression', () => {
+    const parser = new Parser()
+    const res = parser.parse('abc|def')
+    const expected = new AlternativeExpression(...[
         DefaultGroupExpression.nonCapturing(
             new SimpleExpression(new DefaultCharacter('a')),
+            new SimpleExpression(new DefaultCharacter('b')),
+            new SimpleExpression(new DefaultCharacter('c')),
         ),
         DefaultGroupExpression.nonCapturing(
-            new SimpleExpression(new DefaultCharacter('b')),
-        )
-    ]
+            new SimpleExpression(new DefaultCharacter('d')),
+            new SimpleExpression(new DefaultCharacter('e')),
+            new SimpleExpression(new DefaultCharacter('f')),
+        ),
+    ])
     expect(res).toEqual(expected)
 })
 
 test('should correctly parse complicated alternative expression', () => {
     const parser = new Parser()
     const res = parser.parse('abc[de]|b*')
-    const expected = [
-        new AlternativeExpression(
+    const expected = new AlternativeExpression(...[
+        DefaultGroupExpression.nonCapturing(
             new SimpleExpression(new DefaultCharacter('a')),
             new SimpleExpression(new DefaultCharacter('b')),
             new SimpleExpression(new DefaultCharacter('c')),
             new SquareBracketExpression(new SimpleExpression(new DefaultCharacter('d')), new SimpleExpression(new DefaultCharacter('e'))),
         ),
-        new AlternativeExpression(
-            new GreedyExpression(new SimpleExpression(new DefaultCharacter('b') ), true)
-        )
-    ]
+        new GreedyExpression(new SimpleExpression(new DefaultCharacter('b')), true)
+    ])
     expect(res).toEqual(expected)
 })
 
 test('should correctly parse bracket expression', () => {
     const parser = new Parser()
     const res = parser.parse('[abc]')
-    const expected = DefaultGroupExpression.nonCapturing(...[
-        new SquareBracketExpression(
-            new SimpleExpression(new DefaultCharacter('a')),
-            new SimpleExpression(new DefaultCharacter('b')),
-            new SimpleExpression(new DefaultCharacter('c')),
-        )
-    ])
+    const expected = new SquareBracketExpression(
+        new SimpleExpression(new DefaultCharacter('a')),
+        new SimpleExpression(new DefaultCharacter('b')),
+        new SimpleExpression(new DefaultCharacter('c')),
+    )
     expect(res).toEqual(expected)
 })
 
 test('should correctly parse greedy bracket expression', () => {
     const parser = new Parser()
     const res = parser.parse('[abc]+')
-    const expected = DefaultGroupExpression.nonCapturing(...[
-        new GreedyExpression(
-            new SquareBracketExpression(
-                new SimpleExpression(new DefaultCharacter('a')),
-                new SimpleExpression(new DefaultCharacter('b')),
-                new SimpleExpression(new DefaultCharacter('c')),
-            ),
-            false
-        )
-    ])
+    const expected = new GreedyExpression(
+        new SquareBracketExpression(
+            new SimpleExpression(new DefaultCharacter('a')),
+            new SimpleExpression(new DefaultCharacter('b')),
+            new SimpleExpression(new DefaultCharacter('c')),
+        ),
+        false
+    )
     expect(res).toEqual(expected)
 })
 
@@ -141,34 +149,44 @@ test('should correctly parse multiple bracket expressions', () => {
 test('should correctly parse bracket with character range', () => {
     const parser = new Parser()
     const res = parser.parse('[a-c]')
-    const expected = DefaultGroupExpression.nonCapturing(...[
-        new SquareBracketExpression(
-            new SimpleExpression(new DefaultCharacter('a')),
-            new SimpleExpression(new DefaultCharacter('b')),
-            new SimpleExpression(new DefaultCharacter('c')),
-        ),
-    ])
+    const expected = new SquareBracketExpression(
+        new SimpleExpression(new DefaultCharacter('a')),
+        new SimpleExpression(new DefaultCharacter('b')),
+        new SimpleExpression(new DefaultCharacter('c')),
+    )
     expect(res).toEqual(expected)
 })
 
 test('should correctly parse bracket with number range', () => {
     const parser = new Parser()
     const res = parser.parse('[2-5]')
-    const expected = DefaultGroupExpression.nonCapturing(...[
-        new SquareBracketExpression(
-            new SimpleExpression(new DefaultCharacter('2')),
-            new SimpleExpression(new DefaultCharacter('3')),
-            new SimpleExpression(new DefaultCharacter('4')),
-            new SimpleExpression(new DefaultCharacter('5')),
-        ),
-    ])
+    const expected = new SquareBracketExpression(
+        new SimpleExpression(new DefaultCharacter('2')),
+        new SimpleExpression(new DefaultCharacter('3')),
+        new SimpleExpression(new DefaultCharacter('4')),
+        new SimpleExpression(new DefaultCharacter('5')),
+    )
     expect(res).toEqual(expected)
 })
 
 test('should correctly parse bracket with capitalized char range', () => {
     const parser = new Parser()
     const res = parser.parse('[a-cA-C]')
-    const expected = DefaultGroupExpression.nonCapturing(...[
+    const expected = new SquareBracketExpression(
+        new SimpleExpression(new DefaultCharacter('a')),
+        new SimpleExpression(new DefaultCharacter('b')),
+        new SimpleExpression(new DefaultCharacter('c')),
+        new SimpleExpression(new DefaultCharacter('A')),
+        new SimpleExpression(new DefaultCharacter('B')),
+        new SimpleExpression(new DefaultCharacter('C')),
+    )
+    expect(res).toEqual(expected)
+})
+
+test('should correctly parse multiple brackets with capitalized char range', () => {
+    const parser = new Parser()
+    const res = parser.parse('[a-cA-C][0-3]')
+    const expected = DefaultGroupExpression.nonCapturing(
         new SquareBracketExpression(
             new SimpleExpression(new DefaultCharacter('a')),
             new SimpleExpression(new DefaultCharacter('b')),
@@ -177,7 +195,13 @@ test('should correctly parse bracket with capitalized char range', () => {
             new SimpleExpression(new DefaultCharacter('B')),
             new SimpleExpression(new DefaultCharacter('C')),
         ),
-    ])
+        new SquareBracketExpression(
+            new SimpleExpression(new DefaultCharacter('0')),
+            new SimpleExpression(new DefaultCharacter('1')),
+            new SimpleExpression(new DefaultCharacter('2')),
+            new SimpleExpression(new DefaultCharacter('3'))
+        ),
+    )
     expect(res).toEqual(expected)
 })
 
@@ -294,26 +318,22 @@ test('should correctly parse whitespace', () => {
 test('should correctly parse not modifier in beginning of bracket (^)', () => {
     const parser = new Parser()
     const res = parser.parse('[^abc]')
-    const expected = DefaultGroupExpression.nonCapturing(...[
-        SquareBracketExpression.negated(
-            new SimpleExpression(new DefaultCharacter('a')),
-            new SimpleExpression(new DefaultCharacter('b')),
-            new SimpleExpression(new DefaultCharacter('c')),
-        )
-    ])
+    const expected = SquareBracketExpression.negated(
+        new SimpleExpression(new DefaultCharacter('a')),
+        new SimpleExpression(new DefaultCharacter('b')),
+        new SimpleExpression(new DefaultCharacter('c')),
+    )
     expect(res).toEqual(expected)
 })
 
 test('should correctly parse group', () => {
     const parser = new Parser()
     const res = parser.parse('(abc)')
-    const expected = DefaultGroupExpression.nonCapturing(...[
-        new DefaultGroupExpression(
+    const expected = new DefaultGroupExpression(
             new SimpleExpression(new DefaultCharacter('a')),
             new SimpleExpression(new DefaultCharacter('b')),
             new SimpleExpression(new DefaultCharacter('c')),
-        )
-    ])
+    )
     expect(res).toEqual(expected)
 })
 
@@ -367,7 +387,7 @@ test.each([
             )
         ]
     }
-]) ('should correctly parse group: %s', ({expression, expected}) => {
+])('should correctly parse group: %s', ({expression, expected}) => {
     const res = new Parser().parse(expression)
     expect(res).toEqual(expected)
 })
@@ -403,7 +423,7 @@ test.each([
             )
         ])
     }
-]) ('should correctly parse non matching group: %s', ({expression, expected}) => {
+])('should correctly parse non matching group: %s', ({expression, expected}) => {
     const res = new Parser().parse(expression)
     expect(res).toEqual(expected)
 })
@@ -450,7 +470,7 @@ test.each([
             ),
         ])
     }
-]) ('should correctly parse look ahead: %s', ({expression, expected}) => {
+])('should correctly parse look ahead: %s', ({expression, expected}) => {
     const res = new Parser().parse(expression)
     expect(res).toEqual(expected)
 })
@@ -475,7 +495,7 @@ test.each([
             new SimpleExpression(new DefaultCharacter('a')),
         ])
     },
-]) ('should correctly parse look behind: %s', ({expression, expected}) => {
+])('should correctly parse look behind: %s', ({expression, expected}) => {
     const res = new Parser().parse(expression)
     expect(res).toEqual(expected)
 })
@@ -484,7 +504,7 @@ test.each([
     {
         expression: "(?<=a*)b"
     }
-]) ('should not allow modifier in look behind: %s', ({expression}) => {
+])('should not allow modifier in look behind: %s', ({expression}) => {
     expect(() => new Parser().parse(expression)).toThrow(Error)
 })
 
@@ -533,7 +553,7 @@ test.each([
             ),
         ])
     }
-]) ('should correctly parse optional expression: %s', ({expression, expected}) => {
+])('should correctly parse optional expression: %s', ({expression, expected}) => {
     const res = new Parser().parse(expression)
     expect(res).toEqual(expected)
 })
