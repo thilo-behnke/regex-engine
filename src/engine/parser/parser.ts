@@ -47,15 +47,8 @@ export default class Parser {
         this._expressions = []
         this._currentToken = this._lexer.getNextToken()
         while (this._currentToken !== null) {
-            const alternatives = this.tryParseAlternatives(RegexTokenType.EOF)
-            if (alternatives) {
-                const innerExpressions = alternatives.map(alt => {
-                    if (alt.length === 1) {
-                        return alt[0]
-                    }
-                    return DefaultGroupExpression.nonCapturing(...alt)
-                })
-                const alternativeExpression = innerExpressions.length === 1 ? innerExpressions[0] : new AlternativeExpression(...innerExpressions)
+            const alternativeExpression = this.tryParseAlternatives(RegexTokenType.EOF)
+            if (alternativeExpression) {
                 this._expressions.push(alternativeExpression)
             }
         }
@@ -69,7 +62,7 @@ export default class Parser {
     }
 
 
-    private tryParseAlternatives = (stopToken: RegexTokenType): Expression[][] => {
+    private tryParseAlternatives = (stopToken: RegexTokenType): Expression => {
         const alternatives: Expression[][] = []
         let currentAlternative: Expression[] = []
         while (this._currentToken !== null && this._currentToken.type !== stopToken) {
@@ -90,7 +83,13 @@ export default class Parser {
         if (!alternatives.length) {
             return null
         }
-        return alternatives
+        const innerExpressions = alternatives.map(alt => {
+            if (alt.length === 1) {
+                return alt[0]
+            }
+            return DefaultGroupExpression.nonCapturing(...alt)
+        })
+        return innerExpressions.length === 1 ? innerExpressions[0] : new AlternativeExpression(...innerExpressions)
     }
 
     private tryParseRegex = (): Expression[] => {
