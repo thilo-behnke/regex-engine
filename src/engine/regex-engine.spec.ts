@@ -163,6 +163,17 @@ test.each([
     expect(engine.matched).toEqual(expectedMatch)
 })
 
+test.each([
+    {value: 'localhost:90', pattern: '([^:]+):90', shouldMatch: true, expectedMatchGroups: [{match: 'localhost', from: 0, to: 9}], expectedMatch: 'localhost:90'},
+    {value: 'localhost', pattern: '([^:]+)', shouldMatch: true, expectedMatchGroups: [{match: 'localhost', from: 0, to: 9}], expectedMatch: 'localhost'},
+]) ('should match greedy negative square brackets: %s', ({value, pattern, shouldMatch, expectedMatchGroups, expectedMatch}) => {
+    const engine = new RegexEngine()
+    const res = engine.match(value, pattern)
+    expect(res).toEqual(shouldMatch)
+    expect(engine.groups).toEqual(expectedMatchGroups)
+    expect(engine.matched).toEqual(expectedMatch)
+})
+
 // TODO: Fix.
 // test.each([
 //     // url regex
