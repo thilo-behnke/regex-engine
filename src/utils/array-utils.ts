@@ -12,10 +12,16 @@ const last = <T>(arr: T[]): T => {
 }
 
 const max = <T>(arr: T[]): T => {
+    if (!arr.length) {
+        return null
+    }
     return arr.reduce((acc, it) => it > acc ? it : acc)
 }
 
 const min = <T>(arr: T[]): T => {
+    if (!arr.length) {
+        return null
+    }
     return arr.reduce((acc, it) => it < acc ? it : acc)
 }
 

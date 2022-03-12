@@ -38,7 +38,7 @@ export default class RegexEngine {
                 if (!backtrackRes.successful) {
                     break
                 }
-                const unmatchedTokenOffset = this._matchOffset + tokensConsumed
+                const unmatchedTokenOffset = this._matchOffset + tokensConsumed - backtrackRes.consumed
                 if (unmatchedTokenOffset >= tokens.length) {
                     matchSuccessful = true
                     break

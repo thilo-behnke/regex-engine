@@ -43,13 +43,14 @@ export default abstract class AbstractGreedyExpression implements Expression {
 
         if (res.matched) {
             this.storeCurrentMatch(s, wasReset)
+        } else {
+            this._hasNext = false
         }
 
         if (this._expression.isSuccessful()) {
             this._isSuccessful = true
         } else {
-            this._isSuccessful = this._allowNoMatch || this._isSuccessful
-            this._hasNext = false
+            this._isSuccessful = this.isInitial() && this._allowNoMatch || this._isSuccessful
         }
 
         return res
@@ -62,17 +63,26 @@ export default abstract class AbstractGreedyExpression implements Expression {
             return backtrackFailed()
         }
 
-        const updatedMatch = this._currentMatch.slice(0, this._currentMatch.length - 1)
-        this.reset()
-        updatedMatch.every((it, idx) => {
-            const last = idx > 0 ? updatedMatch[idx - 1] : null
-            const next = idx < updatedMatch.length ? updatedMatch[idx + 1] : null
-            return this.matchNext(it, last, next, toTest)
-        })
-        if (this._isSuccessful === undefined && this._allowNoMatch) {
-            this._isSuccessful = true
+        const matchLengthBeforeBacktrack = this._currentMatch.length
+        let updatedMatch = this._currentMatch.slice(0, this._currentMatch.length - 1)
+        while (updatedMatch.length) {
+            this.reset()
+            updatedMatch.every((it, idx) => {
+                const last = idx > 0 ? updatedMatch[idx - 1] : null
+                const next = idx < updatedMatch.length ? updatedMatch[idx + 1] : null
+                return this.matchNext(it, last, next, toTest)
+            })
+            if (this._expression.isSuccessful()) {
+                break
+            }
+            updatedMatch = this._currentMatch.slice(0, this._currentMatch.length - 1)
         }
-        return this._isSuccessful ? successfulBacktrack() : backtrackFailed()
+        if (!updatedMatch.length) {
+            this.reset()
+            this._isSuccessful = this._allowNoMatch
+        }
+        // TODO: What if the backtrack leaves the expression in an inconsistent state? E.g. a greedy group where the group is no longer successful but could be backtracked further?
+        return this._isSuccessful ? successfulBacktrack(matchLengthBeforeBacktrack - this._currentMatch.length) : backtrackFailed()
     }
 
     canBacktrack(): boolean {

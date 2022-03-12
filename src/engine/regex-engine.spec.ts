@@ -152,6 +152,9 @@ test.each([
     {value: 'c', pattern: 'a|b', shouldMatch: false, expectedMatchGroups: [], expectedMatch: null},
     {value: 'abcd', pattern: '(ab[c]?|xyz)d', shouldMatch: true, expectedMatchGroups: [{match: 'abc', from: 0, to: 3}], expectedMatch: 'abcd'},
     {value: 'ab', pattern: '(ab+|a)b', shouldMatch: true, expectedMatchGroups: [{match: 'a', from: 0, to: 1}], expectedMatch: 'ab'},
+    {value: 'ab', pattern: '(ab+|ab)b', shouldMatch: false, expectedMatchGroups: [], expectedMatch: null},
+    {value: 'ab', pattern: '(ab*|ab)b', shouldMatch: true, expectedMatchGroups: [{match: 'a', from: 0, to: 1}], expectedMatch: 'ab'},
+    {value: 'atest', pattern: '(a(test)*|xyz)test', shouldMatch: true, expectedMatchGroups: [{match: 'a', from: 0, to: 1}], expectedMatch: 'atest'},
 ]) ('should correctly match alternatives: %s', ({value, pattern, shouldMatch, expectedMatchGroups, expectedMatch}) => {
     const engine = new RegexEngine()
     const res = engine.match(value, pattern)

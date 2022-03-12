@@ -54,8 +54,7 @@ export default class AlternativeExpression implements Expression {
             }
         })
 
-        // TODO: Refactor to array.
-        this._idx = min(Object.keys(this._successfulExpressions).map(it => parseInt(it)))
+        this._idx = min(Object.keys(this._successfulExpressions).map(it => parseInt(it))) ?? 0
 
         const matchAfterBacktrack = this.currentMatch()
         if (matchAfterBacktrack && matchAfterBacktrack.length < matchBeforeBacktrack.length) {

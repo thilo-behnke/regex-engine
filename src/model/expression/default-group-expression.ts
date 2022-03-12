@@ -19,10 +19,6 @@ export class DefaultGroupExpression extends AbstractGroupExpression {
         return !this._failed && this._expressions.every(it => it.isSuccessful());
     }
 
-    currentMatch(): IndexedToken[] {
-        return this.internalMatch
-    }
-
     get tracksMatch(): boolean {
         return !this._nonCapturing;
     }

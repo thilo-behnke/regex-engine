@@ -18,11 +18,9 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
         this._expressions = expressions;
     }
 
-    protected get internalMatch(): IndexedToken[] {
-        return this._currentMatch.map(([,token]) => token);
+    currentMatch(): IndexedToken[] {
+        return this._currentMatch.map(([,token]) => token)
     }
-
-    abstract currentMatch(): IndexedToken[]
 
     // TODO: Cache
     get matchGroups(): Array<MatchGroup> {
@@ -38,7 +36,7 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
     }
 
     isInitial(): boolean {
-        return this._idx === 0;
+        return this._expressions.every(it => it.isInitial());
     }
 
     get minimumLength(): number {
@@ -54,7 +52,7 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
             return backtrackFailed()
         }
 
-        let backtrackedMatches = []
+        let backtrackedMatches: IndexedToken[] = []
         // TODO: What if the current expression is not exhausted? E.g. in case of a greedy expression.
         let backtrackIdx = this._expressions.lastIndexOf(last(this._expressions.filter(it => !it.isInitial() && it.isSuccessful() && it.canBacktrack())))
         // TODO: What if the backtracked expression is the last expression?
@@ -71,21 +69,21 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
                 ...this._currentMatch.filter(([idx, ]) => idx !== backtrackIdx),
                 ...updatedExpressionMatch.map(it => [backtrackIdx, it] as [number, IndexedToken])
             ], [0])
-            return successfulBacktrack()
+            return successfulBacktrack(backtrackRes.consumed)
         }
 
-        let backtrackSuccessful = false
+        let backtrackRes = backtrackFailed()
         while (backtrackIdx >= 0) {
             const expression = this._expressions[backtrackIdx]
-            const backtrackRes = expression.backtrack(toTest)
+            const expressionBacktrackRes = expression.backtrack(toTest)
             // backtrack failed
-            if (!backtrackRes.successful) {
+            if (!expressionBacktrackRes.successful) {
                 return backtrackFailed()
             }
             // TODO: What if persistedMatch is empty?
-            const lastToken = last(this._currentMatch)[1]
-            backtrackedMatches.unshift(lastToken)
-            this._currentMatch = this._currentMatch.slice(0, this._currentMatch.length - 1)
+            const tail = this._currentMatch.slice(this._currentMatch.length - expressionBacktrackRes.consumed).map(([,token]) => token)
+            backtrackedMatches = [...tail, ...backtrackedMatches]
+            this._currentMatch = this._currentMatch.slice(0, this._currentMatch.length - expressionBacktrackRes.consumed)
 
             this._idx = backtrackIdx + 1
             this._expressions.slice(this._idx, this._expressions.length).forEach(it => it.reset())
@@ -105,10 +103,10 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
                 backtrackIdx--
                 continue
             }
-            backtrackSuccessful = true
+            backtrackRes = successfulBacktrack(expressionBacktrackRes.consumed - tokenIdx)
             break
         }
-        return backtrackSuccessful ? successfulBacktrack() : backtrackFailed()
+        return backtrackRes
     }
 
     canBacktrack(): boolean {
@@ -134,12 +132,10 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
                 ...updatedExpressionMatch.map(it => [this._idx, it] as [number, IndexedToken])
             ], [0])
             if (!nextExpression.hasNext()) {
-                if (nextExpression.isSuccessful()) {
-                } else {
+                if (!nextExpression.isSuccessful()) {
                     this._failed = true
                     return res
                 }
-
                 if (!res.matched) {
                     this._idx++
                     continue;
