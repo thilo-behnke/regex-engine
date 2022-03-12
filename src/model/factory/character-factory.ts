@@ -1,7 +1,7 @@
-import Character from "../character";
-import WildcardCharacter from "../wildcard-character";
-import DefaultCharacter from "../default-character";
-import WordBoundaryCharacter from "../word-boundary-character";
+import Character from "@model/character/character";
+import WildcardCharacter from "@model/character/wildcard-character";
+import DefaultCharacter from "@model/character/default-character";
+import WordBoundaryCharacter from "@model/character/word-boundary-character";
 
 export default class CharacterFactory {
     create = (s: string): Character => {

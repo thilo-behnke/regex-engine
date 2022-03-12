@@ -1,11 +1,8 @@
 import {SimpleExpression} from "./simple-expression";
-import DefaultCharacter from "./default-character";
-import GreedyExpression from "./greedy-expression";
-import SquareBracketExpression from "./square-bracket-expression";
+import DefaultCharacter from "./character/default-character";
 import {DefaultGroupExpression} from "./default-group-expression";
-import {explodeIndexed} from "../utils/string-utils";
+import {explodeIndexed} from "@utils/string-utils";
 import AlternativeExpression from "./alternative-expression";
-import {OptionalExpression} from "./optional-expression";
 
 
 test.each([

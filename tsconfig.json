@@ -4,6 +4,11 @@
     "lib": ["es2017"],
     "noImplicitAny": true,
     "target": "es5",
-    "downlevelIteration": true
+    "downlevelIteration": true,
+    "baseUrl": "src",
+    "paths": {
+      "@utils/*": ["utils/*"],
+      "@model/*": ["model/*"]
+    }
   }
 }

@@ -1,5 +1,5 @@
 import Character from "./character";
-import {IndexedToken, isWord} from "../utils/string-utils";
+import {IndexedToken, isWord} from "@utils/string-utils";
 
 export default class WordWildcardCharacter implements Character {
     test(s: IndexedToken): boolean {

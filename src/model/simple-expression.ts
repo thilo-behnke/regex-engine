@@ -1,6 +1,6 @@
 import {Expression} from "./expression";
-import Character from "./character";
-import {IndexedToken} from "../utils/string-utils";
+import Character from "./character/character";
+import {IndexedToken} from "@utils/string-utils";
 import {matchFailed, MatchIteration} from "./expression/match-iteration";
 
 export class SimpleExpression implements Expression {

@@ -1,5 +1,5 @@
 import Character from "./character";
-import {IndexedToken, isDigit} from "../utils/string-utils";
+import {IndexedToken, isDigit} from "@utils/string-utils";
 
 export default class DigitWildcardCharacter implements Character {
     test(s: IndexedToken): boolean {

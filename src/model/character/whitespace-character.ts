@@ -1,5 +1,5 @@
 import Character from "./character";
-import {IndexedToken, isWhitespace} from "../utils/string-utils";
+import {IndexedToken, isWhitespace} from "@utils/string-utils";
 
 export class WhitespaceCharacter implements Character {
     cursorOnly(): boolean {

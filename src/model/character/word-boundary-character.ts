@@ -1,5 +1,5 @@
 import Character from "./character";
-import {IndexedToken, isWhitespace, isWord, isWordBoundary} from "../utils/string-utils";
+import {IndexedToken, isWord, isWordBoundary} from "@utils/string-utils";
 
 export default class WordBoundaryCharacter implements Character {
     test(s: IndexedToken, last: IndexedToken = null, next: IndexedToken = null): boolean {

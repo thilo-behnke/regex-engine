@@ -1,7 +1,7 @@
 import {SimpleExpression} from "./simple-expression";
-import {explodeIndexed, explodeToCharacters} from "../utils/string-utils";
+import {explodeIndexed, explodeToCharacters} from "@utils/string-utils";
 import GreedyExpression from "./greedy-expression";
-import DefaultCharacter from "./default-character";
+import DefaultCharacter from "./character/default-character";
 
 test.each([
     {expression: 't', match: 'test', shouldMatch: true},
