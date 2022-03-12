@@ -11,8 +11,18 @@ const last = <T>(arr: T[]): T => {
     return arr[arr.length - 1] ?? null
 }
 
+const max = <T>(arr: T[]): T => {
+    return arr.reduce((acc, it) => it > acc ? it : acc)
+}
+
+const min = <T>(arr: T[]): T => {
+    return arr.reduce((acc, it) => it < acc ? it : acc)
+}
+
 export {
     range,
     rangeWithValue,
-    last
+    last,
+    max,
+    min
 }

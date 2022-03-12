@@ -35,11 +35,11 @@ export default class RegexEngine {
             let tokensConsumed = res.tokensConsumed
             while (!matchSuccessful && expression.canBacktrack()) {
                 const backtrackRes = expression.backtrack(tokens)
-                if (!backtrackRes) {
+                if (!backtrackRes.successful) {
                     break
                 }
-                const  unmatchedTokenOffset = this._matchOffset + tokensConsumed
-                if ( unmatchedTokenOffset >= tokens.length) {
+                const unmatchedTokenOffset = this._matchOffset + tokensConsumed
+                if (unmatchedTokenOffset >= tokens.length) {
                     matchSuccessful = true
                     break
                 }

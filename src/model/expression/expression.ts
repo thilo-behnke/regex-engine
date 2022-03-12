@@ -1,5 +1,6 @@
 import {IndexedToken} from "@utils/string-utils";
 import {MatchIteration} from "./match-iteration";
+import {BacktrackIteration} from "./backtrack-iteration";
 
 export interface Expression {
     /**
@@ -32,7 +33,7 @@ export interface Expression {
      * Execute backtrack (one token at a time) and return true if the updated state still matches.
      * @param toTest complete list of tokens to test (may include tokens that are not matched because of the cursor offset)
      */
-    backtrack(toTest: IndexedToken[]): boolean
+    backtrack(toTest: IndexedToken[]): BacktrackIteration
 
     /**
      * Return the length of the shortest possible match.

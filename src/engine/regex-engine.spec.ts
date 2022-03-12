@@ -147,11 +147,11 @@ test.each([
 })
 
 test.each([
-    // {value: 'a', pattern: 'a|b', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'a'},
-    // {value: 'b', pattern: 'a|b', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'b'},
-    // {value: 'c', pattern: 'a|b', shouldMatch: false, expectedMatchGroups: [], expectedMatch: null},
-    // {value: 'abcd', pattern: '(ab[c]?|xyz)d', shouldMatch: true, expectedMatchGroups: [{match: 'abc', from: 0, to: 3}], expectedMatch: 'abcd'},
-    {value: 'ab', pattern: '(ab+|a)b', shouldMatch: false, expectedMatchGroups: [{match: 'a', from: 0, to: 1}], expectedMatch: ['a', 'b']},
+    {value: 'a', pattern: 'a|b', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'a'},
+    {value: 'b', pattern: 'a|b', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'b'},
+    {value: 'c', pattern: 'a|b', shouldMatch: false, expectedMatchGroups: [], expectedMatch: null},
+    {value: 'abcd', pattern: '(ab[c]?|xyz)d', shouldMatch: true, expectedMatchGroups: [{match: 'abc', from: 0, to: 3}], expectedMatch: 'abcd'},
+    {value: 'ab', pattern: '(ab+|a)b', shouldMatch: true, expectedMatchGroups: [{match: 'a', from: 0, to: 1}], expectedMatch: 'ab'},
 ]) ('should correctly match alternatives: %s', ({value, pattern, shouldMatch, expectedMatchGroups, expectedMatch}) => {
     const engine = new RegexEngine()
     const res = engine.match(value, pattern)

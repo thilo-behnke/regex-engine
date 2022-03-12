@@ -5,6 +5,7 @@ import {IndexedToken} from "@utils/string-utils";
 import {matchFailed, MatchIteration} from "./match-iteration";
 import {last} from "@utils/array-utils";
 import orderBy = require("lodash.orderby");
+import {BacktrackIteration, backtrackFailed, successfulBacktrack} from "./backtrack-iteration";
 
 export abstract class AbstractGroupExpression implements Expression, GroupExpression {
     private _idx: number = 0
@@ -48,9 +49,9 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
 
     abstract get tracksMatch(): boolean
 
-    backtrack(toTest: IndexedToken[]): boolean {
+    backtrack(toTest: IndexedToken[]): BacktrackIteration {
         if (!this.canBacktrack()) {
-            return false
+            return backtrackFailed()
         }
 
         let backtrackedMatches = []
@@ -62,15 +63,15 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
             // TODO: Update cursorPos based on backtracking?
             const backtrackRes = expression.backtrack(toTest)
             // backtrack failed
-            if (!backtrackRes) {
-                return false
+            if (!backtrackRes.successful) {
+                return backtrackFailed()
             }
             const updatedExpressionMatch = expression.isSuccessful() ? expression.currentMatch() : []
             this._currentMatch = orderBy([
                 ...this._currentMatch.filter(([idx, ]) => idx !== backtrackIdx),
                 ...updatedExpressionMatch.map(it => [backtrackIdx, it] as [number, IndexedToken])
             ], [0])
-            return true
+            return successfulBacktrack()
         }
 
         let backtrackSuccessful = false
@@ -78,8 +79,8 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
             const expression = this._expressions[backtrackIdx]
             const backtrackRes = expression.backtrack(toTest)
             // backtrack failed
-            if (!backtrackRes) {
-                return false
+            if (!backtrackRes.successful) {
+                return backtrackFailed()
             }
             // TODO: What if persistedMatch is empty?
             const lastToken = last(this._currentMatch)[1]
@@ -107,7 +108,7 @@ export abstract class AbstractGroupExpression implements Expression, GroupExpres
             backtrackSuccessful = true
             break
         }
-        return backtrackSuccessful
+        return backtrackSuccessful ? successfulBacktrack() : backtrackFailed()
     }
 
     canBacktrack(): boolean {

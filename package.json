@@ -20,6 +20,8 @@
   },
   "dependencies": {
     "@types/lodash.orderby": "^4.6.6",
-    "lodash.orderby": "^4.6.0"
+    "lodash.orderby": "^4.6.0",
+    "@types/lodash.groupby": "^4.6.6",
+    "lodash.groupby": "^4.6.0"
   }
 }

@@ -1,7 +1,10 @@
 import {Expression} from "./expression";
 import {IndexedToken} from "@utils/string-utils";
 import {matchFailed, MatchIteration} from "./match-iteration";
+import {last, max, min, range} from "@utils/array-utils";
+import groupBy = require("lodash.groupby");
 import any = jasmine.any;
+import {BacktrackIteration, backtrackFailed} from "./backtrack-iteration";
 
 export default class AlternativeExpression implements Expression {
     private readonly _expressions: Expression[]
@@ -29,12 +32,41 @@ export default class AlternativeExpression implements Expression {
         return !!this._successfulExpressions[this._idx];
     }
 
-    backtrack(toTest: IndexedToken[]): boolean {
-        return false;
+    backtrack(toTest: IndexedToken[]): BacktrackIteration {
+        if (!this.canBacktrack()) {
+            return backtrackFailed()
+        }
+
+        const matchBeforeBacktrack = this.currentMatch()
+        const expressionsByMaxMatchLength = groupBy(this._expressions, it => it.currentMatch.length)
+        const maxMatchLength = max(Object.keys(expressionsByMaxMatchLength))
+
+        this._successfulExpressions = {}
+        let backtrackResult = backtrackFailed()
+        expressionsByMaxMatchLength[maxMatchLength].forEach((it: Expression) => {
+            const res = it.backtrack(toTest)
+            backtrackResult = backtrackResult.successful ? backtrackResult : res
+        })
+
+        this._expressions.forEach((it, idx) => {
+            if (it.isSuccessful()) {
+                this._successfulExpressions[idx] = it
+            }
+        })
+
+        // TODO: Refactor to array.
+        this._idx = min(Object.keys(this._successfulExpressions).map(it => parseInt(it)))
+
+        const matchAfterBacktrack = this.currentMatch()
+        if (matchAfterBacktrack && matchAfterBacktrack.length < matchBeforeBacktrack.length) {
+            return {successful: true, consumed: matchBeforeBacktrack.length - matchAfterBacktrack.length}
+        }
+
+        return backtrackResult
     }
 
     canBacktrack(): boolean {
-        return false;
+        return this._expressions.some(it => it.canBacktrack());
     }
 
     matchNext(s: IndexedToken, last: IndexedToken, next: IndexedToken, toTest: IndexedToken[]): MatchIteration {

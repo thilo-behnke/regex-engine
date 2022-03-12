@@ -1,6 +1,7 @@
 import {Expression} from "./expression";
 import {IndexedToken} from "@utils/string-utils";
 import {MatchIteration} from "./match-iteration";
+import {backtrackFailed, BacktrackIteration} from "./backtrack-iteration";
 
 export class OptionalExpression implements Expression {
     private _expression: Expression
@@ -25,9 +26,9 @@ export class OptionalExpression implements Expression {
         return true
     }
 
-    backtrack(toTest: IndexedToken[]): boolean {
+    backtrack(toTest: IndexedToken[]): BacktrackIteration {
         if (!this.canBacktrack()) {
-            return false
+            return backtrackFailed()
         }
 
         return this._expression.backtrack(toTest)

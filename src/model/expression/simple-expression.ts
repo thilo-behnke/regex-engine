@@ -2,6 +2,7 @@ import {Expression} from "./expression";
 import Character from "../character/character";
 import {IndexedToken} from "@utils/string-utils";
 import {matchFailed, MatchIteration} from "./match-iteration";
+import {BacktrackIteration, backtrackFailed} from "./backtrack-iteration";
 
 export class SimpleExpression implements Expression {
     private readonly _characters: Character[]
@@ -49,8 +50,8 @@ export class SimpleExpression implements Expression {
         return this._isSuccessful ? {matched: true, consumed, cursorOnly} : {...matchFailed(), cursorOnly}
     }
 
-    backtrack(toTest: IndexedToken[]): boolean {
-        return false;
+    backtrack(toTest: IndexedToken[]): BacktrackIteration {
+        return backtrackFailed();
     }
 
     canBacktrack(): boolean {

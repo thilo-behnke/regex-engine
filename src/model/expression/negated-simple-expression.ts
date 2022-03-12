@@ -2,6 +2,7 @@ import {Expression} from "./expression";
 import {SimpleExpression} from "./simple-expression";
 import {IndexedToken} from "@utils/string-utils";
 import {matchFailed, MatchIteration} from "./match-iteration";
+import {BacktrackIteration} from "./backtrack-iteration";
 
 export class NegatedSimpleExpression implements Expression {
     private readonly _delegate: SimpleExpression
@@ -27,7 +28,7 @@ export class NegatedSimpleExpression implements Expression {
         return !this._delegate.isSuccessful();
     }
 
-    backtrack(toTest: IndexedToken[]): boolean {
+    backtrack(toTest: IndexedToken[]): BacktrackIteration {
         return this._delegate.backtrack(toTest);
     }
 

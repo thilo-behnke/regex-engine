@@ -3,6 +3,7 @@ import {Expression} from "./expression";
 import {NegatedSimpleExpression} from "./negated-simple-expression";
 import {IndexedToken} from "@utils/string-utils";
 import {matchFailed, MatchIteration} from "./match-iteration";
+import {backtrackFailed, BacktrackIteration} from "./backtrack-iteration";
 
 export default class SquareBracketExpression implements Expression {
     private readonly _expressions: (SimpleExpression|NegatedSimpleExpression)[]
@@ -70,8 +71,8 @@ export default class SquareBracketExpression implements Expression {
         return matchFailed()
     }
 
-    backtrack(toTest: IndexedToken[]): boolean {
-        return false;
+    backtrack(toTest: IndexedToken[]): BacktrackIteration {
+        return backtrackFailed();
     }
 
     canBacktrack(): boolean {

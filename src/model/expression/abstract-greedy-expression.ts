@@ -1,6 +1,7 @@
 import {Expression} from "./expression";
 import {IndexedToken} from "@utils/string-utils";
 import {MatchIteration} from "./match-iteration";
+import {BacktrackIteration, backtrackFailed, successfulBacktrack} from "./backtrack-iteration";
 
 export default abstract class AbstractGreedyExpression implements Expression {
     private readonly _expression: Expression
@@ -56,9 +57,9 @@ export default abstract class AbstractGreedyExpression implements Expression {
 
     abstract storeCurrentMatch(s: IndexedToken, expressionWasReset: boolean): void
 
-    backtrack(toTest: IndexedToken[]): boolean {
+    backtrack(toTest: IndexedToken[]): BacktrackIteration {
         if (!this.canBacktrack()) {
-            return
+            return backtrackFailed()
         }
 
         const updatedMatch = this._currentMatch.slice(0, this._currentMatch.length - 1)
@@ -71,7 +72,7 @@ export default abstract class AbstractGreedyExpression implements Expression {
         if (this._isSuccessful === undefined && this._allowNoMatch) {
             this._isSuccessful = true
         }
-        return this._isSuccessful
+        return this._isSuccessful ? successfulBacktrack() : backtrackFailed()
     }
 
     canBacktrack(): boolean {
