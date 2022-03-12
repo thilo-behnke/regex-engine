@@ -1,4 +1,4 @@
-import {MatchGroup} from "./match/match-group";
+import {MatchGroup} from "../match/match-group";
 import {Expression} from "./expression";
 
 export default interface GroupExpression extends Expression {

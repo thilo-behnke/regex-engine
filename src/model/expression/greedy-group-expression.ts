@@ -1,8 +1,7 @@
 import AbstractGreedyExpression from "./abstract-greedy-expression";
-import {Expression} from "./expression";
 import GroupExpression from "./group-expression";
-import {MatchGroup} from "./match/match-group";
-import {IndexedToken} from "../utils/string-utils";
+import {MatchGroup} from "../match/match-group";
+import {IndexedToken} from "@utils/string-utils";
 
 export class GreedyGroupExpression extends AbstractGreedyExpression implements GroupExpression {
     private _groupExpression: GroupExpression

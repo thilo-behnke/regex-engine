@@ -1,9 +1,9 @@
 import {Expression} from "./expression";
 import GroupExpression, {isGroupExpression} from "./group-expression";
-import {MatchGroup} from "./match/match-group";
-import {IndexedToken} from "../utils/string-utils";
-import {matchFailed, MatchIteration} from "./expression/match-iteration";
-import {last} from "../utils/array-utils";
+import {MatchGroup} from "../match/match-group";
+import {IndexedToken} from "@utils/string-utils";
+import {matchFailed, MatchIteration} from "./match-iteration";
+import {last} from "@utils/array-utils";
 import orderBy = require("lodash.orderby");
 
 export abstract class AbstractGroupExpression implements Expression, GroupExpression {

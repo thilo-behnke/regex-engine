@@ -1,6 +1,6 @@
 import {Expression} from "./expression";
-import {IndexedToken} from "../utils/string-utils";
-import {MatchIteration} from "./expression/match-iteration";
+import {IndexedToken} from "@utils/string-utils";
+import {MatchIteration} from "./match-iteration";
 
 export class OptionalExpression implements Expression {
     private _expression: Expression

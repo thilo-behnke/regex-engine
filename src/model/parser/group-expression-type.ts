@@ -1,6 +1,6 @@
-import {Expression} from "../expression";
-import {AssertionExpression} from "../assertion-expression";
-import {DefaultGroupExpression} from "../default-group-expression";
+import {Expression} from "../expression/expression";
+import {AssertionExpression} from "../expression/assertion-expression";
+import {DefaultGroupExpression} from "../expression/default-group-expression";
 
 export enum GroupExpressionType {
     CAPTURING = 'CAPTURING',

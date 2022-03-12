@@ -1,7 +1,7 @@
 import {Expression} from "./expression";
 import {AbstractGroupExpression} from "./abstract-group-expression";
-import {IndexedToken} from "../utils/string-utils";
-import {matchFailed, MatchIteration} from "./expression/match-iteration";
+import {IndexedToken} from "@utils/string-utils";
+import {matchFailed, MatchIteration} from "./match-iteration";
 
 export class AssertionExpression extends AbstractGroupExpression {
     private _positive = true

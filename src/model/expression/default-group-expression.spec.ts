@@ -1,6 +1,6 @@
 import {DefaultGroupExpression} from "./default-group-expression";
 import {SimpleExpression} from "./simple-expression";
-import DefaultCharacter from "./character/default-character";
+import DefaultCharacter from "../character/default-character";
 import {explodeIndexed} from "@utils/string-utils";
 import GreedyExpression from "./greedy-expression";
 import SquareBracketExpression from "./square-bracket-expression";

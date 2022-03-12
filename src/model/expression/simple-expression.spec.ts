@@ -1,5 +1,5 @@
 import {SimpleExpression} from "./simple-expression";
-import {explodeIndexed, explodeToCharacters} from "../utils/string-utils";
+import {explodeIndexed, explodeToCharacters} from "@utils/string-utils";
 
 test.each([
     {expression: 'test', match: 'test', shouldMatch: true, expectedMatch: 'test'},

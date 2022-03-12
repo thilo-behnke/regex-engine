@@ -1,6 +1,5 @@
-import Character from "./character/character";
 import {IndexedToken} from "@utils/string-utils";
-import {MatchIteration} from "./expression/match-iteration";
+import {MatchIteration} from "./match-iteration";
 
 export interface Expression {
     /**

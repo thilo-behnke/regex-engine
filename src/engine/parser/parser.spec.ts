@@ -1,7 +1,7 @@
 import Parser from "./parser";
-import {SimpleExpression} from "@model/simple-expression";
-import GreedyExpression from "@model/greedy-expression";
-import SquareBracketExpression from "@model/square-bracket-expression";
+import {SimpleExpression} from "@model/expression/simple-expression";
+import GreedyExpression from "@model/expression/greedy-expression";
+import SquareBracketExpression from "@model/expression/square-bracket-expression";
 import DefaultCharacter from "@model/character/default-character";
 import WildcardCharacter from "@model/character/wildcard-character";
 import WordBoundaryCharacter from "@model/character/word-boundary-character";
@@ -10,12 +10,12 @@ import DigitWildcardCharacter from "@model/character/digit-wildcard-character";
 import AnchorStartCharacter from "@model/character/anchor-start-character";
 import AnchorEndCharacter from "@model/character/anchor-end-character";
 import {WhitespaceCharacter} from "@model/character/whitespace-character";
-import {GreedyGroupExpression} from "@model/greedy-group-expression";
-import {AssertionExpression} from "@model/assertion-expression";
-import {DefaultGroupExpression} from "@model/default-group-expression";
-import {OptionalExpression} from "@model/optional-expression";
-import {OptionalGroupExpression} from "@model/optional-group-expression";
-import AlternativeExpression from "@model/alternative-expression";
+import {GreedyGroupExpression} from "@model/expression/greedy-group-expression";
+import {AssertionExpression} from "@model/expression/assertion-expression";
+import {DefaultGroupExpression} from "@model/expression/default-group-expression";
+import {OptionalExpression} from "@model/expression/optional-expression";
+import {OptionalGroupExpression} from "@model/expression/optional-group-expression";
+import AlternativeExpression from "@model/expression/alternative-expression";
 
 test('should return empty group expression for empty string', () => {
     const parser = new Parser()

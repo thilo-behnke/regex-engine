@@ -1,6 +1,5 @@
 import GroupExpression from "./group-expression";
-import {IndexedToken} from "../utils/string-utils";
-import {MatchGroup} from "./match/match-group";
+import {MatchGroup} from "../match/match-group";
 import AlternativeExpression from "./alternative-expression";
 
 export class AlternativeGroupExpression extends AlternativeExpression implements GroupExpression {

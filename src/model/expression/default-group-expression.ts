@@ -1,6 +1,6 @@
 import {Expression} from "./expression";
 import {AbstractGroupExpression} from "./abstract-group-expression";
-import {IndexedToken} from "../utils/string-utils";
+import {IndexedToken} from "@utils/string-utils";
 
 export class DefaultGroupExpression extends AbstractGroupExpression {
     protected _nonCapturing: boolean = false

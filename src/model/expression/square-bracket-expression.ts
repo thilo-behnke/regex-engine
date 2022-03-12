@@ -1,8 +1,8 @@
 import {SimpleExpression} from "./simple-expression";
 import {Expression} from "./expression";
 import {NegatedSimpleExpression} from "./negated-simple-expression";
-import {IndexedToken} from "../utils/string-utils";
-import {matchFailed, MatchIteration} from "./expression/match-iteration";
+import {IndexedToken} from "@utils/string-utils";
+import {matchFailed, MatchIteration} from "./match-iteration";
 
 export default class SquareBracketExpression implements Expression {
     private readonly _expressions: (SimpleExpression|NegatedSimpleExpression)[]

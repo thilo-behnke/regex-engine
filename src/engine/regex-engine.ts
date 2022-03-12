@@ -1,9 +1,8 @@
 import {explodeIndexed, IndexedToken} from "../utils/string-utils";
 import Parser from "./parser/parser";
-import {Expression} from "../model/expression";
-import {isGroupExpression} from "../model/group-expression";
+import {Expression} from "@model/expression/expression";
+import {isGroupExpression} from "@model/expression/group-expression";
 import {MatchGroup} from "../model/match/match-group";
-import {AssertionExpression, AssertionType} from "../model/assertion-expression";
 
 export default class RegexEngine {
     private readonly _parser: Parser

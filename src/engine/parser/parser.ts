@@ -1,6 +1,6 @@
-import {Expression} from "@model/expression";
-import {SimpleExpression} from "@model/simple-expression";
-import GreedyExpression from "@model/greedy-expression";
+import {Expression} from "@model/expression/expression";
+import {SimpleExpression} from "@model/expression/simple-expression";
+import GreedyExpression from "@model/expression/greedy-expression";
 import WildcardCharacter from "@model/character/wildcard-character";
 import WordBoundaryCharacter from "@model/character/word-boundary-character";
 import WordWildcardCharacter from "@model/character/word-wildcard-character";
@@ -10,8 +10,8 @@ import AnchorEndCharacter from "@model/character/anchor-end-character";
 import {WhitespaceCharacter} from "@model/character/whitespace-character";
 import {Lexer} from "../lexer/lexer";
 import DefaultCharacter from "@model/character/default-character";
-import SquareBracketExpression from "@model/square-bracket-expression";
-import {GreedyGroupExpression} from "@model/greedy-group-expression";
+import SquareBracketExpression from "@model/expression/square-bracket-expression";
+import {GreedyGroupExpression} from "@model/expression/greedy-group-expression";
 import {getCharRange} from "@utils/string-utils";
 import {rangeWithValue} from "@utils/array-utils";
 import {
@@ -23,11 +23,11 @@ import {
 import {RegexTokenType} from "@model/token/regex-token";
 import {IndexedRegexToken} from "@model/token/indexed-regex-token";
 import {ParseError} from "../../exception/parse-error";
-import {OptionalExpression} from "@model/optional-expression";
-import {isGroupExpression} from "@model/group-expression";
-import {OptionalGroupExpression} from "@model/optional-group-expression";
-import AlternativeExpression from "@model/alternative-expression";
-import {DefaultGroupExpression} from "@model/default-group-expression";
+import {OptionalExpression} from "@model/expression/optional-expression";
+import {isGroupExpression} from "@model/expression/group-expression";
+import {OptionalGroupExpression} from "@model/expression/optional-group-expression";
+import AlternativeExpression from "@model/expression/alternative-expression";
+import {DefaultGroupExpression} from "@model/expression/default-group-expression";
 
 export default class Parser {
     private _lexer: Lexer

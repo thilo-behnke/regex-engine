@@ -1,5 +1,5 @@
 import {SimpleExpression} from "./simple-expression";
-import {explodeIndexed, explodeToCharacters} from "../utils/string-utils";
+import {explodeIndexed, explodeToCharacters} from "@utils/string-utils";
 import SquareBracketExpression from "./square-bracket-expression";
 
 test.each([

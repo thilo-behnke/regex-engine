@@ -1,7 +1,6 @@
 import {OptionalExpression} from "./optional-expression";
 import GroupExpression from "./group-expression";
-import {Expression} from "./expression";
-import {MatchGroup} from "./match/match-group";
+import {MatchGroup} from "../match/match-group";
 
 export class OptionalGroupExpression extends OptionalExpression implements GroupExpression {
     private _groupExpression: GroupExpression

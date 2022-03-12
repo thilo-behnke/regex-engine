@@ -1,7 +1,7 @@
 import {Expression} from "./expression";
 import {SimpleExpression} from "./simple-expression";
-import {IndexedToken} from "../utils/string-utils";
-import {matchFailed, MatchIteration} from "./expression/match-iteration";
+import {IndexedToken} from "@utils/string-utils";
+import {matchFailed, MatchIteration} from "./match-iteration";
 
 export class NegatedSimpleExpression implements Expression {
     private readonly _delegate: SimpleExpression

@@ -1,5 +1,5 @@
 import {SimpleExpression} from "./simple-expression";
-import DefaultCharacter from "./character/default-character";
+import DefaultCharacter from "../character/default-character";
 import {DefaultGroupExpression} from "./default-group-expression";
 import {explodeIndexed} from "@utils/string-utils";
 import AlternativeExpression from "./alternative-expression";

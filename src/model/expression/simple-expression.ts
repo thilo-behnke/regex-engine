@@ -1,7 +1,7 @@
 import {Expression} from "./expression";
-import Character from "./character/character";
+import Character from "../character/character";
 import {IndexedToken} from "@utils/string-utils";
-import {matchFailed, MatchIteration} from "./expression/match-iteration";
+import {matchFailed, MatchIteration} from "./match-iteration";
 
 export class SimpleExpression implements Expression {
     private readonly _characters: Character[]
