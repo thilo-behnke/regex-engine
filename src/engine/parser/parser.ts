@@ -30,7 +30,7 @@ import AlternativeExpression from "@model/expression/alternative-expression";
 import {DefaultGroupExpression} from "@model/expression/default-group-expression";
 
 export default class Parser {
-    private _lexer: Lexer
+    private readonly _lexer: Lexer
 
     private _expressions: Expression[]
     private _currentToken: IndexedRegexToken
