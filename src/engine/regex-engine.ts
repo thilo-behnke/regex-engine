@@ -84,14 +84,14 @@ export default class RegexEngine {
             const nextChar = idx < toTest.length ? toTest[idx] : null
             const previous = idx > 0 ? toTest[idx - 1] : null
             const next = idx + 1 < toTest.length ? toTest[idx + 1] : null
-            this._logger.debug(`Now matching token ${nextChar.value} at ${idx} with ${expression.constructor.name}`)
+            this._logger.debug(`Now matching token ${nextChar?.value} at ${idx} with ${expression.constructor.name}`)
             const matchRes = expression.matchNext(nextChar, previous, next, toTest)
             idx += matchRes.consumed
             if (!matchRes.matched) {
-                this._logger.debug(`Match failed for token ${nextChar.value} at ${idx}`)
+                this._logger.debug(`Match failed for token ${nextChar?.value} at ${idx}`)
                 break
             }
-            this._logger.debug(`Match successful for token ${nextChar.value} at ${idx}`)
+            this._logger.debug(`Match successful for token ${nextChar?.value} at ${idx}`)
         }
         return {match: expression.isSuccessful(), tokensConsumed: idx - offset, matched: expression.currentMatch().map(it => it.value)}
     }
