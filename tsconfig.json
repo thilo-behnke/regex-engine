@@ -1,5 +1,6 @@
 {
   "files": ["src/**"],
+  "exclude": ["node_modules", "**/*.spec.ts"],
   "compilerOptions": {
     "lib": ["es2017"],
     "noImplicitAny": true,
