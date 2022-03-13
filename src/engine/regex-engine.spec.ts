@@ -67,6 +67,8 @@ test.each([
     {value: "Y9c", pattern: "[A-Y][7-9]c", shouldMatch: true},
     {value: "atest", pattern: "^te*est$", shouldMatch: false},
     {value: "test", pattern: "(.*)", shouldMatch: true},
+    {value: "abc", pattern: "(?:abc)+(?:def)*", shouldMatch: true},
+    {value: "def", pattern: "(?:abc)+(?:def)*", shouldMatch: false}
 ]) ('should match: %s', ({value, pattern, shouldMatch}) => {
     const engine = new RegexEngine()
     const res = engine.match(value, pattern)
