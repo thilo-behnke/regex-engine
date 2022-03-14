@@ -106,6 +106,24 @@ test.each([
             new IndexedRegexToken(DefaultRegexToken.character('c'), 5),
             new IndexedRegexToken(DefaultRegexToken.eof(), 6),
         ]
+    },
+    {
+        s: '[a-Z]',
+        expected: [
+            new IndexedRegexToken(DefaultRegexToken.characterClassStart(), 0),
+            new IndexedRegexToken(DefaultRegexToken.characterRange('a-Z'), 1, 3),
+            new IndexedRegexToken(DefaultRegexToken.characterClassEnd(), 4),
+            new IndexedRegexToken(DefaultRegexToken.eof(), 5),
+        ]
+    },
+    {
+        s: 'a-Z',
+        expected: [
+            new IndexedRegexToken(DefaultRegexToken.character('a'), 0),
+            new IndexedRegexToken(DefaultRegexToken.character('-'), 1),
+            new IndexedRegexToken(DefaultRegexToken.character('Z'), 2),
+            new IndexedRegexToken(DefaultRegexToken.eof(), 3),
+        ]
     }
 ])('should correctly scan given string to lexems: %s', ({s, expected}) => {
     const lexer = new Lexer()

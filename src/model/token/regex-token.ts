@@ -17,6 +17,10 @@ export default class DefaultRegexToken implements RegexToken {
         return new DefaultRegexToken(s, RegexTokenType.CHARACTER)
     }
 
+    static characterRange(s: string): DefaultRegexToken {
+        return new DefaultRegexToken(s, RegexTokenType.CHARACTER_RANGE)
+    }
+
     static escaped(s: string): DefaultRegexToken {
         return new DefaultRegexToken(s, RegexTokenType.ESCAPED)
     }
@@ -89,6 +93,7 @@ export default class DefaultRegexToken implements RegexToken {
 
 export enum RegexTokenType {
     CHARACTER = 'CHARACTER',
+    CHARACTER_RANGE = 'CHARACTER_RANGE',
     ESCAPED = 'ESCAPED',
     MODIFIER = 'MODIFIER',
     ALTERNATIVE = 'ALTERNATIVE',

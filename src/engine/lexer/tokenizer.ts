@@ -59,8 +59,18 @@ export default class Tokenizer {
                 this.consume(this._current)
                 continue;
             }
-            this.tokens.push(new IndexedRegexToken(DefaultRegexToken.character(this._current), this._idx, this._idx))
+
+            const startIdx = this._idx
+            const fromCharacter = this._current
             this.consume(this._current)
+            if (this._current === '-') {
+                this.consume(this._current)
+                const toCharacter = this._current
+                this.tokens.push(new IndexedRegexToken(DefaultRegexToken.characterRange(`${fromCharacter}-${toCharacter}`), startIdx, this._idx))
+                this.consume(this._current)
+                continue;
+            }
+            this.tokens.push(new IndexedRegexToken(DefaultRegexToken.character(fromCharacter), startIdx))
         }
         return [
             ...this.tokens,

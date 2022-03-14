@@ -250,18 +250,14 @@ export default class Parser {
                 case RegexTokenType.CHARACTER:
                     const char = this._currentToken.lexem
                     this.consume(RegexTokenType.CHARACTER)
-                    if (this._currentToken.lexem !== "-") {
-                        const charExpression = new SimpleExpression(new DefaultCharacter(char))
-                        expressions.push(charExpression)
-                        break
-                    }
-                    this.consume(RegexTokenType.CHARACTER)
-                    if (this._currentToken.type !== RegexTokenType.CHARACTER) {
-                        this.throwParseError('Invalid range definition in brackets')
-                    }
-                    const charsInRange = getCharRange(char, this._currentToken.lexem).map(it => new SimpleExpression(new DefaultCharacter(it)))
+                    const charExpression = new SimpleExpression(new DefaultCharacter(char))
+                    expressions.push(charExpression)
+                    break
+                case RegexTokenType.CHARACTER_RANGE:
+                    const [from, to] = next.lexem.split('-')
+                    const charsInRange = getCharRange(from, to).map(it => new SimpleExpression(new DefaultCharacter(it)))
                     charsInRange.forEach(it => expressions.push(it))
-                    this.consume(RegexTokenType.CHARACTER)
+                    this.consume(RegexTokenType.CHARACTER_RANGE)
                     break
                 case RegexTokenType.ESCAPED:
                     const escapedExpression = this.tryParseEscaped()

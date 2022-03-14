@@ -33,8 +33,4 @@ export class Lexer {
         this._idx++
         return token
     }
-
-    lookahead(i: number = 0): RegexToken {
-        return this.hasNextToken() ? this._tokens[this._idx + i] : null
-    }
 }
