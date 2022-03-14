@@ -1,15 +1,15 @@
 
 export interface RegexToken {
-    get value(): string
+    get lexem(): string
     get type(): RegexTokenType
 }
 
 export default class DefaultRegexToken implements RegexToken {
-    private readonly _value: string
+    private readonly _lexem: string
     private readonly _type: RegexTokenType
 
     constructor(value: string, type: RegexTokenType) {
-        this._value = value;
+        this._lexem = value;
         this._type = type;
     }
 
@@ -17,8 +17,8 @@ export default class DefaultRegexToken implements RegexToken {
         return new DefaultRegexToken(s, RegexTokenType.CHARACTER)
     }
 
-    static escaped(): DefaultRegexToken {
-        return new DefaultRegexToken('\\', RegexTokenType.ESCAPED)
+    static escaped(s: string): DefaultRegexToken {
+        return new DefaultRegexToken(s, RegexTokenType.ESCAPED)
     }
 
     static modifier(s: string): DefaultRegexToken {
@@ -29,20 +29,41 @@ export default class DefaultRegexToken implements RegexToken {
         return new DefaultRegexToken('|', RegexTokenType.ALTERNATIVE)
     }
 
-    static bracketOpen(): DefaultRegexToken {
-        return new DefaultRegexToken('(', RegexTokenType.BRACKET_OPEN)
+    static groupStart(): DefaultRegexToken {
+        return new DefaultRegexToken('(', RegexTokenType.GROUP_START)
     }
 
-    static bracketClose(): DefaultRegexToken {
-        return new DefaultRegexToken(')', RegexTokenType.BRACKET_CLOSE)
+    static nonCapturingGroupStart(): DefaultRegexToken {
+        return new DefaultRegexToken('(?:', RegexTokenType.NON_CAPTURING_GROUP_START)
     }
 
-    static squareBracketOpen(): DefaultRegexToken {
-        return new DefaultRegexToken('[', RegexTokenType.SQUARE_BRACKET_OPEN)
+    static lookaheadGroupStart(negative: boolean = false): DefaultRegexToken {
+        if (!negative) {
+            return new DefaultRegexToken('(?=', RegexTokenType.LOOKAHEAD_GROUP_START)
+        }
+        return new DefaultRegexToken('(?!', RegexTokenType.LOOKAHEAD_NEGATIVE_GROUP_START)
     }
 
-    static squareBracketClose(): DefaultRegexToken {
-        return new DefaultRegexToken(']', RegexTokenType.SQUARE_BRACKET_CLOSE)
+    static lookbehindGroupStart(negative: boolean = false): DefaultRegexToken {
+        if (!negative) {
+            return new DefaultRegexToken('(?<=', RegexTokenType.LOOKBEHIND_GROUP_START)
+        }
+        return new DefaultRegexToken('(?<!', RegexTokenType.LOOKBEHIND_NEGATIVE_GROUP_START)
+    }
+
+    static groupEnd(): DefaultRegexToken {
+        return new DefaultRegexToken(')', RegexTokenType.GROUP_END)
+    }
+
+    static characterClassStart(negated: boolean = false): DefaultRegexToken {
+        if (!negated) {
+            return new DefaultRegexToken('[', RegexTokenType.CHARACTER_CLASS_START)
+        }
+        return new DefaultRegexToken('[^', RegexTokenType.CHARACTER_CLASS_NEGATED_START)
+    }
+
+    static characterClassEnd(): DefaultRegexToken {
+        return new DefaultRegexToken(']', RegexTokenType.CHARACTER_CLASS_END)
     }
 
     static anchorStart(): DefaultRegexToken {
@@ -57,8 +78,8 @@ export default class DefaultRegexToken implements RegexToken {
         return new DefaultRegexToken("EOF", RegexTokenType.EOF)
     }
 
-    get value(): string {
-        return this._value;
+    get lexem(): string {
+        return this._lexem;
     }
 
     get type(): RegexTokenType {
@@ -71,10 +92,16 @@ export enum RegexTokenType {
     ESCAPED = 'ESCAPED',
     MODIFIER = 'MODIFIER',
     ALTERNATIVE = 'ALTERNATIVE',
-    BRACKET_OPEN = 'BRACKET_OPEN',
-    BRACKET_CLOSE = 'BRACKET_CLOSE',
-    SQUARE_BRACKET_OPEN = 'SQUARE_BRACKET_OPEN',
-    SQUARE_BRACKET_CLOSE = 'SQUARE_BRACKET_CLOSE',
+    GROUP_START = 'GROUP_START',
+    NON_CAPTURING_GROUP_START = 'NON_CAPTURING_GROUP_START',
+    LOOKBEHIND_GROUP_START = 'LOOKBEHIND_GROUP_START',
+    LOOKBEHIND_NEGATIVE_GROUP_START = 'LOOKBEHIND_NEGATIVE_GROUP_START',
+    LOOKAHEAD_GROUP_START = 'LOOKAHEAD_GROUP_START',
+    LOOKAHEAD_NEGATIVE_GROUP_START = 'LOOKAHEAD_NEGATIVE_GROUP_START',
+    GROUP_END = 'GROUP_END',
+    CHARACTER_CLASS_START = 'CHARACTER_CLASS_START',
+    CHARACTER_CLASS_NEGATED_START = 'CHARACTER_CLASS_NEGATED_START',
+    CHARACTER_CLASS_END = 'CHARACTER_CLASS_END',
     ANCHOR_START = 'ANCHOR_START',
     ANCHOR_END = 'ANCHOR_END',
     EOF = 'EOF'

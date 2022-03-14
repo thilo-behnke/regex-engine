@@ -1,6 +1,6 @@
-import Tokenizer from "../tokenizer/tokenizer";
 import {RegexToken} from "../../model/token/regex-token";
 import {IndexedRegexToken} from "../../model/token/indexed-regex-token";
+import Tokenizer from "./tokenizer";
 
 export class Lexer {
     private _tokenizer: Tokenizer
@@ -14,7 +14,7 @@ export class Lexer {
 
     load(s: string): void {
         this.reset()
-        this._tokens = this._tokenizer.tokenize(s).map((it, idx) => new IndexedRegexToken(it, idx))
+        this._tokens = this._tokenizer.tokenize(s)
     }
 
     reset(): void {

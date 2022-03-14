@@ -13,13 +13,6 @@ import DefaultCharacter from "@model/character/default-character";
 import SquareBracketExpression from "@model/expression/square-bracket-expression";
 import {GreedyGroupExpression} from "@model/expression/greedy-group-expression";
 import {getCharRange} from "@utils/string-utils";
-import {rangeWithValue} from "@utils/array-utils";
-import {
-    createGroupExpression,
-    GroupExpressionType,
-    isLookbehind,
-    isMatchGroup
-} from "@model/parser/group-expression-type";
 import {RegexTokenType} from "@model/token/regex-token";
 import {IndexedRegexToken} from "@model/token/indexed-regex-token";
 import {ParseError} from "../../exception/parse-error";
@@ -28,6 +21,7 @@ import {isGroupExpression} from "@model/expression/group-expression";
 import {OptionalGroupExpression} from "@model/expression/optional-group-expression";
 import AlternativeExpression from "@model/expression/alternative-expression";
 import {DefaultGroupExpression} from "@model/expression/default-group-expression";
+import {AssertionExpression} from "../../model/expression/assertion-expression";
 
 export default class Parser {
     private readonly _lexer: Lexer
@@ -101,17 +95,75 @@ export default class Parser {
             return [new SimpleExpression(new AnchorEndCharacter())]
         }
 
-        if (this._currentToken.type == RegexTokenType.SQUARE_BRACKET_OPEN) {
+        if (this._currentToken.type === RegexTokenType.CHARACTER_CLASS_START) {
+            this.consume(RegexTokenType.CHARACTER_CLASS_START)
             const squareBracketExpression = this.consumeSquareBrackets()
             return [squareBracketExpression]
         }
+        if (this._currentToken.type === RegexTokenType.CHARACTER_CLASS_NEGATED_START) {
+            this.consume(RegexTokenType.CHARACTER_CLASS_NEGATED_START)
+            const squareBracketExpression = this.consumeSquareBrackets(true)
+            return [squareBracketExpression]
+        }
 
-        if (this._currentToken.type == RegexTokenType.BRACKET_OPEN) {
-            const bracketExpression = this.consumeBrackets()
+        if (this._currentToken.type === RegexTokenType.GROUP_START) {
+            this.consume(RegexTokenType.GROUP_START)
+            const bracketContent = this.consumeBracketContent()
+            const bracketExpression = new DefaultGroupExpression(...bracketContent)
+            return [this.tryWrapInModifier(bracketExpression)]
+        }
+        if (this._currentToken.type === RegexTokenType.NON_CAPTURING_GROUP_START) {
+            this.consume(RegexTokenType.NON_CAPTURING_GROUP_START)
+            const bracketContent = this.consumeBracketContent()
+            const bracketExpression = DefaultGroupExpression.nonCapturing(...bracketContent)
+            return [this.tryWrapInModifier(bracketExpression)]
+        }
+        if (this._currentToken.type === RegexTokenType.LOOKAHEAD_GROUP_START) {
+            this.consume(RegexTokenType.LOOKAHEAD_GROUP_START)
+            const bracketContent = this.consumeBracketContent()
+            const bracketExpression = AssertionExpression.positiveLookahead(...bracketContent)
+            // @ts-ignore
+            if (this._currentToken.type === RegexTokenType.MODIFIER) {
+                this.consume(this._currentToken.type)
+            }
+            return [bracketExpression]
+        }
+        if (this._currentToken.type === RegexTokenType.LOOKAHEAD_NEGATIVE_GROUP_START) {
+            this.consume(RegexTokenType.LOOKAHEAD_NEGATIVE_GROUP_START)
+            const bracketContent = this.consumeBracketContent()
+            const bracketExpression = AssertionExpression.negativeLookahead(...bracketContent)
+            // @ts-ignore
+            if (this._currentToken.type === RegexTokenType.MODIFIER) {
+                this.consume(this._currentToken.type)
+            }
+            return [bracketExpression]
+        }
+        if (this._currentToken.type === RegexTokenType.LOOKBEHIND_GROUP_START) {
+            this.consume(RegexTokenType.LOOKBEHIND_GROUP_START)
+            this._allowModifiers = false
+            const bracketContent = this.consumeBracketContent()
+            const bracketExpression = AssertionExpression.positiveLookbehind(...bracketContent)
+            this._allowModifiers = true
+            // @ts-ignore
+            if (this._currentToken.type === RegexTokenType.MODIFIER) {
+                this.consume(this._currentToken.type)
+            }
+            return [bracketExpression]
+        }
+        if (this._currentToken.type === RegexTokenType.LOOKBEHIND_NEGATIVE_GROUP_START) {
+            this.consume(RegexTokenType.LOOKBEHIND_NEGATIVE_GROUP_START)
+            this._allowModifiers = false
+            const bracketContent = this.consumeBracketContent()
+            const bracketExpression = AssertionExpression.negativeLookbehind(...bracketContent)
+            this._allowModifiers = true
+            // @ts-ignore
+            if (this._currentToken.type === RegexTokenType.MODIFIER) {
+                this.consume(this._currentToken.type)
+            }
             return [bracketExpression]
         }
 
-        if (this._currentToken.type === RegexTokenType.CHARACTER && this._currentToken.value === '.') {
+        if (this._currentToken.type === RegexTokenType.CHARACTER && this._currentToken.lexem === '.') {
             this.consume(RegexTokenType.CHARACTER)
             const expression = this.tryWrapInModifier(new SimpleExpression(new WildcardCharacter()))
             return [expression]
@@ -135,11 +187,11 @@ export default class Parser {
             this.throwParseError('Found orphaned modifier')
         }
 
-        if (this._currentToken.type == RegexTokenType.SQUARE_BRACKET_CLOSE) {
+        if (this._currentToken.type == RegexTokenType.CHARACTER_CLASS_END) {
             this.throwParseError('Found orphaned closing square bracket')
         }
 
-        if (this._currentToken.type == RegexTokenType.BRACKET_CLOSE) {
+        if (this._currentToken.type == RegexTokenType.GROUP_END) {
             this.throwParseError('Found orphaned closing bracket')
         }
 
@@ -151,58 +203,54 @@ export default class Parser {
         if (!next) {
             this.throwParseError('Found escape sequence at end of string')
         }
-        if (next.type !== RegexTokenType.CHARACTER) {
-            this.throwParseError('Tried to escape invalid character')
+        if (next.type !== RegexTokenType.ESCAPED) {
+            this.throwParseError('Unexpected token, expected ESCAPED')
         }
-        this.consume(RegexTokenType.CHARACTER)
-        if (next.value === "b") {
+        this.consume(RegexTokenType.ESCAPED)
+        if (next.lexem === "b") {
             return new SimpleExpression(new WordBoundaryCharacter())
         }
-        if (next.value === "w") {
+        if (next.lexem === "w") {
             return new SimpleExpression(new WordWildcardCharacter())
         }
-        if (next.value === "d") {
+        if (next.lexem === "d") {
             return new SimpleExpression(new DigitWildcardCharacter())
         }
-        if (next.value === "s") {
+        if (next.lexem === "s") {
             return new SimpleExpression(new WhitespaceCharacter())
         }
-        if (next.value === "/") {
+        if (next.lexem === "/") {
             return new SimpleExpression(new DefaultCharacter("/"))
         }
         // TODO: Only allowed in bracket expression
-        if (next.value === "-") {
+        if (next.lexem === "-") {
             return new SimpleExpression(new DefaultCharacter("-"))
         }
         // TODO: Only allowed in bracket expression
-        if (next.value === ".") {
+        if (next.lexem === ".") {
             return new SimpleExpression(new DefaultCharacter("."))
         }
         this.throwParseError('Found invalid escape sequence')
     }
 
-    private consumeSquareBrackets(): Expression {
-        this.consume(RegexTokenType.SQUARE_BRACKET_OPEN)
-        let negated = this._currentToken.type === RegexTokenType.CHARACTER && this._currentToken.value === "^"
-        if (negated) {
-            this.consume(RegexTokenType.CHARACTER)
-        }
+    private consumeSquareBrackets(negated: boolean = false): Expression {
         const expressions = []
-        while(this._currentToken.type !== RegexTokenType.SQUARE_BRACKET_CLOSE) {
+        while(this._currentToken.type !== RegexTokenType.CHARACTER_CLASS_END) {
             const next = this._currentToken
             switch(next.type) {
                 case RegexTokenType.ANCHOR_START:
                 case RegexTokenType.ANCHOR_END:
-                case RegexTokenType.SQUARE_BRACKET_OPEN:
+                case RegexTokenType.CHARACTER_CLASS_START:
+                case RegexTokenType.CHARACTER_CLASS_NEGATED_START:
                     this.throwParseError('Unexpected token in brackets')
                     return
                 case RegexTokenType.EOF:
                     this.throwParseError(`Unexpected eof in brackets`)
                     return
                 case RegexTokenType.CHARACTER:
-                    const char = this._currentToken.value
+                    const char = this._currentToken.lexem
                     this.consume(RegexTokenType.CHARACTER)
-                    if (this._currentToken.value !== "-") {
+                    if (this._currentToken.lexem !== "-") {
                         const charExpression = new SimpleExpression(new DefaultCharacter(char))
                         expressions.push(charExpression)
                         break
@@ -211,127 +259,49 @@ export default class Parser {
                     if (this._currentToken.type !== RegexTokenType.CHARACTER) {
                         this.throwParseError('Invalid range definition in brackets')
                     }
-                    const charsInRange = getCharRange(char, this._currentToken.value).map(it => new SimpleExpression(new DefaultCharacter(it)))
+                    const charsInRange = getCharRange(char, this._currentToken.lexem).map(it => new SimpleExpression(new DefaultCharacter(it)))
                     charsInRange.forEach(it => expressions.push(it))
                     this.consume(RegexTokenType.CHARACTER)
                     break
                 case RegexTokenType.ESCAPED:
-                    this.consume(RegexTokenType.ESCAPED)
                     const escapedExpression = this.tryParseEscaped()
                     expressions.push(escapedExpression)
                     break
                 case RegexTokenType.MODIFIER:
                     const token = this._currentToken
-                    if (token.value === "?") {
+                    if (token.lexem === "?") {
                         this.consume(RegexTokenType.MODIFIER)
-                        expressions.push(new SimpleExpression(new DefaultCharacter(token.value)))
+                        expressions.push(new SimpleExpression(new DefaultCharacter(token.lexem)))
                         break
                     }
                 default:
                     this.throwParseError('Unknown token in brackets')
             }
         }
-        this.consume(RegexTokenType.SQUARE_BRACKET_CLOSE)
+        this.consume(RegexTokenType.CHARACTER_CLASS_END)
         const bracketExpression = negated ? SquareBracketExpression.negated(...expressions) : new SquareBracketExpression(...expressions)
         return this.tryWrapInModifier(bracketExpression)
     }
 
-    private consumeBrackets(): Expression {
-        this.consume(RegexTokenType.BRACKET_OPEN)
-        const groupType = this.tryConsumeBracketModifier()
-
+    private consumeBracketContent(): Expression[] {
         const expressions: Expression[] = []
-        // Modifiers are not allowed within brackets.
-        if (isLookbehind(groupType)) {
-            this._allowModifiers = false
-        }
-
-        const withinBrackets = this.tryParseAlternatives(RegexTokenType.BRACKET_CLOSE)
+        const withinBrackets = this.tryParseAlternatives(RegexTokenType.GROUP_END)
         if (!withinBrackets) {
             this.throwParseError('Empty group')
         }
         withinBrackets.forEach(it => expressions.push(it))
-
-        if (isLookbehind(groupType)) {
-            this._allowModifiers = true
-        }
-
-        const groupExpression = createGroupExpression(groupType, ...expressions)
-        if (!isMatchGroup(groupType)) {
-            return groupExpression
-        }
-        return this.tryWrapInModifier(groupExpression)
-    }
-
-    private tryConsumeBracketModifier() {
-        if (this.peekNonMatchingGroup()) {
-            return GroupExpressionType.NON_CAPTURING
-        } else if (this.peekPositiveLookahead()) {
-            return GroupExpressionType.POSITIVE_LOOKAHEAD
-        } else if (this.peekNegativeLookahead()) {
-            return GroupExpressionType.NEGATIVE_LOOKAHEAD
-        } else if (this.peekPositiveLookbehind()) {
-            return GroupExpressionType.POSITIVE_LOOKBEHIND
-        } else if (this.peekNegativeLookbehind()) {
-            return GroupExpressionType.NEGATIVE_LOOKBEHIND
-        }
-        return GroupExpressionType.CAPTURING
-    }
-
-    private peekNonMatchingGroup() {
-        if (this._currentToken.type === RegexTokenType.MODIFIER && this._currentToken.value === "?" && this._lexer.lookahead()?.type === RegexTokenType.CHARACTER && this._lexer.lookahead().value === ":") {
-            this.consume(RegexTokenType.MODIFIER, RegexTokenType.CHARACTER)
-            return true
-        }
-        return false
-    }
-
-    private peekPositiveLookahead() {
-        if (this._currentToken.type === RegexTokenType.MODIFIER && this._currentToken.value === "?" && this._lexer.lookahead()?.type === RegexTokenType.CHARACTER && this._lexer.lookahead().value === "=") {
-            this.consume(RegexTokenType.MODIFIER, RegexTokenType.CHARACTER)
-            return true
-        }
-        return false
-    }
-
-    private peekNegativeLookahead() {
-        if (this._currentToken.type === RegexTokenType.MODIFIER && this._currentToken.value === "?" && this._lexer.lookahead()?.type === RegexTokenType.CHARACTER && this._lexer.lookahead().value === "!") {
-            this.consume(RegexTokenType.MODIFIER, RegexTokenType.CHARACTER)
-            return true
-        }
-        return false
-    }
-
-    private peekPositiveLookbehind() {
-        if (this._currentToken.type === RegexTokenType.MODIFIER && this._currentToken.value === "?" && this._lexer.lookahead()?.type === RegexTokenType.CHARACTER && this._lexer.lookahead().value === "<" && this._lexer.lookahead()?.type === RegexTokenType.CHARACTER && this._lexer.lookahead(1).value === "=") {
-            this.consume(RegexTokenType.MODIFIER, RegexTokenType.CHARACTER, RegexTokenType.CHARACTER)
-            return true
-        }
-        return false
-    }
-
-    private peekNegativeLookbehind() {
-        if (this._currentToken.type === RegexTokenType.MODIFIER && this._currentToken.value === "?" && this._lexer.lookahead()?.type === RegexTokenType.CHARACTER && this._lexer.lookahead().value === "<" && this._lexer.lookahead()?.type === RegexTokenType.CHARACTER && this._lexer.lookahead(1).value === "!") {
-            this.consume(RegexTokenType.MODIFIER, RegexTokenType.CHARACTER, RegexTokenType.CHARACTER)
-            return true
-        }
-        return false
+        return expressions
     }
 
     private consumeCharacter() {
-        const charExpression = new SimpleExpression(new DefaultCharacter(this._currentToken.value))
+        const charExpression = new SimpleExpression(new DefaultCharacter(this._currentToken.lexem))
         this.consume(RegexTokenType.CHARACTER)
         return this.tryWrapInModifier(charExpression)
     }
 
     private consumeEscaped() {
-        this.consume(RegexTokenType.ESCAPED)
         const escapedExpression = this.tryParseEscaped()
         return this.tryWrapInModifier(escapedExpression)
-    }
-
-    private consumeMultiple(type: RegexTokenType, n: number) {
-        this.consume(...rangeWithValue(n, type))
     }
 
     private consume(...types: RegexTokenType[]) {
@@ -351,11 +321,11 @@ export default class Parser {
             if (!this._allowModifiers) {
                 this.throwParseError('Modifiers not allowed at current position')
             }
-            if (this._currentToken.value === "*" || this._currentToken.value === "+") {
-                const expression = isGroupExpression(baseExpression) ? new GreedyGroupExpression(baseExpression, this._currentToken.value === "*") : new GreedyExpression(baseExpression, this._currentToken.value === "*")
+            if (this._currentToken.lexem === "*" || this._currentToken.lexem === "+") {
+                const expression = isGroupExpression(baseExpression) ? new GreedyGroupExpression(baseExpression, this._currentToken.lexem === "*") : new GreedyExpression(baseExpression, this._currentToken.lexem === "*")
                 this.consume(RegexTokenType.MODIFIER)
                 return expression
-            } else if (this._currentToken.value === "?") {
+            } else if (this._currentToken.lexem === "?") {
                 const expression = isGroupExpression(baseExpression) ? new OptionalGroupExpression(baseExpression) : new OptionalExpression(baseExpression)
                 this.consume(RegexTokenType.MODIFIER)
                 return expression
