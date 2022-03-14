@@ -1,4 +1,9 @@
 import RegexEngine from "./regex-engine";
+import {LoggerFactory} from "../logging/logger-factory";
+
+beforeEach(() => {
+    LoggerFactory.noop()
+})
 
 test('should detect equal character literals', () => {
     const engine = new RegexEngine()
