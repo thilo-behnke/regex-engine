@@ -50,7 +50,7 @@ const isWhitespace = (s: string) => {
 }
 
 const isWordBoundary = (s: string) => {
-    return !s || ['-'].includes(s) || isWhitespace(s)
+    return !s || ['-', '/', '\\'].includes(s) || isWhitespace(s)
 }
 
 const isDigit = (s: string) => {

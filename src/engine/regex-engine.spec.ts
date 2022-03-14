@@ -182,14 +182,16 @@ test.each([
 })
 
 // TODO: Fix.
-// test.each([
-//     // url regex
-//     // https://stackoverflow.com/a/27755
-//     {value: 'https://www.google.com', pattern: '^((http[s]?|ftp):\\/)?\\/?([^:\\/\\s]+)((\\/\\w+)*\\/)([\\w\\-\\.]+[^#?\\s]+)(.*)?(#[\\w\\-]+)?$', shouldMatch: true, expectedMatchGroups: [], expectedMatch: 'b'},
-// ]) ('should correctly handle real world examples', ({value, pattern, shouldMatch, expectedMatchGroups, expectedMatch}) => {
-//     const engine = new RegexEngine()
-//     const res = engine.match(value, pattern)
-//     expect(res).toEqual(shouldMatch)
-//     expect(engine.groups).toEqual(expectedMatchGroups)
-//     expect(engine.matched).toEqual(expectedMatch)
-// })
+test.each([
+    // url regex
+    // https://stackoverflow.com/a/27755
+    {value: 'https://www.google.com', pattern: '^(?:(http[s]?|ftp):\\/\\/)?([^:\\/\\s]+)$', shouldMatch: true, expectedMatchGroups: [{match: 'https', from: 0, to: 5}, {match: 'www.google.com', from: 8, to: 22}], expectedMatch: 'https://www.google.com'},
+    {value: 'https://www.google.com/test/', pattern: '^(?:(http[s]?|ftp):\\/\\/)?([^:\\/\\s]+)((\\/\\w+)*\\/)$', shouldMatch: true, expectedMatchGroups: [{match: 'https', from: 0, to: 5}, {match: 'www.google.com/test', from: 8, to: 27}], expectedMatch: 'https://www.google.com/test/'},
+    {value: 'https://www.google.com:80/test/', pattern: '^(?:(http[s]?|ftp):\\/\\/)?([^:\\/\\s]+):(\\d+)(?:(?:\\/(\\w+))*\\/)$', shouldMatch: true, expectedMatchGroups: [{match: 'https', from: 0, to: 5}, {match: 'www.google.com', from: 8, to: 22}, {match: '80', from: 23, to: 25}, {match: 'test', from: 26, to: 30}], expectedMatch: 'https://www.google.com:80/test/'},
+]) ('should correctly handle real world examples: %s', ({value, pattern, shouldMatch, expectedMatchGroups, expectedMatch}) => {
+    const engine = new RegexEngine()
+    const res = engine.match(value, pattern)
+    expect(res).toEqual(shouldMatch)
+    expect(engine.groups).toEqual(expectedMatchGroups)
+    expect(engine.matched).toEqual(expectedMatch)
+})
